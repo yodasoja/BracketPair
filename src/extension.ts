@@ -146,6 +146,7 @@ export function activate(context: vscode.ExtensionContext) {
                             decorations.set(colorDeclaration, [range]);
                         }
                     }
+                    break;
                 }
             }
         }
