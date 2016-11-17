@@ -33,7 +33,7 @@ class Decoration {
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
+    let timeout: NodeJS.Timer | null = null;
     let roundBracket = new BracketPair(["#e6b422", "#c70067", "#00a960", "#fc7482"], '(', ')');
     let squareBracket = new BracketPair(["#33ccff", "#8080ff", "#0073a8"], '[', ']');
     let curlyBracket = new BracketPair(["#d4d4aa", "#d1a075", "#9c6628"], '{', '}');
@@ -53,14 +53,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     regexPattern += "]";
 
-    var regex = new RegExp(regexPattern, 'g');
+    let regex = new RegExp(regexPattern, 'g');
 
     let activeEditor = vscode.window.activeTextEditor;
     if (activeEditor) {
         triggerUpdateDecorations();
     }
 
-    vscode.window.onDidChangeActiveTextEditor(function (editor) {
+    vscode.window.onDidChangeActiveTextEditor(editor => {
         activeEditor = editor;
         if (editor) {
             triggerUpdateDecorations();
@@ -70,19 +70,24 @@ export function activate(context: vscode.ExtensionContext) {
     // TODO If remove text feature is added, update this method
     // Watching: https://github.com/Microsoft/vscode/issues/6374
     vscode.workspace.onDidChangeTextDocument(event => {
-        for (let contentChange of event.contentChanges) {
-            if (contentChange.text === "" || regex.exec(contentChange.text) !== null) {
-                triggerUpdateDecorations();
-                return;
+        if (activeEditor && event.document === activeEditor.document) {
+            for (let contentChange of event.contentChanges) {
+                if (contentChange.text === "" || regex.exec(contentChange.text) !== null) {
+                    triggerUpdateDecorations();
+                    return;
+                }
             }
         }
     }, null, context.subscriptions);
 
     function triggerUpdateDecorations() {
-        if (!activeEditor) {
-            return;
+        if (timeout) {
+            clearTimeout(timeout);
         }
+        timeout = setTimeout(updateDecorations, 500);
+    }
 
+    function updateDecorations() {
         console.log("Colorizing brackets");
 
         let text = activeEditor.document.getText();
@@ -98,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
         let match: RegExpExecArray | null;
         while ((match = regex.exec(text)) !== null) {
             let startPos = activeEditor.document.positionAt(match.index);
-            let endPos = activeEditor.document.positionAt(match.index + match.length);
+            let endPos = activeEditor.document.positionAt(match.index + match[0].length);
             let range = new vscode.Range(startPos, endPos);
 
             for (let bracketPair of bracketPairs) {
@@ -115,6 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
                         decorations.set(colorDeclaration, [range]);
                     }
                     openBrackets[bracketPair.openCharacter]++;
+                    break;
                 }
                 else if (bracketPair.closeCharacter === match[0]) {
                     if (openBrackets[bracketPair.openCharacter] === 0) {
