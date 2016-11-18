@@ -33,6 +33,7 @@ class Decoration {
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+    console.log("Activated");
     let timeout: NodeJS.Timer | null = null;
     let roundBracket = new BracketPair(["#e6b422", "#c70067", "#00a960", "#fc7482"], '(', ')');
     let squareBracket = new BracketPair(["#33ccff", "#8080ff", "#0073a8"], '[', ']');
@@ -53,8 +54,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     regexPattern += "]";
 
-    let regex = new RegExp(regexPattern, 'g');
-
     let activeEditor = vscode.window.activeTextEditor;
     if (activeEditor) {
         triggerUpdateDecorations();
@@ -71,8 +70,9 @@ export function activate(context: vscode.ExtensionContext) {
     // Watching: https://github.com/Microsoft/vscode/issues/6374
     vscode.workspace.onDidChangeTextDocument(event => {
         if (activeEditor && event.document === activeEditor.document) {
+            let regex = new RegExp(regexPattern);
             for (let contentChange of event.contentChanges) {
-                if (contentChange.text === "" || regex.exec(contentChange.text) !== null) {
+                if (contentChange.text === "" || regex.test(contentChange.text)) {
                     triggerUpdateDecorations();
                     return;
                 }
@@ -91,7 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
         console.log("Colorizing brackets");
 
         let text = activeEditor.document.getText();
-
+        console.log(text);
         let openBrackets: { [character: string]: number; } = {};
 
         let decorations = new Map<vscode.TextEditorDecorationType, vscode.Range[]>();
@@ -99,6 +99,8 @@ export function activate(context: vscode.ExtensionContext) {
         for (let bracketPair of bracketPairs) {
             openBrackets[bracketPair.openCharacter] = 0;
         }
+
+        let regex = new RegExp(regexPattern, "g");
 
         let match: RegExpExecArray | null;
         while ((match = regex.exec(text)) !== null) {
