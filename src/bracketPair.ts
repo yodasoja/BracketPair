@@ -5,8 +5,8 @@ import * as vscode from 'vscode';
 
 export default class BracketPair {
     
-    openCharacter: string;
-    closeCharacter: string;
+    readonly openCharacter: string;
+    readonly closeCharacter: string;
     colorDeclaration: vscode.TextEditorDecorationType[] = [];
 
     constructor(firstBracket: string, lastBracket: string, colors: string[]) {
