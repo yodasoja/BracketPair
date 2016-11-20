@@ -3,11 +3,12 @@ import * as vscode from 'vscode';
 import BracketPair from "./bracketPair";
 
 export default class Document {
-    bracketPairs: BracketPair[];
-    bracketsPerLine: BracketPair[][];
+    bracketsPerLine: { [character: string]: number; }[] = [];
     textEditor: vscode.TextEditor;
+
     readonly infinitePosition: vscode.Position;
-    regexPattern: string;
+    readonly bracketPairs: BracketPair[];
+    readonly regexPattern: string;
 
     constructor(textEditor: vscode.TextEditor) {
         // TODO Move this to settings
@@ -19,12 +20,25 @@ export default class Document {
         this.bracketPairs = [roundBracket, squareBracket, curlyBracket];
         this.textEditor = textEditor;
 
-        this.regexPattern = "[";
-        for (let bracketPair of this.bracketPairs) {
-            this.regexPattern += "\\" + bracketPair.openCharacter + "\\" + bracketPair.closeCharacter;
+        let regexBuilder = "[";
+        this.bracketPairs.forEach(bracketPair => {
+            regexBuilder += `\\${bracketPair.openCharacter}\\${bracketPair.closeCharacter}`;
+        });
+        regexBuilder += "]";
 
+        this.regexPattern = regexBuilder;
+
+        for (let i = 0; i < textEditor.document.lineCount; i++) {
+            {
+                let bracketCount: { [character: string]: number; } = {};
+                this.bracketPairs.forEach(bracketPair => {
+                    bracketCount[bracketPair.openCharacter] = 0;
+                    bracketCount[bracketPair.closeCharacter] = 0;
+                });
+
+                this.bracketsPerLine.push(bracketCount);
+            }
         }
-        this.regexPattern += "]";
     }
 
     onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
@@ -33,13 +47,13 @@ export default class Document {
             // TODO Implement virtual document tracking to detect deleted text
             // TODO Per line record amount of brackets for optimization, no need to parse whole document per change
             if (contentChange.text === "" || regex.test(contentChange.text)) {
-                this.updateDecorations();
+                this.updateDecorations(contentChange.range.start.line);
                 return;
             }
         }
     }
 
-    updateDecorations(startPosition: vscode.Position | null = null) {
+    updateDecorations(lineNumber = 0) {
         console.log("Colorizing brackets");
 
         // TODO Move errorBracket to brackets array and count amount of unmatched brackets
@@ -49,31 +63,32 @@ export default class Document {
 
         let text: string;
 
-        if (startPosition !== null) {
-            text = this.textEditor.document.getText(new vscode.Range(startPosition, this.infinitePosition));
+        if (lineNumber !== 0) {
+            text = this.textEditor.document.getText(new vscode.Range(new vscode.Position(lineNumber, 0), this.infinitePosition));
         }
         else {
             text = this.textEditor.document.getText();
         }
 
         let bracketCount: { [character: string]: number; } = {};
-
         let decorations = new Map<vscode.TextEditorDecorationType, vscode.Range[]>();
 
         for (let bracketPair of this.bracketPairs) {
             bracketCount[bracketPair.openCharacter] = 0;
+            bracketCount[bracketPair.closeCharacter] = 0;
         }
 
         let regex = new RegExp(this.regexPattern, "g");
 
         let match: RegExpExecArray | null;
+        let previousLineNumber = -1;
         while ((match = regex.exec(text)) !== null) {
-            let startPos = this.textEditor.document.positionAt(match.index);
-            let endPos = this.textEditor.document.positionAt(match.index + match[0].length);
+            let startPos = new vscode.Position(this.textEditor.document.positionAt(match.index).line + lineNumber, this.textEditor.document.positionAt(match.index).character);
+            let endPos = startPos.translate(0, match[0].length);
             let range = new vscode.Range(startPos, endPos);
 
             for (let bracketPair of this.bracketPairs) {
-                // If char matches, store the position and color 
+                // If open bracket matches, store the position and color, increment count 
                 if (bracketPair.openCharacter === match[0]) {
                     let colorIndex = bracketCount[bracketPair.openCharacter] % bracketPair.colorDeclaration.length;
                     let colorDeclaration = bracketPair.colorDeclaration[colorIndex];
@@ -89,6 +104,7 @@ export default class Document {
                     break;
                 }
                 else if (bracketPair.closeCharacter === match[0]) {
+                    // If no more open brackets, bracket is an 'error'
                     if (bracketCount[bracketPair.openCharacter] === 0) {
                         let decoration = decorations.get(errorBracket);
                         if (decoration !== undefined) {
@@ -97,7 +113,10 @@ export default class Document {
                         else {
                             decorations.set(errorBracket, [range]);
                         }
+
+                        bracketCount[bracketPair.closeCharacter]++;
                     }
+                    // If close bracket matches, decrement open count
                     else {
                         bracketCount[bracketPair.openCharacter]--;
 
@@ -114,6 +133,15 @@ export default class Document {
                     }
                     break;
                 }
+            }
+
+            if (startPos.line !== previousLineNumber) {
+                this.bracketPairs.forEach(bracketPair => {
+                    this.bracketsPerLine[startPos.line][bracketPair.openCharacter] = bracketCount[bracketPair.openCharacter];
+                    this.bracketsPerLine[startPos.line][bracketPair.closeCharacter] = bracketCount[bracketPair.closeCharacter];
+                });
+
+                previousLineNumber = startPos.line;
             }
         }
 

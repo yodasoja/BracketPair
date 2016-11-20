@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import Document from "./document";
 
 export default class DocumentManager {
+    // TODO Is there a more efficient way to do this? Use URI as key maybe?
     documents = new Map<vscode.TextDocument, Document>();
 
     public updateDecorations(textEditor: vscode.TextEditor) {
