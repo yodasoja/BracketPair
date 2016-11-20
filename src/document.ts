@@ -9,6 +9,7 @@ export default class Document {
     readonly infinitePosition: vscode.Position;
     readonly bracketPairs: BracketPair[];
     readonly regexPattern: string;
+    referenceDocument: string;
 
     constructor(textEditor: vscode.TextEditor) {
         // TODO Move this to settings
@@ -19,6 +20,7 @@ export default class Document {
         this.infinitePosition = new vscode.Position(Infinity, Infinity);
         this.bracketPairs = [roundBracket, squareBracket, curlyBracket];
         this.textEditor = textEditor;
+        this.referenceDocument = textEditor.document.getText();
 
         let regexBuilder = "[";
         this.bracketPairs.forEach(bracketPair => {
@@ -47,12 +49,10 @@ export default class Document {
 
     onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         let lowestLineNumberChanged = this.textEditor.document.lineCount - 1;
-        let highestLineNumberChanged = 0;
 
         for (let contentChange of contentChanges) {
             if (this.updateRequired(contentChange)) {
                 lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
-                highestLineNumberChanged = Math.max(highestLineNumberChanged, contentChange.range.end.line);
             }
         }
 
@@ -61,45 +61,38 @@ export default class Document {
 
     updateRequired(contentChange: vscode.TextDocumentContentChangeEvent) {
         let regex = new RegExp(this.regexPattern);
-        let splitContent = contentChange.text.split("\r\n");
-        if (splitContent.length > 1) {
-            let amountOfNewLines = splitContent.length - 1;
-            let emptyBrackets: { [character: string]: number; }[] = [];
 
-            for (let i = 0; i <= amountOfNewLines; i++) {
+        let editStart = this.textEditor.document.offsetAt(contentChange.range.start);
+        let editEnd = editStart + contentChange.rangeLength;
+
+        let startText = this.referenceDocument.substring(0, editStart);
+        let removedText = this.referenceDocument.substring(editStart, editEnd);
+        let endText = this.referenceDocument.substring(editEnd);
+
+        this.referenceDocument = startText + contentChange.text + endText;
+
+        let addedLines = startText.split("\r\n").length - 1;
+        let removedLines = contentChange.range.end.line - contentChange.range.start.line;
+
+        if (addedLines > 0) {
+            let emptyBrackets: { [character: string]: number; }[] = [];
+            for (let i = 0; i <= addedLines; i++) {
                 emptyBrackets.push(this.getEmptyBracketArray());
             }
 
-            console.log("Inserting " + amountOfNewLines + " line(s) after line: " + (contentChange.range.start.line + 1));
             this.bracketsPerLine =
                 this.bracketsPerLine.slice(0, contentChange.range.start.line)
                     .concat(emptyBrackets)
                     .concat(this.bracketsPerLine
                         .slice(contentChange.range.start.line));
 
-            // lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
-            // highestLineNumberChanged = Math.max(highestLineNumberChanged, contentChange.range.start.line + amountOfNewLines);
-
-        } // Line(s) deleted
-        else if (contentChange.text === "" && contentChange.range.start.line !== contentChange.range.end.line) {
-            console.log("Removing lines between: " + (contentChange.range.start.line + 1) + ", " + (contentChange.range.end.line + 1));
-            let linesToBeRemoved = contentChange.range.end.line - contentChange.range.start.line;
-            this.bracketsPerLine.splice(contentChange.range.start.line, linesToBeRemoved);
-        }
-        // Text deleted
-        else if (contentChange.text === "") {
-            console.log("Text deleted at line : " + (contentChange.range.start.line + 1));
-        }
-        // Text contains a bracket
-        else if (regex.test(contentChange.text)) {
-            console.log("Text added at line : " + (contentChange.range.start.line + 1));
-        }
-        // No need to update
-        else {
-            return false;
         }
 
-        return true;
+        if (removedLines > 0) {
+            this.bracketsPerLine.splice(contentChange.range.start.line, removedLines);
+        }
+
+        return (regex.test(removedText) || regex.test(contentChange.text));
     }
 
     updateDecorations(lineNumber: number = 0) {
@@ -111,14 +104,7 @@ export default class Document {
             color: "#e2041b"
         });
 
-        let text: string;
-
-        if (lineNumber !== 0) {
-            text = this.textEditor.document.getText(new vscode.Range(new vscode.Position(lineNumber, 0), this.infinitePosition));
-        }
-        else {
-            text = this.textEditor.document.getText();
-        }
+        let text = this.textEditor.document.getText(new vscode.Range(new vscode.Position(lineNumber, 0), this.infinitePosition));
 
         let bracketCount = this.getEmptyBracketArray();
         let decorations = new Map<vscode.TextEditorDecorationType, vscode.Range[]>();
