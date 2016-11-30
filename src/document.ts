@@ -83,11 +83,13 @@ export default class Document {
     }
 
     updateDecorations(lineNumber: number = 0) {
+        console.time("updateDecorations");
+
         let amountToRemove = this.lineDecorations.length - lineNumber;
         this.lineDecorations.splice(lineNumber, amountToRemove);
-
-        let text = this.textEditor.document.getText();
-
+        let startPos = new vscode.Position(lineNumber, 0);
+        let text = this.textEditor.document.getText(new vscode.Range(startPos, new vscode.Position(Infinity, Infinity)));
+        let startIndex = this.textEditor.document.offsetAt(startPos);
         let bracketCount: { [character: string]: number; } = {};
 
         for (let bracketPair of this.bracketPairs) {
@@ -99,11 +101,7 @@ export default class Document {
 
         let match: RegExpExecArray | null;
         while ((match = regex.exec(text)) !== null) {
-            let textPos = this.textEditor.document.positionAt(match.index);
-
-            if (textPos.line < lineNumber) {
-                continue;
-            }
+            let textPos = this.textEditor.document.positionAt(this.textEditor.document.offsetAt(this.textEditor.document.positionAt(match.index)) + startIndex);
 
             let startPos = new vscode.Position(textPos.line, textPos.character);
             let endPos = startPos.translate(0, match[0].length);
@@ -176,14 +174,19 @@ export default class Document {
             }
         }
 
+        let sum = 0;
         for (let [color, decoration] of this.decorations) {
             let ranges = reduceMap.get(color);
             if (ranges !== undefined) {
+                sum += ranges.length;
                 this.textEditor.setDecorations(decoration, ranges);
             }
             else {
                 this.textEditor.setDecorations(decoration, []);
             }
         }
+
+        console.timeEnd("updateDecorations");
+        console.log(sum + " decorations");
     }
 }
