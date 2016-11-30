@@ -7,16 +7,13 @@ export default class BracketPair {
     
     readonly openCharacter: string;
     readonly closeCharacter: string;
-    colorDeclaration: vscode.TextEditorDecorationType[] = [];
+    readonly colors : string[];
+    readonly orphanColor: string;
 
-    constructor(firstBracket: string, lastBracket: string, colors: string[]) {
+    constructor(firstBracket: string, lastBracket: string, colors: string[], orphanColor : string) {
         this.openCharacter = firstBracket;
         this.closeCharacter = lastBracket;
-
-        for (let color of colors) {
-            this.colorDeclaration.push(vscode.window.createTextEditorDecorationType({
-                color: color
-            }));
-        }
+        this.colors = colors;
+        this.orphanColor = orphanColor;
     }
 }
