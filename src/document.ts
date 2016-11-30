@@ -14,9 +14,10 @@ export default class Document {
 
     constructor(textEditor: vscode.TextEditor) {
         // TODO Move this to settings
-        let roundBracket = new BracketPair('(', ')', ["#e6b422", "#c70067", "#00a960", "#fc7482"]);
-        let squareBracket = new BracketPair('[', ']', ["#33ccff", "#8080ff", "#0073a8"]);
-        let curlyBracket = new BracketPair('{', '}', ["#d4d4aa", "#d1a075", "#9c6628"]);
+        let roundBracket = new BracketPair('(', ')', ["#CCC42C", "#99976E", "#FFD351", "#90C2FF", "#2C9ECC"]);
+        let squareBracket = new BracketPair('[', ']', ["#CCC42C", "#99976E", "#FFD351", "#90C2FF", "#2C9ECC"]);
+        let curlyBracket = new BracketPair('{', '}', ["#CCC42C", "#99976E", "#FFD351", "#90C2FF", "#2C9ECC"]);
+
 
         this.infinitePosition = new vscode.Position(Infinity, Infinity);
         this.bracketPairs = [roundBracket, squareBracket, curlyBracket];
@@ -30,10 +31,6 @@ export default class Document {
         regexBuilder += "]";
 
         this.regexPattern = regexBuilder;
-
-        for (let i = 0; i < textEditor.document.lineCount; i++) {
-            this.lineDecorations.push(new Map<vscode.TextEditorDecorationType, vscode.Range[]>());
-        }
     }
 
     onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
@@ -60,31 +57,42 @@ export default class Document {
 
         this.referenceDocument = startText + contentChange.text + endText;
 
-        let addedLines = startText.split("\r\n").length - 1;
-        let removedLines = contentChange.range.end.line - contentChange.range.start.line;
-
-        if (addedLines > 0) {
-            let emptyLines: LineDecoration[] = [];
-            for (let i = 0; i <= addedLines; i++) {
-                emptyLines.push(new Map<vscode.TextEditorDecorationType, vscode.Range[]>());
-            }
-
-            // Insert empty lines into the array
-            this.lineDecorations =
-                this.lineDecorations.slice(0, contentChange.range.start.line)
-                    .concat(emptyLines)
-                    .concat(this.lineDecorations.slice(contentChange.range.start.line));
-
-        }
-
-        if (removedLines > 0) {
-            this.lineDecorations.splice(contentChange.range.start.line, removedLines);
-        }
-
         return (regex.test(removedText) || regex.test(contentChange.text));
     }
 
+    getLineDecoration(index: number) {
+        if (index < this.lineDecorations.length) {
+            return this.lineDecorations[index];
+        }
+        else {
+            if (this.lineDecorations.length === 0) {
+                this.lineDecorations.push(this.getEmptyLine());
+            }
+
+            for (let i = this.lineDecorations.length - 1; i < index; i++) {
+                this.lineDecorations.push(this.getEmptyLine());
+            }
+            return (this.lineDecorations[this.lineDecorations.length - 1]);
+        }
+
+    }
+
+    getEmptyLine() {
+        let line = new Map<vscode.TextEditorDecorationType, vscode.Range[]>();
+
+        for (let bracketPair of this.bracketPairs) {
+            for (let decoration of bracketPair.colorDeclaration) {
+                line.set(decoration, []);
+            }
+        }
+
+        return line;
+    }
+
     updateDecorations(lineNumber: number = 0) {
+        let amountToRemove = this.lineDecorations.length - lineNumber;
+        this.lineDecorations.splice(lineNumber, amountToRemove);
+
         console.log(this.textEditor.document.fileName);
         console.log("Colorizing brackets from line: " + (lineNumber + 1));
 
@@ -107,7 +115,6 @@ export default class Document {
         let regex = new RegExp(this.regexPattern, "g");
 
         let match: RegExpExecArray | null;
-        let previousLineNumber = -1;
         while ((match = regex.exec(text)) !== null) {
             let textPos = this.textEditor.document.positionAt(match.index);
             let startPos = new vscode.Position(textPos.line + lineNumber, textPos.character);
@@ -122,7 +129,7 @@ export default class Document {
                     let colorIndex = bracketCount[bracketPair.openCharacter] % bracketPair.colorDeclaration.length;
                     let colorDeclaration = bracketPair.colorDeclaration[colorIndex];
 
-                    let decoration = this.lineDecorations[startPos.line].get(colorDeclaration);
+                    let decoration = this.getLineDecoration(startPos.line).get(colorDeclaration);
                     if (decoration !== undefined) {
                         decoration.push(range);
                     }
@@ -135,7 +142,7 @@ export default class Document {
                 else if (bracketPair.closeCharacter === match[0]) {
                     // If no more open brackets, bracket is an 'error'
                     if (bracketCount[bracketPair.openCharacter] === 0) {
-                        let decoration = this.lineDecorations[startPos.line].get(errorBracket);
+                        let decoration = this.getLineDecoration(startPos.line).get(errorBracket);
                         if (decoration !== undefined) {
                             decoration.push(range);
                         }
@@ -152,7 +159,7 @@ export default class Document {
                         let colorIndex = bracketCount[bracketPair.openCharacter] % bracketPair.colorDeclaration.length;
                         let colorDeclaration = bracketPair.colorDeclaration[colorIndex];
 
-                        let decoration = this.lineDecorations[startPos.line].get(colorDeclaration);
+                        let decoration = this.getLineDecoration(startPos.line).get(colorDeclaration);
                         if (decoration !== undefined) {
                             decoration.push(range);
                         }
@@ -163,34 +170,18 @@ export default class Document {
                     break;
                 }
             }
-
-            if (startPos.line !== previousLineNumber) {
-                this.bracketPairs.forEach(bracketPair => {
-                    this.lineDecorations[startPos.line][bracketPair.openCharacter] = bracketCount[bracketPair.openCharacter];
-                    this.lineDecorations[startPos.line][bracketPair.closeCharacter] = bracketCount[bracketPair.closeCharacter];
-                });
-
-                previousLineNumber = startPos.line;
-            }
         }
 
         console.time('decorations');
 
-        let reduceMap = new Map<vscode.TextEditorDecorationType, vscode.Range[]>();
+        console.log("Amount of lines: " + this.lineDecorations.length);
+
         for (let map of this.lineDecorations) {
-            for (let [key, value] of map) {
-                let reducedArray = reduceMap.get(key);
-                if (reducedArray !== undefined) {
-                    reducedArray.concat(value);
-                }
-                else {
-                    reduceMap.set(key, value);
+            {
+                for (let [decoration, ranges] of map) {
+                    this.textEditor.setDecorations(decoration, ranges);
                 }
             }
-        }
-
-        for (let [decoration, ranges] of reduceMap.entries()) {
-            this.textEditor.setDecorations(decoration, ranges);
         }
         console.timeEnd('decorations');
 
