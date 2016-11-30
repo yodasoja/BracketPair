@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import BracketPair from "./bracketPair";
 type LineColorMap = Map<string, vscode.Range[]>;
 
-
 export default class Document {
     private lineDecorations: LineColorMap[] = [];
     private textEditor: vscode.TextEditor;
@@ -71,7 +70,7 @@ export default class Document {
         return (regex.test(removedText) || regex.test(contentChange.text));
     }
 
-    getLineMap(index: number): LineColorMap {
+    getLineColorMap(index: number): LineColorMap {
         if (index < this.lineDecorations.length) {
             return this.lineDecorations[index];
         }
@@ -87,12 +86,7 @@ export default class Document {
         let amountToRemove = this.lineDecorations.length - lineNumber;
         this.lineDecorations.splice(lineNumber, amountToRemove);
 
-        console.log(this.textEditor.document.fileName);
-        console.log("Colorizing brackets from line: " + (lineNumber + 1));
-
-        //let text = this.textEditor.document.getText(new vscode.Range(new vscode.Position(lineNumber, 0), this.infinitePosition));
         let text = this.textEditor.document.getText();
-
 
         let bracketCount: { [character: string]: number; } = {};
 
@@ -107,17 +101,13 @@ export default class Document {
         while ((match = regex.exec(text)) !== null) {
             let textPos = this.textEditor.document.positionAt(match.index);
 
-            if (textPos.line < lineNumber)
-            {
+            if (textPos.line < lineNumber) {
                 continue;
             }
 
-            // let startPos = new vscode.Position(textPos.line + lineNumber, textPos.character);
             let startPos = new vscode.Position(textPos.line, textPos.character);
             let endPos = startPos.translate(0, match[0].length);
             let range = new vscode.Range(startPos, endPos);
-
-            //console.log("Found bracket at Line: " + (startPos.line + 1) + ", Character: " + startPos.character);
 
             for (let bracketPair of this.bracketPairs) {
                 // If open bracket matches, store the position and color, increment count 
@@ -125,7 +115,7 @@ export default class Document {
                     let colorIndex = bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
                     let color = bracketPair.colors[colorIndex];
 
-                    let colorRanges = this.getLineMap(startPos.line).get(color);
+                    let colorRanges = this.getLineColorMap(startPos.line).get(color);
                     if (colorRanges !== undefined) {
                         colorRanges.push(range);
                     }
@@ -143,9 +133,9 @@ export default class Document {
                         let colorIndex = bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
                         let colorDeclaration = bracketPair.colors[colorIndex];
 
-                        let decoration = this.getLineMap(startPos.line).get(colorDeclaration);
-                        if (decoration !== undefined) {
-                            decoration.push(range);
+                        let colorRanges = this.getLineColorMap(startPos.line).get(colorDeclaration);
+                        if (colorRanges !== undefined) {
+                            colorRanges.push(range);
                         }
                         else {
                             this.lineDecorations[startPos.line].set(colorDeclaration, [range]);
@@ -153,9 +143,9 @@ export default class Document {
                     }
                     // If no more open brackets, bracket is an 'error'
                     else {
-                        let decoration = this.getLineMap(startPos.line).get(bracketPair.orphanColor);
-                        if (decoration !== undefined) {
-                            decoration.push(range);
+                        let colorRanges = this.getLineColorMap(startPos.line).get(bracketPair.orphanColor);
+                        if (colorRanges !== undefined) {
+                            colorRanges.push(range);
                         }
                         else {
                             this.lineDecorations[startPos.line].set(bracketPair.orphanColor, [range]);
@@ -167,10 +157,6 @@ export default class Document {
                 break;
             }
         }
-
-        console.time('decorations');
-
-        console.log("Amount of lines: " + this.lineDecorations.length);
 
         let reduceMap = new Map<string, vscode.Range[]>();
         for (let map of this.lineDecorations) {
@@ -199,7 +185,5 @@ export default class Document {
                 this.textEditor.setDecorations(decoration, []);
             }
         }
-
-        console.timeEnd('decorations');
     }
 }
