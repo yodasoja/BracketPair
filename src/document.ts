@@ -90,7 +90,9 @@ export default class Document {
         console.log(this.textEditor.document.fileName);
         console.log("Colorizing brackets from line: " + (lineNumber + 1));
 
-        let text = this.textEditor.document.getText(new vscode.Range(new vscode.Position(lineNumber, 0), this.infinitePosition));
+        //let text = this.textEditor.document.getText(new vscode.Range(new vscode.Position(lineNumber, 0), this.infinitePosition));
+        let text = this.textEditor.document.getText();
+
 
         let bracketCount: { [character: string]: number; } = {};
 
@@ -99,14 +101,19 @@ export default class Document {
             bracketCount[bracketPair.closeCharacter] = 0;
         }
 
-        //let decorations = new Map<vscode.TextEditorDecorationType, vscode.Range[]>();
-
         let regex = new RegExp(this.regexPattern, "g");
 
         let match: RegExpExecArray | null;
         while ((match = regex.exec(text)) !== null) {
             let textPos = this.textEditor.document.positionAt(match.index);
-            let startPos = new vscode.Position(textPos.line + lineNumber, textPos.character);
+
+            if (textPos.line < lineNumber)
+            {
+                continue;
+            }
+
+            // let startPos = new vscode.Position(textPos.line + lineNumber, textPos.character);
+            let startPos = new vscode.Position(textPos.line, textPos.character);
             let endPos = startPos.translate(0, match[0].length);
             let range = new vscode.Range(startPos, endPos);
 
@@ -172,10 +179,12 @@ export default class Document {
                     let existingRanges = reduceMap.get(color);
 
                     if (existingRanges !== undefined) {
-                        reduceMap.set(color, existingRanges.concat(ranges));
+                        existingRanges.push.apply(existingRanges, ranges);
                     }
                     else {
-                        reduceMap.set(color, ranges);
+                        // Slice because we will be added values to this array in the future, 
+                        // but don't want to modify the original array which is stored per line
+                        reduceMap.set(color, ranges.slice());
                     }
                 }
             }
