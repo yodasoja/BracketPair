@@ -84,15 +84,16 @@ export default class Document {
     }
 
     updateDecorations(lineNumber: number = 0) {
+        console.time('decorations');
+
+        let lineNumberRange = new vscode.Position(lineNumber, 0);
         let amountToRemove = this.lineDecorations.length - lineNumber;
         this.lineDecorations.splice(lineNumber, amountToRemove);
 
         console.log(this.textEditor.document.fileName);
         console.log("Colorizing brackets from line: " + (lineNumber + 1));
 
-        //let text = this.textEditor.document.getText(new vscode.Range(new vscode.Position(lineNumber, 0), this.infinitePosition));
-        let text = this.textEditor.document.getText();
-
+        let text = this.textEditor.document.getText(new vscode.Range(lineNumberRange, this.infinitePosition));
 
         let bracketCount: { [character: string]: number; } = {};
 
@@ -106,18 +107,10 @@ export default class Document {
         let match: RegExpExecArray | null;
         while ((match = regex.exec(text)) !== null) {
             let textPos = this.textEditor.document.positionAt(match.index);
-
-            if (textPos.line < lineNumber)
-            {
-                continue;
-            }
-
-            // let startPos = new vscode.Position(textPos.line + lineNumber, textPos.character);
-            let startPos = new vscode.Position(textPos.line, textPos.character);
+            let x = new vscode.Position(textPos.line + lineNumberRange.line, textPos.character + lineNumberRange.character);
+            let startPos = this.textEditor.document.positionAt(this.textEditor.document.offsetAt(x));
             let endPos = startPos.translate(0, match[0].length);
             let range = new vscode.Range(startPos, endPos);
-
-            //console.log("Found bracket at Line: " + (startPos.line + 1) + ", Character: " + startPos.character);
 
             for (let bracketPair of this.bracketPairs) {
                 // If open bracket matches, store the position and color, increment count 
@@ -167,10 +160,6 @@ export default class Document {
                 break;
             }
         }
-
-        console.time('decorations');
-
-        console.log("Amount of lines: " + this.lineDecorations.length);
 
         let reduceMap = new Map<string, vscode.Range[]>();
         for (let map of this.lineDecorations) {
