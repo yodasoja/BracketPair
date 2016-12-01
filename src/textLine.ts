@@ -9,6 +9,7 @@ export default class TextLine {
 
     constructor(bracketPairs: BracketPair[], previousLine?: TextLine) {
         if (previousLine !== undefined) {
+            // Mantain previous lines bracket count
             for (let key in previousLine.bracketCount) {
                 this.bracketCount[key] = previousLine.bracketCount[key];
             }
