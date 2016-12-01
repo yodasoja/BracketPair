@@ -1,10 +1,12 @@
 'use strict';
 import * as vscode from 'vscode';
 import BracketPair from "./bracketPair";
+import TextLine from "./textLine";
+
 type LineColorMap = Map<string, vscode.Range[]>;
 
 export default class Document {
-    private lineDecorations: LineColorMap[] = [];
+    private lines: TextLine[] = [];
     private textEditor: vscode.TextEditor;
     private decorations = new Map<string, vscode.TextEditorDecorationType>();
 
@@ -70,32 +72,28 @@ export default class Document {
         return (regex.test(removedText) || regex.test(contentChange.text));
     }
 
-    getLineColorMap(index: number): LineColorMap {
-        if (index < this.lineDecorations.length) {
-            return this.lineDecorations[index];
+    getLine(index: number): TextLine {
+        if (index < this.lines.length) {
+            return this.lines[index];
         }
         else {
-            for (let i = this.lineDecorations.length; i <= index; i++) {
-                this.lineDecorations.push(new Map<string, vscode.Range[]>());
+            for (let i = this.lines.length; i <= index; i++) {
+                let newLine = new TextLine(this.bracketPairs, this.lines[i - 1]);
+                this.lines.push(newLine);
             }
-            return (this.lineDecorations[this.lineDecorations.length - 1]);
+            let lineToReturn = this.lines[this.lines.length - 1];
+            return lineToReturn;
         }
     }
 
     updateDecorations(lineNumber: number = 0) {
         console.time("updateDecorations");
 
-        let amountToRemove = this.lineDecorations.length - lineNumber;
-        this.lineDecorations.splice(lineNumber, amountToRemove);
+        let amountToRemove = this.lines.length - lineNumber;
+        this.lines.splice(lineNumber, amountToRemove);
         let startPos = new vscode.Position(lineNumber, 0);
         let text = this.textEditor.document.getText(new vscode.Range(startPos, new vscode.Position(Infinity, Infinity)));
         let startIndex = this.textEditor.document.offsetAt(startPos);
-        let bracketCount: { [character: string]: number; } = {};
-
-        for (let bracketPair of this.bracketPairs) {
-            bracketCount[bracketPair.openCharacter] = 0;
-            bracketCount[bracketPair.closeCharacter] = 0;
-        }
 
         let regex = new RegExp(this.regexPattern, "g");
 
@@ -107,49 +105,51 @@ export default class Document {
             let endPos = startPos.translate(0, match[0].length);
             let range = new vscode.Range(startPos, endPos);
 
+            let currentLine = this.getLine(startPos.line);
+
             for (let bracketPair of this.bracketPairs) {
                 // If open bracket matches, store the position and color, increment count 
                 if (bracketPair.openCharacter === match[0]) {
-                    let colorIndex = bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
+                    let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
                     let color = bracketPair.colors[colorIndex];
 
-                    let colorRanges = this.getLineColorMap(startPos.line).get(color);
+                    let colorRanges = currentLine.colorRanges.get(color);
                     if (colorRanges !== undefined) {
                         colorRanges.push(range);
                     }
                     else {
-                        this.lineDecorations[startPos.line].set(color, [range]);
+                        currentLine.colorRanges.set(color, [range]);
                     }
-                    bracketCount[bracketPair.openCharacter]++;
+                    currentLine.bracketCount[bracketPair.openCharacter]++;
                     break;
                 }
                 else if (bracketPair.closeCharacter === match[0]) {
                     // If close bracket matches, decrement open count
-                    if (bracketCount[bracketPair.openCharacter] !== 0) {
-                        bracketCount[bracketPair.openCharacter]--;
+                    if (currentLine.bracketCount[bracketPair.openCharacter] !== 0) {
+                        currentLine.bracketCount[bracketPair.openCharacter]--;
 
-                        let colorIndex = bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
+                        let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
                         let colorDeclaration = bracketPair.colors[colorIndex];
 
-                        let colorRanges = this.getLineColorMap(startPos.line).get(colorDeclaration);
+                        let colorRanges = currentLine.colorRanges.get(colorDeclaration);
                         if (colorRanges !== undefined) {
                             colorRanges.push(range);
                         }
                         else {
-                            this.lineDecorations[startPos.line].set(colorDeclaration, [range]);
+                            currentLine.colorRanges.set(colorDeclaration, [range]);
                         }
                     }
                     // If no more open brackets, bracket is an 'error'
                     else {
-                        let colorRanges = this.getLineColorMap(startPos.line).get(bracketPair.orphanColor);
+                        let colorRanges = currentLine.colorRanges.get(bracketPair.orphanColor);
                         if (colorRanges !== undefined) {
                             colorRanges.push(range);
                         }
                         else {
-                            this.lineDecorations[startPos.line].set(bracketPair.orphanColor, [range]);
+                            currentLine.colorRanges.set(bracketPair.orphanColor, [range]);
                         }
 
-                        bracketCount[bracketPair.closeCharacter]++;
+                    currentLine.bracketCount[bracketPair.closeCharacter]++;
                     }
                 }
                 break;
@@ -157,9 +157,9 @@ export default class Document {
         }
 
         let reduceMap = new Map<string, vscode.Range[]>();
-        for (let map of this.lineDecorations) {
+        for (let line of this.lines) {
             {
-                for (let [color, ranges] of map) {
+                for (let [color, ranges] of line.colorRanges) {
                     let existingRanges = reduceMap.get(color);
 
                     if (existingRanges !== undefined) {
