@@ -3,8 +3,6 @@ import * as vscode from 'vscode';
 import BracketPair from "./bracketPair";
 import TextLine from "./textLine";
 
-type LineColorMap = Map<string, vscode.Range[]>;
-
 export default class Document {
     private timeout: NodeJS.Timer | null;
     private readonly timeoutLength = 200;
@@ -36,7 +34,7 @@ export default class Document {
     }
 
     // Create a regex to match open and close brackets
-    // TODO Test what happens if use specifies other characters then []{}()
+    // TODO Test what happens if user specifies other characters then []{}()
     private createRegex(bracketPairs: BracketPair[]) {
         let regex = "[";
 
