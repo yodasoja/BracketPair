@@ -149,10 +149,10 @@ export default class Document {
                             currentLine.colorRanges.set(bracketPair.orphanColor, [range]);
                         }
 
-                    currentLine.bracketCount[bracketPair.closeCharacter]++;
+                        currentLine.bracketCount[bracketPair.closeCharacter]++;
                     }
+                    break;
                 }
-                break;
             }
         }
 
