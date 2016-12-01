@@ -7,7 +7,7 @@ export default class DocumentManager {
     documents = new Map<vscode.TextDocument, Document>();
 
     public updateDecorations(textEditor: vscode.TextEditor) {
-        this.getDocument(textEditor).updateDecorations();
+        this.getDocument(textEditor).triggerUpdateDecorations();
     }
 
     public onDidChangeTextDocument(textEditor: vscode.TextEditor, contentChanges: vscode.TextDocumentContentChangeEvent[]) {

@@ -6,6 +6,8 @@ import TextLine from "./textLine";
 type LineColorMap = Map<string, vscode.Range[]>;
 
 export default class Document {
+    private timeout: NodeJS.Timer | null;
+    private readonly timeoutLength = 200;
     private lines: TextLine[] = [];
     private textEditor: vscode.TextEditor;
     private decorations = new Map<string, vscode.TextEditorDecorationType>();
@@ -54,10 +56,10 @@ export default class Document {
             }
         }
 
-        this.updateDecorations(lowestLineNumberChanged);
+        this.triggerUpdateDecorations(lowestLineNumberChanged);
     }
 
-    updateRequired(contentChange: vscode.TextDocumentContentChangeEvent) {
+    private updateRequired(contentChange: vscode.TextDocumentContentChangeEvent) {
         let regex = new RegExp(this.regexPattern);
 
         let editStart = this.textEditor.document.offsetAt(contentChange.range.start);
@@ -72,7 +74,7 @@ export default class Document {
         return (regex.test(removedText) || regex.test(contentChange.text));
     }
 
-    getLine(index: number): TextLine {
+    private getLine(index: number): TextLine {
         if (index < this.lines.length) {
             return this.lines[index];
         }
@@ -86,7 +88,19 @@ export default class Document {
         }
     }
 
-    updateDecorations(lineNumber: number = 0) {
+    triggerUpdateDecorations(lineNumber: number = 0) {
+        let self = this;
+
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
+
+        this.timeout = setTimeout(function () {
+            self.updateDecorations(lineNumber);
+        }, this.timeoutLength);
+    }
+
+    private updateDecorations(lineNumber: number) {
         console.time("updateDecorations");
 
         let amountToRemove = this.lines.length - lineNumber;
