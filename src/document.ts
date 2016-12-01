@@ -8,15 +8,18 @@ type LineColorMap = Map<string, vscode.Range[]>;
 export default class Document {
     private timeout: NodeJS.Timer | null;
     private readonly timeoutLength = 200;
-    private lowestChangedLine = Infinity;
+    // This program caches non-changes lines, and will only analyze linenumbers including & above a changed line
+    private lineToUpdateWhenTimeoutEnds = Infinity;
 
     private lines: TextLine[] = [];
     private textEditor: vscode.TextEditor;
     private decorations = new Map<string, vscode.TextEditorDecorationType>();
 
-    private readonly infinitePosition: vscode.Position;
+    // This is used to read until end of document
+    private readonly infinitePosition = new vscode.Position(Infinity, Infinity);
     private readonly bracketPairs: BracketPair[];
     private readonly regexPattern: string;
+    // This is used to track deleted changes
     private referenceDocument: string;
 
     constructor(textEditor: vscode.TextEditor) {
@@ -25,31 +28,40 @@ export default class Document {
         let squareBracket = new BracketPair('[', ']', ["#CCC42C", "#99976E", "#FFD351", "#90C2FF", "#2C9ECC"], "#e2041b");
         let curlyBracket = new BracketPair('{', '}', ["#CCC42C", "#99976E", "#FFD351", "#90C2FF", "#2C9ECC"], "#e2041b");
 
-        this.infinitePosition = new vscode.Position(Infinity, Infinity);
         this.bracketPairs = [roundBracket, squareBracket, curlyBracket];
         this.textEditor = textEditor;
         this.referenceDocument = textEditor.document.getText();
 
-        let regexBuilder = "[";
-        this.bracketPairs.forEach(bracketPair => {
-            regexBuilder += `\\${bracketPair.openCharacter}\\${bracketPair.closeCharacter}`;
+        this.regexPattern = this.createRegex(this.bracketPairs);
+    }
 
-            bracketPair.colors.forEach(color => {
-                this.decorations.set(color, vscode.window.createTextEditorDecorationType({
-                    color: color
-                }));
-            });
-            this.decorations.set(bracketPair.orphanColor, vscode.window.createTextEditorDecorationType({
-                color: bracketPair.orphanColor
-            }));
-        });
+    // Create a regex to match open and close brackets
+    // TODO Test what happens if use specifies other characters then []{}()
+    private createRegex(bracketPairs: BracketPair[]) {
+        let regex = "[";
 
-        regexBuilder += "]";
+        for (let bracketPair of bracketPairs) {
+            regex += `\\${bracketPair.openCharacter}\\${bracketPair.closeCharacter}`;
 
-        this.regexPattern = regexBuilder;
+            for (let color of bracketPair.colors) {
+                let decoration = vscode.window.createTextEditorDecorationType({ color: color });
+                this.decorations.set(color, decoration);
+            }
+
+            let errorDecoration = vscode.window.createTextEditorDecorationType({ color: bracketPair.orphanColor });
+            this.decorations.set(bracketPair.orphanColor, errorDecoration);
+        }
+
+        regex += "]";
+
+        return regex;
     }
 
     onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
+        this.triggerUpdateDecorations(this.getLowestLineNumberChanged(contentChanges));
+    }
+
+    private getLowestLineNumberChanged(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         let lowestLineNumberChanged = this.textEditor.document.lineCount - 1;
 
         for (let contentChange of contentChanges) {
@@ -57,9 +69,13 @@ export default class Document {
                 lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
             }
         }
-        this.triggerUpdateDecorations(lowestLineNumberChanged);
+
+        return lowestLineNumberChanged;
     }
 
+    // If content change added or removed a bracket, that line will be used to resume updating the document
+    // Removed characters are tracked using a reference document
+    // TODO Not sure if this is how the reference document should be implemented, seems to work ok...
     private updateRequired(contentChange: vscode.TextDocumentContentChangeEvent) {
         let regex = new RegExp(this.regexPattern);
 
@@ -75,6 +91,8 @@ export default class Document {
         return (regex.test(removedText) || regex.test(contentChange.text));
     }
 
+    // Lines are stored in an array, if line is requested outside of array bounds
+    // add emptys lines until array is correctly sized
     private getLine(index: number): TextLine {
         if (index < this.lines.length) {
             return this.lines[index];
@@ -90,32 +108,44 @@ export default class Document {
     }
 
     triggerUpdateDecorations(lineNumber: number = 0) {
+        // Have to keep a reference to this or everything breaks
         let self = this;
 
         if (this.timeout) {
             clearTimeout(this.timeout);
         }
 
-        this.lowestChangedLine = Math.min(this.lowestChangedLine, lineNumber);
+        this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, lineNumber);
         this.timeout = setTimeout(function () {
             self.updateDecorations(lineNumber);
         }, this.timeoutLength);
     }
 
     private updateDecorations(lineNumber: number) {
-        this.lowestChangedLine = Infinity;
+        // Set to infinity because its used with Math.Min
+        this.lineToUpdateWhenTimeoutEnds = Infinity;
 
         let amountToRemove = this.lines.length - lineNumber;
+
+        // Remove cached lines that need to be updated
         this.lines.splice(lineNumber, amountToRemove);
+
         let startPos = new vscode.Position(lineNumber, 0);
-        let text = this.textEditor.document.getText(new vscode.Range(startPos, new vscode.Position(Infinity, Infinity)));
-        let startIndex = this.textEditor.document.offsetAt(startPos);
+        let text = this.textEditor.document.getText(new vscode.Range(startPos, this.infinitePosition));
+        let lineOffset = this.textEditor.document.offsetAt(startPos);
 
         let regex = new RegExp(this.regexPattern, "g");
 
         let match: RegExpExecArray | null;
         while ((match = regex.exec(text)) !== null) {
-            let textPos = this.textEditor.document.positionAt(this.textEditor.document.offsetAt(this.textEditor.document.positionAt(match.index)) + startIndex);
+            // The text being regexed only includes lines that need to be updated
+            // So we calculate the position where non-updated lines are the offset
+            // TODO Performance test this approach vs simply regex whole document
+            let textPos = this.textEditor.document.positionAt(
+                this.textEditor.document.offsetAt(
+                    this.textEditor.document.positionAt(match.index)
+                ) + lineOffset
+            );
 
             let startPos = new vscode.Position(textPos.line, textPos.character);
             let endPos = startPos.translate(0, match[0].length);
@@ -124,7 +154,7 @@ export default class Document {
             let currentLine = this.getLine(startPos.line);
 
             for (let bracketPair of this.bracketPairs) {
-                // If open bracket matches, store the position and color, increment count 
+                // If open bracket matches
                 if (bracketPair.openCharacter === match[0]) {
                     let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
                     let color = bracketPair.colors[colorIndex];
@@ -140,7 +170,7 @@ export default class Document {
                     break;
                 }
                 else if (bracketPair.closeCharacter === match[0]) {
-                    // If close bracket matches, decrement open count
+                    // If close bracket matches
                     if (currentLine.bracketCount[bracketPair.openCharacter] !== 0) {
                         currentLine.bracketCount[bracketPair.openCharacter]--;
 
@@ -155,7 +185,7 @@ export default class Document {
                             currentLine.colorRanges.set(colorDeclaration, [range]);
                         }
                     }
-                    // If no more open brackets, bracket is an 'error'
+                    // If no more open brackets, close bracket is an 'orphan'
                     else {
                         let colorRanges = currentLine.colorRanges.get(bracketPair.orphanColor);
                         if (colorRanges !== undefined) {
@@ -165,37 +195,42 @@ export default class Document {
                             currentLine.colorRanges.set(bracketPair.orphanColor, [range]);
                         }
 
-                        currentLine.bracketCount[bracketPair.closeCharacter]++;
+                        // We can count orphaned brackets, but no use-case for it yet
+                        // currentLine.bracketCount[bracketPair.closeCharacter]++;
                     }
                     break;
                 }
             }
         }
 
-        let reduceMap = new Map<string, vscode.Range[]>();
+        let colorMap = new Map<string, vscode.Range[]>();
+
+        // Reduce all the colors/ranges of the lines into a singular map
         for (let line of this.lines) {
             {
                 for (let [color, ranges] of line.colorRanges) {
-                    let existingRanges = reduceMap.get(color);
+                    let existingRanges = colorMap.get(color);
 
                     if (existingRanges !== undefined) {
                         existingRanges.push.apply(existingRanges, ranges);
                     }
                     else {
-                        // Slice because we will be added values to this array in the future, 
+                        // Slice because we will be adding values to this array in the future, 
                         // but don't want to modify the original array which is stored per line
-                        reduceMap.set(color, ranges.slice());
+                        colorMap.set(color, ranges.slice());
                     }
                 }
             }
         }
 
         for (let [color, decoration] of this.decorations) {
-            let ranges = reduceMap.get(color);
+            let ranges = colorMap.get(color);
             if (ranges !== undefined) {
                 this.textEditor.setDecorations(decoration, ranges);
             }
             else {
+                // We must set non-used colors to an empty array
+                // Or previous decorations will not be invalidated
                 this.textEditor.setDecorations(decoration, []);
             }
         }
