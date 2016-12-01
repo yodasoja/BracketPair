@@ -8,6 +8,8 @@ type LineColorMap = Map<string, vscode.Range[]>;
 export default class Document {
     private timeout: NodeJS.Timer | null;
     private readonly timeoutLength = 200;
+    private lowestChangedLine = Infinity;
+
     private lines: TextLine[] = [];
     private textEditor: vscode.TextEditor;
     private decorations = new Map<string, vscode.TextEditorDecorationType>();
@@ -55,7 +57,6 @@ export default class Document {
                 lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
             }
         }
-
         this.triggerUpdateDecorations(lowestLineNumberChanged);
     }
 
@@ -95,13 +96,14 @@ export default class Document {
             clearTimeout(this.timeout);
         }
 
+        this.lowestChangedLine = Math.min(this.lowestChangedLine, lineNumber);
         this.timeout = setTimeout(function () {
             self.updateDecorations(lineNumber);
         }, this.timeoutLength);
     }
 
     private updateDecorations(lineNumber: number) {
-        console.time("updateDecorations");
+        this.lowestChangedLine = Infinity;
 
         let amountToRemove = this.lines.length - lineNumber;
         this.lines.splice(lineNumber, amountToRemove);
@@ -188,19 +190,14 @@ export default class Document {
             }
         }
 
-        let sum = 0;
         for (let [color, decoration] of this.decorations) {
             let ranges = reduceMap.get(color);
             if (ranges !== undefined) {
-                sum += ranges.length;
                 this.textEditor.setDecorations(decoration, ranges);
             }
             else {
                 this.textEditor.setDecorations(decoration, []);
             }
         }
-
-        console.timeEnd("updateDecorations");
-        console.log(sum + " decorations");
     }
 }
