@@ -20,13 +20,9 @@ export default class Document {
     // This is used to track deleted changes
     private referenceDocument: string;
 
-    constructor(textEditor: vscode.TextEditor) {
-        // TODO Move this to settings
-        let roundBracket = new BracketPair('(', ')', ["#CCC42C", "#99976E", "#FFD351", "#90C2FF", "#2C9ECC"], "#e2041b");
-        let squareBracket = new BracketPair('[', ']', ["#CCC42C", "#99976E", "#FFD351", "#90C2FF", "#2C9ECC"], "#e2041b");
-        let curlyBracket = new BracketPair('{', '}', ["#CCC42C", "#99976E", "#FFD351", "#90C2FF", "#2C9ECC"], "#e2041b");
+    constructor(textEditor: vscode.TextEditor, bracketPairs : BracketPair[]) {
 
-        this.bracketPairs = [roundBracket, squareBracket, curlyBracket];
+        this.bracketPairs = bracketPairs;
         this.textEditor = textEditor;
         this.referenceDocument = textEditor.document.getText();
 

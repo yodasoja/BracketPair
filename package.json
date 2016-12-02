@@ -21,15 +21,12 @@
       "properties": {
         "bracketPair.pairColors": {
           "type": [
-            [
-              "string",
-              "string",
-              "array",
-              "string"
-            ]
+            "array"
           ],
           "items": {
-            "type": "string"
+            "type": [
+              "array"
+            ]
           },
           "default": [
             [
