@@ -51,7 +51,7 @@ export default class Document {
     }
 
     private getLowestLineNumberChanged(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        let lowestLineNumberChanged = this.textEditor.document.lineCount - 1;
+        let lowestLineNumberChanged = Infinity;
 
         for (let contentChange of contentChanges) {
             lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
@@ -93,7 +93,6 @@ export default class Document {
 
     private updateDecorations() {
         let lineNumber = this.lineToUpdateWhenTimeoutEnds;
-        console.log("Update from line: " + lineNumber)
         let amountToRemove = this.lines.length - lineNumber;
 
         // Remove cached lines that need to be updated

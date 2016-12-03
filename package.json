@@ -32,33 +32,27 @@
             [
               "()",
               [
-                "#CCC42C",
-                "#99976E",
-                "#FFD351",
-                "#90C2FF",
-                "#2C9ECC"
+                "Gold",
+                "Orchid",
+                "LightSkyBlue"
               ],
-              "red"
+              "Red"
             ],
             [
               "[]",
               [
-                "#CCC42C",
-                "#99976E",
-                "#FFD351",
-                "#90C2FF",
-                "#2C9ECC"
+                "Gold",
+                "Orchid",
+                "LightSkyBlue"
               ],
               "red"
             ],
             [
               "{}",
               [
-                "#CCC42C",
-                "#99976E",
-                "#FFD351",
-                "#90C2FF",
-                "#2C9ECC"
+                "Gold",
+                "Orchid",
+                "LightSkyBlue"
               ],
               "red"
             ]
