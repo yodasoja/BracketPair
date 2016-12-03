@@ -77,7 +77,7 @@ export default class Document {
     }
 
     triggerUpdateDecorations(lineNumber: number = 0) {
-        if (this.timeOutLength >= 0) {
+        if (this.timeOutLength > 0) {
             // Have to keep a reference to this or everything breaks
             let self = this;
 
