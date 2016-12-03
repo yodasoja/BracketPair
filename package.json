@@ -1,7 +1,7 @@
 {
-  "name": "bracket-pair",
-  "displayName": "Bracket Pair",
-  "description": "Colorize matching brackets for pair identification",
+  "name": "bracket-pair-colorizer",
+  "displayName": "Bracket Pair Colorizer",
+  "description": "A customizable extension for colorizing matching brackets",
   "version": "0.0.1",
   "publisher": "CoenraadS",
   "engines": {
@@ -19,7 +19,11 @@
       "type": "object",
       "title": "BracketPair",
       "properties": {
-        "bracketPair.pairColors": {
+        "bracketPairColorizer.timeOut": {
+          "type": "number",
+          "default": "200"
+        },
+        "bracketPairColorizer.pairColors": {
           "type": [
             "array"
           ],
@@ -45,7 +49,7 @@
                 "Orchid",
                 "LightSkyBlue"
               ],
-              "red"
+              "Red"
             ],
             [
               "{}",
@@ -54,7 +58,7 @@
                 "Orchid",
                 "LightSkyBlue"
               ],
-              "red"
+              "Red"
             ]
           ],
           "description": "Define which paired characters should be colored"
@@ -73,5 +77,10 @@
     "mocha": "^2.3.3",
     "@types/node": "^6.0.40",
     "@types/mocha": "^2.2.32"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CoenraadS/BracketPair"
+  },
+  "license": "SEE LICENSE IN LICENSE.md"
 }

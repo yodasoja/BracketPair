@@ -7,8 +7,10 @@ export default class DocumentManager {
     // TODO Is there a more efficient way to do this? Use URI as key maybe?
     documents = new Map<vscode.TextDocument, Document>();
     readonly bracketPairs: BracketPair[];
+    readonly timeOut: number;
 
-    constructor(settings: BracketPair[]) {
+    constructor(settings: BracketPair[], timeOut: number) {
+        this.timeOut = timeOut;
         this.bracketPairs = settings;
     }
 
@@ -24,11 +26,11 @@ export default class DocumentManager {
         this.documents.delete(closedDocument);
     }
 
-    private getDocument(textEditor: vscode.TextEditor) {
+    private getDocument(textEditor: vscode.TextEditor): Document {
         let document = this.documents.get(textEditor.document);
 
         if (document === undefined) {
-            document = new Document(textEditor, this.bracketPairs);
+            document = new Document(textEditor, this.bracketPairs, this.timeOut);
             this.documents.set(textEditor.document, document);
         }
 

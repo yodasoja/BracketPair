@@ -6,10 +6,11 @@ import * as assert from 'assert';
 import BracketPair from "./bracketPair";
 
 export function activate(context: vscode.ExtensionContext) {
-    let settings = vscode.workspace.getConfiguration().get("bracketPair.pairColors") as [{}];
+    let configuration = vscode.workspace.getConfiguration();
+    let bracketSettings = configuration.get("bracketPairColorizer.pairColors") as [{}];
     let bracketPairs: BracketPair[] = [];
     let settingsCount = 0;
-    for (let setting of settings) {
+    for (let setting of bracketSettings) {
         let settingLength = Object.keys(setting).length;
         assert(settingLength === 3, "Setting [" + settingsCount + "] only has " + settingLength + " elements, expected " + 3);
 
@@ -26,7 +27,9 @@ export function activate(context: vscode.ExtensionContext) {
         settingsCount++;
     }
 
-    let documentManager = new DocumentManager(bracketPairs);
+    let timeout = configuration.get("bracketPairColorizer.timeOut") as number;
+
+    let documentManager = new DocumentManager(bracketPairs, timeout);
 
     let activeEditor = vscode.window.activeTextEditor;
 

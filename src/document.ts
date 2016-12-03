@@ -5,7 +5,7 @@ import TextLine from "./textLine";
 
 export default class Document {
     private timeout: NodeJS.Timer | null;
-    private readonly timeoutLength = 200;
+    private readonly timeOutLength: number;
     // This program caches non-changes lines, and will only analyze linenumbers including & above a changed line
     private lineToUpdateWhenTimeoutEnds = Infinity;
 
@@ -16,11 +16,11 @@ export default class Document {
     private readonly bracketPairs: BracketPair[];
     private readonly regexPattern: string;
 
-    constructor(textEditor: vscode.TextEditor, bracketPairs: BracketPair[]) {
+    constructor(textEditor: vscode.TextEditor, bracketPairs: BracketPair[], timeOut: number) {
 
         this.bracketPairs = bracketPairs;
         this.textEditor = textEditor;
-
+        this.timeOutLength = timeOut;
         this.regexPattern = this.createRegex(this.bracketPairs);
     }
 
@@ -77,22 +77,30 @@ export default class Document {
     }
 
     triggerUpdateDecorations(lineNumber: number = 0) {
-        // Have to keep a reference to this or everything breaks
-        let self = this;
+        if (this.timeOutLength >= 0) {
+            // Have to keep a reference to this or everything breaks
+            let self = this;
 
-        if (this.timeout) {
-            clearTimeout(this.timeout);
+            if (this.timeout) {
+                clearTimeout(this.timeout);
+            }
+
+            this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, lineNumber);
+            this.timeout = setTimeout(function () {
+                self.updateDecorations();
+                self.lineToUpdateWhenTimeoutEnds = Infinity;
+            }, this.timeOutLength);
         }
-
-        this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, lineNumber);
-        this.timeout = setTimeout(function () {
-            self.updateDecorations();
-            self.lineToUpdateWhenTimeoutEnds = Infinity;
-        }, this.timeoutLength);
+        else {
+            this.updateDecorations(lineNumber);
+        }
     }
 
-    private updateDecorations() {
-        let lineNumber = this.lineToUpdateWhenTimeoutEnds;
+    private updateDecorations(lineNumber?: number) {
+        if (lineNumber === undefined) {
+            lineNumber = this.lineToUpdateWhenTimeoutEnds;
+        }
+
         let amountToRemove = this.lines.length - lineNumber;
 
         // Remove cached lines that need to be updated
