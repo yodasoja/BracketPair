@@ -18,7 +18,7 @@ export default class DocumentManager {
             let secondBracket = setting[1] as string;
             assert(secondBracket.length === 1, "User defined close bracket must only be one character");
             let colors = setting[2] as string[];
-            assert(colors.length !== 0,  "User defined bracket colors must not be empty");
+            assert(colors.length !== 0, "User defined bracket colors must not be empty");
             let orphanColor = setting[3] as string;
             assert(orphanColor.length !== 0, "User defined orphan color must not be empty");
             this.bracketPairs.push(new BracketPair(firstBracket, secondBracket, colors, orphanColor));
@@ -31,6 +31,10 @@ export default class DocumentManager {
 
     public onDidChangeTextDocument(textEditor: vscode.TextEditor, contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         this.getDocument(textEditor).onDidChangeTextDocument(contentChanges);
+    }
+
+    public onDidCloseTextDocument(closedDocument: vscode.TextDocument) {
+        this.documents.delete(closedDocument);
     }
 
     private getDocument(textEditor: vscode.TextEditor) {

@@ -20,7 +20,7 @@ export default class Document {
     // This is used to track deleted changes
     private referenceDocument: string;
 
-    constructor(textEditor: vscode.TextEditor, bracketPairs : BracketPair[]) {
+    constructor(textEditor: vscode.TextEditor, bracketPairs: BracketPair[]) {
 
         this.bracketPairs = bracketPairs;
         this.textEditor = textEditor;
@@ -117,31 +117,20 @@ export default class Document {
 
     private updateDecorations(lineNumber: number) {
         // Set to infinity because its used with Math.Min
-        this.lineToUpdateWhenTimeoutEnds = Infinity;
 
         let amountToRemove = this.lines.length - lineNumber;
 
         // Remove cached lines that need to be updated
         this.lines.splice(lineNumber, amountToRemove);
 
-        let startPos = new vscode.Position(lineNumber, 0);
-        let text = this.textEditor.document.getText(new vscode.Range(startPos, this.infinitePosition));
-        let lineOffset = this.textEditor.document.offsetAt(startPos);
-
+        let text = this.textEditor.document.getText();
         let regex = new RegExp(this.regexPattern, "g");
+        regex.lastIndex = this.textEditor.document.offsetAt(new vscode.Position(lineNumber, 0));
 
         let match: RegExpExecArray | null;
         while ((match = regex.exec(text)) !== null) {
-            // The text being regexed only includes lines that need to be updated
-            // So we calculate the position where non-updated lines are the offset
-            // TODO Performance test this approach vs simply regex whole document
-            let textPos = this.textEditor.document.positionAt(
-                this.textEditor.document.offsetAt(
-                    this.textEditor.document.positionAt(match.index)
-                ) + lineOffset
-            );
+            let startPos = this.textEditor.document.positionAt(match.index);
 
-            let startPos = new vscode.Position(textPos.line, textPos.character);
             let endPos = startPos.translate(0, match[0].length);
             let range = new vscode.Range(startPos, endPos);
 
@@ -228,5 +217,7 @@ export default class Document {
                 this.textEditor.setDecorations(decoration, []);
             }
         }
+
+        this.lineToUpdateWhenTimeoutEnds = Infinity;
     }
 }

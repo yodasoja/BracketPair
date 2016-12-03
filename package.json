@@ -39,7 +39,7 @@
                 "#90C2FF",
                 "#2C9ECC"
               ],
-              "#e2041b"
+              "red"
             ],
             [
               "[",
@@ -51,7 +51,7 @@
                 "#90C2FF",
                 "#2C9ECC"
               ],
-              "#e2041b"
+              "red"
             ],
             [
               "{",
@@ -63,7 +63,7 @@
                 "#90C2FF",
                 "#2C9ECC"
               ],
-              "#e2041b"
+              "red"
             ]
           ],
           "description": "[Open Bracket, Close Bracket, [Hex Colours], Orphan Color]"

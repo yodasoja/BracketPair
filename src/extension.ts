@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.window.onDidChangeActiveTextEditor(editor => {
         activeEditor = editor;
-        if (editor) {
+        if (activeEditor) {
             documentManager.updateDecorations(activeEditor);
         }
     }, null, context.subscriptions);
@@ -23,6 +23,13 @@ export function activate(context: vscode.ExtensionContext) {
             documentManager.onDidChangeTextDocument(activeEditor, event.contentChanges);
         }
     }, null, context.subscriptions);
+
+    vscode.workspace.onDidCloseTextDocument(event => {
+        if (activeEditor) {
+            documentManager.onDidCloseTextDocument(event);
+        }
+    }, null, context.subscriptions);
+
 }
 
 export function deactivate() {
