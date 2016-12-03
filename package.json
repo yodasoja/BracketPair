@@ -7,6 +7,7 @@
   "engines": {
     "vscode": "^1.5.0"
   },
+  "icon": "images/icon.svg",
   "categories": [
     "Other"
   ],
@@ -21,7 +22,8 @@
       "properties": {
         "bracketPairColorizer.timeOut": {
           "type": "number",
-          "default": "200"
+          "default": "200",
+          "description": "How long the user should idle for, before the document is colorized"
         },
         "bracketPairColorizer.pairColors": {
           "type": [
