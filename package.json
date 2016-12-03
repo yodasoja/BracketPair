@@ -30,8 +30,7 @@
           },
           "default": [
             [
-              "(",
-              ")",
+              "()",
               [
                 "#CCC42C",
                 "#99976E",
@@ -42,8 +41,7 @@
               "red"
             ],
             [
-              "[",
-              "]",
+              "[]",
               [
                 "#CCC42C",
                 "#99976E",
@@ -54,8 +52,7 @@
               "red"
             ],
             [
-              "{",
-              "}",
+              "{}",
               [
                 "#CCC42C",
                 "#99976E",
@@ -66,7 +63,7 @@
               "red"
             ]
           ],
-          "description": "[Open Bracket, Close Bracket, [Hex Colours], Orphan Color]"
+          "description": "Define which paired characters should be colored"
         }
       }
     }

@@ -2,9 +2,32 @@
 
 import * as vscode from 'vscode';
 import DocumentManager from "./documentManager";
+import * as assert from 'assert';
+import BracketPair from "./bracketPair";
 
 export function activate(context: vscode.ExtensionContext) {
-    let documentManager = new DocumentManager();
+    let settings = vscode.workspace.getConfiguration().get("bracketPair.pairColors") as [{}];
+    let bracketPairs: BracketPair[] = [];
+    let settingsCount = 0;
+    for (let setting of settings) {
+        let settingLength = Object.keys(setting).length;
+        assert(settingLength === 3, "Setting [" + settingsCount + "] only has " + settingLength + " elements, expected " + 3);
+
+        let brackets = setting[0] as string;
+        assert(brackets.length === 2, "User defined brackets must be two characters");
+
+        let colors = setting[1] as string[];
+        assert(colors.length !== 0, "User defined bracket colors must not be empty");
+
+        let orphanColor = setting[2] as string;
+        assert(orphanColor.length !== 0, "User defined orphan color must not be empty");
+
+        bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
+        settingsCount++;
+    }
+
+    let documentManager = new DocumentManager(bracketPairs);
+
     let activeEditor = vscode.window.activeTextEditor;
 
     if (activeEditor) {
