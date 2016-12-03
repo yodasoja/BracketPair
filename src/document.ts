@@ -111,13 +111,13 @@ export default class Document {
 
         this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, lineNumber);
         this.timeout = setTimeout(function () {
-            self.updateDecorations(lineNumber);
+            self.updateDecorations();
+            self.lineToUpdateWhenTimeoutEnds = Infinity;
         }, this.timeoutLength);
     }
 
-    private updateDecorations(lineNumber: number) {
-        // Set to infinity because its used with Math.Min
-
+    private updateDecorations() {
+        let lineNumber = this.lineToUpdateWhenTimeoutEnds;
         let amountToRemove = this.lines.length - lineNumber;
 
         // Remove cached lines that need to be updated
@@ -217,7 +217,5 @@ export default class Document {
                 this.textEditor.setDecorations(decoration, []);
             }
         }
-
-        this.lineToUpdateWhenTimeoutEnds = Infinity;
     }
 }
