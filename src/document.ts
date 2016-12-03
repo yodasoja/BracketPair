@@ -13,18 +13,13 @@ export default class Document {
     private textEditor: vscode.TextEditor;
     private decorations = new Map<string, vscode.TextEditorDecorationType>();
 
-    // This is used to read until end of document
-    private readonly infinitePosition = new vscode.Position(Infinity, Infinity);
     private readonly bracketPairs: BracketPair[];
     private readonly regexPattern: string;
-    // This is used to track deleted changes
-    private referenceDocument: string;
 
     constructor(textEditor: vscode.TextEditor, bracketPairs: BracketPair[]) {
 
         this.bracketPairs = bracketPairs;
         this.textEditor = textEditor;
-        this.referenceDocument = textEditor.document.getText();
 
         this.regexPattern = this.createRegex(this.bracketPairs);
     }
@@ -59,30 +54,10 @@ export default class Document {
         let lowestLineNumberChanged = this.textEditor.document.lineCount - 1;
 
         for (let contentChange of contentChanges) {
-            if (this.updateRequired(contentChange)) {
-                lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
-            }
+            lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
         }
 
         return lowestLineNumberChanged;
-    }
-
-    // If content change added or removed a bracket, that line will be used to resume updating the document
-    // Removed characters are tracked using a reference document
-    // TODO Not sure if this is how the reference document should be implemented, seems to work ok...
-    private updateRequired(contentChange: vscode.TextDocumentContentChangeEvent) {
-        let regex = new RegExp(this.regexPattern);
-
-        let editStart = this.textEditor.document.offsetAt(contentChange.range.start);
-        let editEnd = editStart + contentChange.rangeLength;
-
-        let startText = this.referenceDocument.substring(0, editStart);
-        let removedText = this.referenceDocument.substring(editStart, editEnd);
-        let endText = this.referenceDocument.substring(editEnd);
-
-        this.referenceDocument = startText + contentChange.text + endText;
-
-        return (regex.test(removedText) || regex.test(contentChange.text));
     }
 
     // Lines are stored in an array, if line is requested outside of array bounds
@@ -118,6 +93,7 @@ export default class Document {
 
     private updateDecorations() {
         let lineNumber = this.lineToUpdateWhenTimeoutEnds;
+        console.log("Update from line: " + lineNumber)
         let amountToRemove = this.lines.length - lineNumber;
 
         // Remove cached lines that need to be updated
