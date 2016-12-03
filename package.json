@@ -18,6 +18,10 @@
     "bracket",
     "brackets"
   ],
+  "galleryBanner": {
+    "color": "#1E1E1E",
+    "theme": "dark"
+  },
   "main": "./out/src/extension",
   "contributes": {
     "configuration": {
