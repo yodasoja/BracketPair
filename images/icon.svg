@@ -1,23 +1,160 @@
-<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
- <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
 
- <g>
-  <title>background</title>
-  <rect x="-1" y="-1" width="130" height="130" id="canvas_background" fill="#fff"/>
-  <g id="canvasGrid" display="none">
-   <rect id="svg_1" width="100%" height="100%" x="0" y="0" stroke-width="0" fill="url(#gridpattern)"/>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="icon.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#e1e1e1"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="4"
+     inkscape:cx="49.961902"
+     inkscape:cy="59.168306"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1536"
+     inkscape:window-height="811"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
+    <sodipodi:guide
+       position="64,64"
+       orientation="1,0"
+       id="guide3346"
+       inkscape:label=""
+       inkscape:color="rgb(0,0,255)" />
+    <sodipodi:guide
+       position="64,64"
+       orientation="0,1"
+       id="guide3348"
+       inkscape:label=""
+       inkscape:color="rgb(0,0,255)" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Background">
+    <rect
+       style="fill:#333333;fill-opacity:1"
+       id="rect4300"
+       width="128"
+       height="128"
+       x="0"
+       y="2.2617187e-005" />
   </g>
- </g>
- <g>
-  <title>Layer 1</title>
-  <ellipse ry="40" rx="40" id="svg_2" cy="64" cx="64.049024" stroke-width="1.5" stroke="#000" fill="#e1e1e1"/>
-  <g stroke="null" id="svg_4">
-   <text transform="matrix(0.5782750248908995,0,0,0.5782750248908995,27.42647398263216,34.94885792583227) " stroke="#000" fill="#ff00f2" stroke-width="0" stroke-opacity="null" x="102.68561" y="57.37877" id="svg_7" font-size="63" font-family="Helvetica, Arial, sans-serif" text-anchor="start" xml:space="preserve">)</text>
-   <text transform="matrix(0.5782750248908995,0,0,0.5782750248908995,27.42647398263216,34.94885792583227) " stroke="#000" fill="#ff00f2" stroke-width="0" stroke-opacity="null" x="1.935623" y="56.928772" id="svg_6" font-size="63" font-family="Helvetica, Arial, sans-serif" text-anchor="start" xml:space="preserve">(</text>
-   <text transform="matrix(0.5782750248908995,0,0,0.5782750248908995,27.42647398263216,34.94885792583227) " stroke="#000" fill="#ffff00" stroke-width="0" stroke-opacity="null" x="14.810615" y="75.178769" id="svg_3" font-size="39" font-family="Helvetica, Arial, sans-serif" text-anchor="start" xml:space="preserve">[  ] [  ]</text>
-   <text stroke="#000" fill="#10ff00" stroke-width="0" stroke-opacity="null" x="114.547415" y="203.957712" id="svg_8" font-size="63" font-family="Helvetica, Arial, sans-serif" text-anchor="start" xml:space="preserve" transform="matrix(0.6855943168208379,0,0,0.14081419618397373,-8.70810425570514,34.16989013828105) ">^</text>
-   <text stroke="#000" fill="#10ff00" stroke-width="0" stroke-opacity="null" x="58.070911" y="203.957712" id="svg_9" font-size="63" font-family="Helvetica, Arial, sans-serif" text-anchor="start" xml:space="preserve" transform="matrix(0.6807172791766192,0,0,0.14081419618397373,-0.9320007337588425,34.16989013828105) ">^</text>
-   <text stroke="#000" fill="#ff0000" stroke-width="0" stroke-opacity="null" x="59.753771" y="120.23938" id="svg_10" font-size="63" font-family="Helvetica, Arial, sans-serif" text-anchor="start" xml:space="preserve" transform="matrix(0,0.5782750248908995,-0.5782750248908995,0,124.30109397275372,51.56974711781368) ">{</text>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-924.36216)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="47.176636"
+       y="1006.759"
+       id="text3350"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3352"
+         x="47.176636"
+         y="1006.759"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#19a6ff;fill-opacity:1">(</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3462"
+       y="1012.0071"
+       x="34.180946"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:60px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#fffc00;fill-opacity:1"
+         y="1012.0071"
+         x="34.180946"
+         id="tspan3464"
+         sodipodi:role="line">(</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="19.28125"
+       y="1017.1069"
+       id="text3466"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3468"
+         x="19.28125"
+         y="1017.1069"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#b21212;fill-opacity:1">(</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-80.914063"
+       y="990.23883"
+       id="text3350-9"
+       sodipodi:linespacing="125%"
+       transform="scale(-1,1)"><tspan
+         sodipodi:role="line"
+         id="tspan3352-0"
+         x="-80.914063"
+         y="990.23883"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#19a6ff;fill-opacity:1">(</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3462-4"
+       y="995.48688"
+       x="-93.909744"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#fffc00;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"
+       transform="scale(-1,1)"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:60px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#fffc00;fill-opacity:1"
+         y="995.48688"
+         x="-93.909744"
+         id="tspan3464-0"
+         sodipodi:role="line">(</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-108.80945"
+       y="1000.5867"
+       id="text3466-0"
+       sodipodi:linespacing="125%"
+       transform="scale(-1,1)"><tspan
+         sodipodi:role="line"
+         id="tspan3468-2"
+         x="-108.80945"
+         y="1000.5867"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#b21212;fill-opacity:1">(</tspan></text>
   </g>
- </g>
 </svg>
