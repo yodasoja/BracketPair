@@ -5,11 +5,11 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   version="1.1"
-   id="svg2"
-   viewBox="0 0 128 128"
+   width="128"
    height="128"
-   width="128">
+   viewBox="0 0 128 128"
+   id="svg2"
+   version="1.1">
   <defs
      id="defs4" />
   <metadata
@@ -27,78 +27,83 @@
   <g
      id="layer2">
     <rect
-       y="2.2617187e-005"
-       x="0"
-       height="128"
-       width="128"
+       style="fill:#333333;fill-opacity:1"
        id="rect4300"
-       style="fill:#333333;fill-opacity:1" />
+       width="128"
+       height="128"
+       x="0"
+       y="2.2617187e-005" />
   </g>
   <g
-     transform="translate(0,-924.36216)"
-     id="layer1">
-    <text
-       id="text3350"
-       y="1016.5078"
-       x="47.976646"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#19a6ff;fill-opacity:1"
-         y="1016.5078"
-         x="47.976646"
-         id="tspan3352">(</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="34.980957"
-       y="1021.7558"
-       id="text3462"><tspan
-         id="tspan3464"
-         x="34.980957"
-         y="1021.7558"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:60px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#fffc00;fill-opacity:1">(</tspan></text>
-    <text
-       id="text3466"
-       y="1026.8558"
-       x="20.081249"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#b21212;fill-opacity:1"
-         y="1026.8558"
-         x="20.081249"
-         id="tspan3468">(</tspan></text>
-    <text
-       transform="scale(-1,1)"
-       id="text3350-9"
-       y="981.33905"
-       x="-79.714066"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#19a6ff;fill-opacity:1"
-         y="981.33905"
-         x="-79.714066"
-         id="tspan3352-0">(</tspan></text>
-    <text
-       transform="scale(-1,1)"
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#fffc00;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="-92.709747"
-       y="986.5871"
-       id="text3462-4"><tspan
-         id="tspan3464-0"
-         x="-92.709747"
-         y="986.5871"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:60px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#fffc00;fill-opacity:1">(</tspan></text>
-    <text
-       transform="scale(-1,1)"
-       id="text3466-0"
-       y="991.68689"
-       x="-107.60945"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#b21212;fill-opacity:1"
-         y="991.68689"
-         x="-107.60945"
-         id="tspan3468-2">(</tspan></text>
+     id="g3535">
+    <g
+       id="g3527">
+      <text
+         id="text3350"
+         y="92.075386"
+         x="48.020668"
+         style="font-style:normal;font-weight:normal;font-size:40.00056458px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"
+         transform="scale(1.0000162,0.9999838)"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#19a6ff;fill-opacity:1"
+           y="92.075386"
+           x="48.020668"
+           id="tspan3352">(</tspan></text>
+      <text
+         transform="scale(0.99999644,1.0000036)"
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="35.211063"
+         y="97.293411"
+         id="text3462"><tspan
+           id="tspan3464"
+           x="35.211063"
+           y="97.293411"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:60px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#fffc00;fill-opacity:1">(</tspan></text>
+      <text
+         transform="scale(1.0000021,0.9999979)"
+         id="text3466"
+         y="102.51353"
+         x="20.281208"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#b21212;fill-opacity:1"
+           y="102.51353"
+           x="20.281208"
+           id="tspan3468">(</tspan></text>
+    </g>
+    <g
+       id="g3519">
+      <text
+         id="text3350-8"
+         y="56.804874"
+         x="57.885876"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#19a6ff;fill-opacity:1"
+           y="56.804874"
+           x="57.885876"
+           id="tspan3352-6">)</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="59.695812"
+         y="62.024811"
+         id="text3462-4"><tspan
+           id="tspan3464-2"
+           x="59.695812"
+           y="62.024811"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:60px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#fffc00;fill-opacity:1">)</tspan></text>
+      <text
+         id="text3466-0"
+         y="67.244247"
+         x="63.584751"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#b21212;fill-opacity:1"
+           y="67.244247"
+           x="63.584751"
+           id="tspan3468-8">)</tspan></text>
+    </g>
   </g>
 </svg>
