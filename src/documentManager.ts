@@ -4,8 +4,7 @@ import Document from "./document";
 import BracketPair from "./bracketPair";
 
 export default class DocumentManager {
-    // TODO Is there a more efficient way to do this? Use URI as key maybe?
-    documents = new Map<vscode.TextDocument, Document>();
+    documents = new Map<string, Document>();
     readonly bracketPairs: BracketPair[];
     readonly timeOut: number;
 
@@ -23,15 +22,15 @@ export default class DocumentManager {
     }
 
     public onDidCloseTextDocument(closedDocument: vscode.TextDocument) {
-        this.documents.delete(closedDocument);
+        this.documents.delete(closedDocument.uri.toString());
     }
 
     private getDocument(textEditor: vscode.TextEditor): Document {
-        let document = this.documents.get(textEditor.document);
+        let document = this.documents.get(textEditor.document.uri.toString());
 
         if (document === undefined) {
-            document = new Document(textEditor, this.bracketPairs, this.timeOut);
-            this.documents.set(textEditor.document, document);
+            document = new Document(textEditor.document.uri.toString(), this.bracketPairs, this.timeOut);
+            this.documents.set(textEditor.document.uri.toString(), document);
         }
 
         return document;

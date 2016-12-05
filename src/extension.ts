@@ -55,7 +55,6 @@ export function activate(context: vscode.ExtensionContext) {
             documentManager.onDidCloseTextDocument(event);
         }
     }, null, context.subscriptions);
-
 }
 
 export function deactivate() {
