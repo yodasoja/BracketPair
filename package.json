@@ -30,7 +30,7 @@
             "properties": {
                 "bracketPairColorizer.timeOut": {
                     "type": "number",
-                    "default": "200",
+                    "default": 200,
                     "description": "How long the user should idle for, before the document is colorized"
                 },
                 "bracketPairColorizer.pairColors": {
