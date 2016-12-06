@@ -2,7 +2,6 @@
 import * as vscode from 'vscode';
 import TextLine from "./textLine";
 import Settings from "./settings";
-import ColorMode from './colorMode';
 
 export default class Document {
     private timeout: NodeJS.Timer | null;
@@ -70,6 +69,8 @@ export default class Document {
 
     private updateDecorations(lineNumber?: number) {
         let editors: vscode.TextEditor[] = [];
+
+        // One document may be shared by multiple editors (side by side view)
         vscode.window.visibleTextEditors.forEach(editor => {
             if (editor.document && this.uri === editor.document.uri.toString()) {
                 editors.push(editor);
@@ -103,65 +104,7 @@ export default class Document {
             let range = new vscode.Range(startPos, endPos);
 
             let currentLine = this.getLine(startPos.line);
-
-            for (let bracketPair of this.settings.bracketPairs) {
-                // If open bracket matches
-                if (bracketPair.openCharacter === match[0]) {
-
-                    let colorIndex: number;
-                    if (this.settings.colorMode === ColorMode.Consecutive) {
-                        colorIndex = currentLine.consecutiveColorCount % bracketPair.colors.length;
-                    }
-                    else {
-                        colorIndex = currentLine.bracketColorIndexes[bracketPair.openCharacter].length % bracketPair.colors.length;
-                    }
-
-                    let color = bracketPair.colors[colorIndex];
-
-                    let colorRanges = currentLine.colorRanges.get(color);
-                    if (colorRanges !== undefined) {
-                        colorRanges.push(range);
-                    }
-                    else {
-                        currentLine.colorRanges.set(color, [range]);
-                    }
-                    currentLine.bracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
-
-                    if (this.settings.colorMode === ColorMode.Consecutive) {
-                        currentLine.consecutiveColorCount++;
-                    }
-                    break;
-                }
-                else if (bracketPair.closeCharacter === match[0]) {
-                    // If close bracket, and has an open pair
-                    let colorIndex = currentLine.bracketColorIndexes[bracketPair.openCharacter].pop();
-                    if (colorIndex !== undefined) {
-                        if (this.settings.colorMode === ColorMode.Consecutive) {
-                            currentLine.consecutiveColorCount--;
-                        }
-                        let color = bracketPair.colors[colorIndex];
-
-                        let colorRanges = currentLine.colorRanges.get(color);
-                        if (colorRanges !== undefined) {
-                            colorRanges.push(range);
-                        }
-                        else {
-                            currentLine.colorRanges.set(color, [range]);
-                        }
-                    }
-                    // If no more open brackets, close bracket is an 'orphan'
-                    else {
-                        let colorRanges = currentLine.colorRanges.get(bracketPair.orphanColor);
-                        if (colorRanges !== undefined) {
-                            colorRanges.push(range);
-                        }
-                        else {
-                            currentLine.colorRanges.set(bracketPair.orphanColor, [range]);
-                        }
-                    }
-                    break;
-                }
-            }
+            currentLine.addBracket(match[0], range);
         }
 
         let colorMap = new Map<string, vscode.Range[]>();
