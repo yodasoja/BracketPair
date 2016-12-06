@@ -28,25 +28,50 @@ Screenshot:
 Configure how long the editor should be idle for before updating the document.  
 Set to 0 to disable.
 
-> `"bracketPairColorizer.pairColors"`   
+>`"bracketPairColorizer.colorMode"`  
+![Consecutive](images/consecutiveExample.png "Consecutive Example")  
+![Independant](images/independantExample.png "Independant Example")
+
+> `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
-Here is an example for matching '<>'
-````
-[
-    "<>",                   // Brackets to match
-    [                       // CSS Color cycle
-        "Gold",
-        "Orchid",
-        "LightSkyBlue"
-    ],
-    "Red"                   // Orphaned bracket color
-]
-````
+> Example for matching '<>'
+>````
+>[
+>    "()",
+>    "[]",
+>    "{}",
+>    "<>",                  // New bracket
+>    [                      // CSS Color cycle
+>        "Gold",
+>        "Orchid",
+>        "LightSkyBlue"
+>    ],
+>    "Red"                  // Orphaned bracket color
+>]
+>````
+
+> `"bracketPairColorizer.independantPairColors"`   
+> A new bracket pair can be configured by adding it to the array.  
+> Example for matching '<>'
+>````
+>[
+>    "<>",                   // New bracket
+>    [                       // CSS Color cycle
+>        "Gold",
+>        "Orchid",
+>        "LightSkyBlue"
+>    ],
+>    "Red"                   // Orphaned bracket color
+>]
+>````
 
 -----------------------------------------------------------------------------------------------------------
 
 
 ## Release Notes
+
+### 0.1.0
+Added consecutive bracket coloring
 
 ### 0.0.4
 
@@ -64,11 +89,6 @@ Fixed an issue where timeout wasn't being disabled when set to 0
 ### 0.0.1
 
 Initial release
-
-
-
-
-
 
 -----------------------------------------------------------------------------------------------------------
 
