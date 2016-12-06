@@ -97,114 +97,123 @@ export default class Document {
     }
 
     private updateDecorations(lineNumber?: number) {
+        let editors: vscode.TextEditor[] = [];
         vscode.window.visibleTextEditors.forEach(editor => {
             if (editor.document && this.uri === editor.document.uri.toString()) {
-
-                if (lineNumber === undefined) {
-                    lineNumber = this.lineToUpdateWhenTimeoutEnds;
-                }
-
-                let amountToRemove = this.lines.length - lineNumber;
-
-                // Remove cached lines that need to be updated
-                this.lines.splice(lineNumber, amountToRemove);
-
-                let text = editor.document.getText();
-                let regex = new RegExp(this.regexPattern, "g");
-                regex.lastIndex = editor.document.offsetAt(new vscode.Position(lineNumber, 0));
-
-                let match: RegExpExecArray | null;
-                while ((match = regex.exec(text)) !== null) {
-                    let startPos = editor.document.positionAt(match.index);
-
-                    let endPos = startPos.translate(0, match[0].length);
-                    let range = new vscode.Range(startPos, endPos);
-
-                    let currentLine = this.getLine(startPos.line);
-
-                    for (let bracketPair of this.bracketPairs) {
-                        // If open bracket matches
-                        if (bracketPair.openCharacter === match[0]) {
-                            let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
-                            let color = bracketPair.colors[colorIndex];
-
-                            let colorRanges = currentLine.colorRanges.get(color);
-                            if (colorRanges !== undefined) {
-                                colorRanges.push(range);
-                            }
-                            else {
-                                currentLine.colorRanges.set(color, [range]);
-                            }
-                            currentLine.bracketCount[bracketPair.openCharacter]++;
-                            break;
-                        }
-                        else if (bracketPair.closeCharacter === match[0]) {
-                            // If close bracket matches
-                            if (currentLine.bracketCount[bracketPair.openCharacter] !== 0) {
-                                currentLine.bracketCount[bracketPair.openCharacter]--;
-
-                                let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
-                                let colorDeclaration = bracketPair.colors[colorIndex];
-
-                                let colorRanges = currentLine.colorRanges.get(colorDeclaration);
-                                if (colorRanges !== undefined) {
-                                    colorRanges.push(range);
-                                }
-                                else {
-                                    currentLine.colorRanges.set(colorDeclaration, [range]);
-                                }
-                            }
-                            // If no more open brackets, close bracket is an 'orphan'
-                            else {
-                                let colorRanges = currentLine.colorRanges.get(bracketPair.orphanColor);
-                                if (colorRanges !== undefined) {
-                                    colorRanges.push(range);
-                                }
-                                else {
-                                    currentLine.colorRanges.set(bracketPair.orphanColor, [range]);
-                                }
-
-                                // We can count orphaned brackets, but no use-case for it yet
-                                // currentLine.bracketCount[bracketPair.closeCharacter]++;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                let colorMap = new Map<string, vscode.Range[]>();
-
-                // Reduce all the colors/ranges of the lines into a singular map
-                for (let line of this.lines) {
-                    {
-                        for (let [color, ranges] of line.colorRanges) {
-                            let existingRanges = colorMap.get(color);
-
-                            if (existingRanges !== undefined) {
-                                existingRanges.push.apply(existingRanges, ranges);
-                            }
-                            else {
-                                // Slice because we will be adding values to this array in the future, 
-                                // but don't want to modify the original array which is stored per line
-                                colorMap.set(color, ranges.slice());
-                            }
-                        }
-                    }
-                }
-
-                for (let [color, decoration] of this.decorations) {
-                    let ranges = colorMap.get(color);
-                    if (ranges !== undefined) {
-                        editor.setDecorations(decoration, ranges);
-                    }
-                    else {
-                        // We must set non-used colors to an empty array
-                        // Or previous decorations will not be invalidated
-                        editor.setDecorations(decoration, []);
-                    }
-                }
-                return;
+                editors.push(editor);
             }
         });
+
+        if (editors.length === 0) {
+            return;
+        }
+
+        let document = editors[0].document;
+
+        if (lineNumber === undefined) {
+            lineNumber = this.lineToUpdateWhenTimeoutEnds;
+        }
+
+        let amountToRemove = this.lines.length - lineNumber;
+
+        // Remove cached lines that need to be updated
+        this.lines.splice(lineNumber, amountToRemove);
+
+        let text = document.getText();
+        let regex = new RegExp(this.regexPattern, "g");
+        regex.lastIndex = document.offsetAt(new vscode.Position(lineNumber, 0));
+
+        let match: RegExpExecArray | null;
+        while ((match = regex.exec(text)) !== null) {
+            let startPos = document.positionAt(match.index);
+
+            let endPos = startPos.translate(0, match[0].length);
+            let range = new vscode.Range(startPos, endPos);
+
+            let currentLine = this.getLine(startPos.line);
+
+            for (let bracketPair of this.bracketPairs) {
+                // If open bracket matches
+                if (bracketPair.openCharacter === match[0]) {
+                    let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
+                    let color = bracketPair.colors[colorIndex];
+
+                    let colorRanges = currentLine.colorRanges.get(color);
+                    if (colorRanges !== undefined) {
+                        colorRanges.push(range);
+                    }
+                    else {
+                        currentLine.colorRanges.set(color, [range]);
+                    }
+                    currentLine.bracketCount[bracketPair.openCharacter]++;
+                    break;
+                }
+                else if (bracketPair.closeCharacter === match[0]) {
+                    // If close bracket matches
+                    if (currentLine.bracketCount[bracketPair.openCharacter] !== 0) {
+                        currentLine.bracketCount[bracketPair.openCharacter]--;
+
+                        let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
+                        let colorDeclaration = bracketPair.colors[colorIndex];
+
+                        let colorRanges = currentLine.colorRanges.get(colorDeclaration);
+                        if (colorRanges !== undefined) {
+                            colorRanges.push(range);
+                        }
+                        else {
+                            currentLine.colorRanges.set(colorDeclaration, [range]);
+                        }
+                    }
+                    // If no more open brackets, close bracket is an 'orphan'
+                    else {
+                        let colorRanges = currentLine.colorRanges.get(bracketPair.orphanColor);
+                        if (colorRanges !== undefined) {
+                            colorRanges.push(range);
+                        }
+                        else {
+                            currentLine.colorRanges.set(bracketPair.orphanColor, [range]);
+                        }
+
+                        // We can count orphaned brackets, but no use-case for it yet
+                        // currentLine.bracketCount[bracketPair.closeCharacter]++;
+                    }
+                    break;
+                }
+            }
+        }
+
+        let colorMap = new Map<string, vscode.Range[]>();
+
+        // Reduce all the colors/ranges of the lines into a singular map
+        for (let line of this.lines) {
+            {
+                for (let [color, ranges] of line.colorRanges) {
+                    let existingRanges = colorMap.get(color);
+
+                    if (existingRanges !== undefined) {
+                        existingRanges.push.apply(existingRanges, ranges);
+                    }
+                    else {
+                        // Slice because we will be adding values to this array in the future, 
+                        // but don't want to modify the original array which is stored per line
+                        colorMap.set(color, ranges.slice());
+                    }
+                }
+            }
+        }
+
+        for (let [color, decoration] of this.decorations) {
+            let ranges = colorMap.get(color);
+            editors.forEach(editor => {
+                if (ranges !== undefined) {
+                    editor.setDecorations(decoration, ranges);
+                }
+                else {
+                    // We must set non-used colors to an empty array
+                    // Or previous decorations will not be invalidated
+                    editor.setDecorations(decoration, []);
+                }
+            });
+        }
     }
 }
