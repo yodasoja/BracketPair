@@ -70,6 +70,9 @@ Set to 0 to disable.
 
 ## Release Notes
 
+### 0.1.1
+Prevent opening brackets having same color as previous closing bracket in consecutive mode
+
 ### 0.1.0
 Added consecutive bracket coloring
 
