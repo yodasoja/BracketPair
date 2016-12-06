@@ -1,49 +1,21 @@
 'use strict';
 import * as vscode from 'vscode';
-import BracketPair from "./bracketPair";
 import TextLine from "./textLine";
+import Settings from "./settings";
+import ColorMode from './colorMode';
 
 export default class Document {
     private timeout: NodeJS.Timer | null;
-    private readonly timeOutLength: number;
     // This program caches non-changes lines, and will only analyze linenumbers including & above a changed line
     private lineToUpdateWhenTimeoutEnds = Infinity;
 
     private lines: TextLine[] = [];
     private readonly uri: string;
-    private decorations = new Map<string, vscode.TextEditorDecorationType>();
+    private readonly settings: Settings;
 
-    private readonly bracketPairs: BracketPair[];
-    private readonly regexPattern: string;
-
-    constructor(uri: string, bracketPairs: BracketPair[], timeOut: number) {
-
-        this.bracketPairs = bracketPairs;
+    constructor(uri: string, settings: Settings) {
+        this.settings = settings;
         this.uri = uri;
-        this.timeOutLength = timeOut;
-        this.regexPattern = this.createRegex(this.bracketPairs);
-    }
-
-    // Create a regex to match open and close brackets
-    // TODO Test what happens if user specifies other characters then []{}()
-    private createRegex(bracketPairs: BracketPair[]) {
-        let regex = "[";
-
-        for (let bracketPair of bracketPairs) {
-            regex += `\\${bracketPair.openCharacter}\\${bracketPair.closeCharacter}`;
-
-            for (let color of bracketPair.colors) {
-                let decoration = vscode.window.createTextEditorDecorationType({ color: color });
-                this.decorations.set(color, decoration);
-            }
-
-            let errorDecoration = vscode.window.createTextEditorDecorationType({ color: bracketPair.orphanColor });
-            this.decorations.set(bracketPair.orphanColor, errorDecoration);
-        }
-
-        regex += "]";
-
-        return regex;
     }
 
     onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
@@ -68,7 +40,7 @@ export default class Document {
         }
         else {
             for (let i = this.lines.length; i <= index; i++) {
-                let newLine = new TextLine(this.bracketPairs, this.lines[i - 1]);
+                let newLine = new TextLine(this.settings, this.lines[i - 1]);
                 this.lines.push(newLine);
             }
             let lineToReturn = this.lines[this.lines.length - 1];
@@ -77,7 +49,7 @@ export default class Document {
     }
 
     triggerUpdateDecorations(lineNumber: number = 0) {
-        if (this.timeOutLength > 0) {
+        if (this.settings.timeOutLength > 0) {
             // Have to keep a reference to this or everything breaks
             let self = this;
 
@@ -89,7 +61,7 @@ export default class Document {
             this.timeout = setTimeout(function () {
                 self.updateDecorations();
                 self.lineToUpdateWhenTimeoutEnds = Infinity;
-            }, this.timeOutLength);
+            }, this.settings.timeOutLength);
         }
         else {
             this.updateDecorations(lineNumber);
@@ -120,7 +92,7 @@ export default class Document {
         this.lines.splice(lineNumber, amountToRemove);
 
         let text = document.getText();
-        let regex = new RegExp(this.regexPattern, "g");
+        let regex = new RegExp(this.settings.regexPattern, "g");
         regex.lastIndex = document.offsetAt(new vscode.Position(lineNumber, 0));
 
         let match: RegExpExecArray | null;
@@ -132,10 +104,18 @@ export default class Document {
 
             let currentLine = this.getLine(startPos.line);
 
-            for (let bracketPair of this.bracketPairs) {
+            for (let bracketPair of this.settings.bracketPairs) {
                 // If open bracket matches
                 if (bracketPair.openCharacter === match[0]) {
-                    let colorIndex = currentLine.bracketColorIndexes[bracketPair.openCharacter].length % bracketPair.colors.length;
+
+                    let colorIndex: number;
+                    if (this.settings.colorMode === ColorMode.Consecutive) {
+                        colorIndex = currentLine.consecutiveColorCount % bracketPair.colors.length;
+                    }
+                    else {
+                        colorIndex = currentLine.bracketColorIndexes[bracketPair.openCharacter].length % bracketPair.colors.length;
+                    }
+
                     let color = bracketPair.colors[colorIndex];
 
                     let colorRanges = currentLine.colorRanges.get(color);
@@ -146,20 +126,27 @@ export default class Document {
                         currentLine.colorRanges.set(color, [range]);
                     }
                     currentLine.bracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
+
+                    if (this.settings.colorMode === ColorMode.Consecutive) {
+                        currentLine.consecutiveColorCount++;
+                    }
                     break;
                 }
                 else if (bracketPair.closeCharacter === match[0]) {
                     // If close bracket, and has an open pair
                     let colorIndex = currentLine.bracketColorIndexes[bracketPair.openCharacter].pop();
                     if (colorIndex !== undefined) {
-                        let colorDeclaration = bracketPair.colors[colorIndex];
+                        if (this.settings.colorMode === ColorMode.Consecutive) {
+                            currentLine.consecutiveColorCount--;
+                        }
+                        let color = bracketPair.colors[colorIndex];
 
-                        let colorRanges = currentLine.colorRanges.get(colorDeclaration);
+                        let colorRanges = currentLine.colorRanges.get(color);
                         if (colorRanges !== undefined) {
                             colorRanges.push(range);
                         }
                         else {
-                            currentLine.colorRanges.set(colorDeclaration, [range]);
+                            currentLine.colorRanges.set(color, [range]);
                         }
                     }
                     // If no more open brackets, close bracket is an 'orphan'
@@ -186,7 +173,7 @@ export default class Document {
                     let existingRanges = colorMap.get(color);
 
                     if (existingRanges !== undefined) {
-                        existingRanges.push.apply(existingRanges, ranges);
+                        existingRanges.push(...ranges);
                     }
                     else {
                         // Slice because we will be adding values to this array in the future, 
@@ -197,7 +184,7 @@ export default class Document {
             }
         }
 
-        for (let [color, decoration] of this.decorations) {
+        for (let [color, decoration] of this.settings.decorations) {
             let ranges = colorMap.get(color);
             editors.forEach(editor => {
                 if (ranges !== undefined) {
@@ -205,7 +192,7 @@ export default class Document {
                 }
                 else {
                     // We must set non-used colors to an empty array
-                    // Or previous decorations will not be invalidated
+                    // or previous decorations will not be invalidated
                     editor.setDecorations(decoration, []);
                 }
             });

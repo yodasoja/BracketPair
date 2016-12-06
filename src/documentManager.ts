@@ -1,17 +1,12 @@
 'use strict';
 import * as vscode from 'vscode';
 import Document from "./document";
-import BracketPair from "./bracketPair";
+import Settings from "./settings";
+
 
 export default class DocumentManager {
     documents = new Map<string, Document>();
-    readonly bracketPairs: BracketPair[];
-    readonly timeOut: number;
-
-    constructor(settings: BracketPair[], timeOut: number) {
-        this.timeOut = timeOut;
-        this.bracketPairs = settings;
-    }
+    private readonly settings = new Settings();
 
     public updateDecorations(textEditor: vscode.TextEditor) {
         this.getDocument(textEditor).triggerUpdateDecorations();
@@ -29,7 +24,7 @@ export default class DocumentManager {
         let document = this.documents.get(textEditor.document.uri.toString());
 
         if (document === undefined) {
-            document = new Document(textEditor.document.uri.toString(), this.bracketPairs, this.timeOut);
+            document = new Document(textEditor.document.uri.toString(), this.settings);
             this.documents.set(textEditor.document.uri.toString(), document);
         }
 
