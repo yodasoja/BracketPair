@@ -8,6 +8,12 @@ export function activate(context: vscode.ExtensionContext) {
 
     let activeEditor = vscode.window.activeTextEditor;
 
+    vscode.window.visibleTextEditors.forEach(editor => {
+        if (editor) {
+            documentManager.updateDecorations(editor);
+        }
+    });
+
     if (activeEditor) {
         documentManager.updateDecorations(activeEditor);
     }

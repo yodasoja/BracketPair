@@ -9,6 +9,7 @@ export default class TextLine {
     private bracketColorIndexes: { [character: string]: number[]; } = {};
     private readonly settings: Settings;
     consecutiveColorCount = 0;
+    lastCloseBracketColorIndex?: number;
 
     constructor(settings: Settings, previousLine?: TextLine) {
         this.settings = settings;
@@ -19,6 +20,7 @@ export default class TextLine {
                 this.bracketColorIndexes[key] = previousLine.bracketColorIndexes[key].slice();
             }
             this.consecutiveColorCount = previousLine.consecutiveColorCount;
+            this.lastCloseBracketColorIndex = previousLine.lastCloseBracketColorIndex;
         }
         else {
             for (let bracketPair of settings.bracketPairs) {
@@ -32,10 +34,13 @@ export default class TextLine {
         for (let bracketPair of this.settings.bracketPairs) {
             // If open bracket matches
             if (bracketPair.openCharacter === bracket) {
-
                 let colorIndex: number;
                 if (this.settings.colorMode === ColorMode.Consecutive) {
                     colorIndex = this.consecutiveColorCount % bracketPair.colors.length;
+                    if (colorIndex === this.lastCloseBracketColorIndex) {
+                        colorIndex = (colorIndex + 1) % bracketPair.colors.length;
+                        this.consecutiveColorCount++;
+                    }
                     this.consecutiveColorCount++;
                 }
                 else {
@@ -57,12 +62,12 @@ export default class TextLine {
             }
             else if (bracketPair.closeCharacter === bracket) {
                 // If close bracket, and has an open pair
-                let colorIndex = this.bracketColorIndexes[bracketPair.openCharacter].pop();
-                if (colorIndex !== undefined) {
+                this.lastCloseBracketColorIndex = this.bracketColorIndexes[bracketPair.openCharacter].pop();
+                if (this.lastCloseBracketColorIndex !== undefined) {
                     if (this.settings.colorMode === ColorMode.Consecutive) {
                         this.consecutiveColorCount--;
                     }
-                    let color = bracketPair.colors[colorIndex];
+                    let color = bracketPair.colors[this.lastCloseBracketColorIndex];
 
                     let colorRanges = this.colorRanges.get(color);
                     if (colorRanges !== undefined) {
