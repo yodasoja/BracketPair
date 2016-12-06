@@ -135,7 +135,7 @@ export default class Document {
             for (let bracketPair of this.bracketPairs) {
                 // If open bracket matches
                 if (bracketPair.openCharacter === match[0]) {
-                    let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
+                    let colorIndex = currentLine.bracketColorIndexes[bracketPair.openCharacter].length % bracketPair.colors.length;
                     let color = bracketPair.colors[colorIndex];
 
                     let colorRanges = currentLine.colorRanges.get(color);
@@ -145,15 +145,13 @@ export default class Document {
                     else {
                         currentLine.colorRanges.set(color, [range]);
                     }
-                    currentLine.bracketCount[bracketPair.openCharacter]++;
+                    currentLine.bracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
                     break;
                 }
                 else if (bracketPair.closeCharacter === match[0]) {
-                    // If close bracket matches
-                    if (currentLine.bracketCount[bracketPair.openCharacter] !== 0) {
-                        currentLine.bracketCount[bracketPair.openCharacter]--;
-
-                        let colorIndex = currentLine.bracketCount[bracketPair.openCharacter] % bracketPair.colors.length;
+                    // If close bracket, and has an open pair
+                    let colorIndex = currentLine.bracketColorIndexes[bracketPair.openCharacter].pop();
+                    if (colorIndex !== undefined) {
                         let colorDeclaration = bracketPair.colors[colorIndex];
 
                         let colorRanges = currentLine.colorRanges.get(colorDeclaration);
@@ -173,9 +171,6 @@ export default class Document {
                         else {
                             currentLine.colorRanges.set(bracketPair.orphanColor, [range]);
                         }
-
-                        // We can count orphaned brackets, but no use-case for it yet
-                        // currentLine.bracketCount[bracketPair.closeCharacter]++;
                     }
                     break;
                 }
