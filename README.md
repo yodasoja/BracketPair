@@ -46,29 +46,29 @@ Here is an example for matching '<>'
 -----------------------------------------------------------------------------------------------------------
 
 
-## Known Issues
-
-* No Tests
-* Brackets in comments are not ignored
-* Sometimes a TextEditor is disposed while in use, causes the extension to crash
-
------------------------------------------------------------------------------------------------------------
-
-
 ## Release Notes
 
-### 0.0.1
+### 0.0.4
 
-Initial release
-
-### 0.0.2
-
-Fixed an issue where timeout wasn't being disabled when set to 0
+Fixed race condition causing a textEditor to be disposed while updating decoration.
 
 ### 0.0.3
 
 Updated ReadMe  
 Improved icon
+
+### 0.0.2
+
+Fixed an issue where timeout wasn't being disabled when set to 0
+
+### 0.0.1
+
+Initial release
+
+
+
+
+
 
 -----------------------------------------------------------------------------------------------------------
 
