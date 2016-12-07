@@ -8,7 +8,7 @@ export default class TextLine {
     colorRanges = new Map<string, vscode.Range[]>();
     private bracketColors: { [character: string]: number[]; } = {};
     private readonly settings: Settings;
-    lastCloseBracketColorIndex?: number;
+    lastBracketColor = "";
 
     constructor(settings: Settings, previousLine?: TextLine) {
         this.settings = settings;
@@ -18,7 +18,7 @@ export default class TextLine {
             for (let key in previousLine.bracketColors) {
                 this.bracketColors[key] = previousLine.bracketColors[key].slice();
             }
-            this.lastCloseBracketColorIndex = previousLine.lastCloseBracketColorIndex;
+            this.lastBracketColor = previousLine.lastBracketColor;
         }
         else {
             for (let bracketPair of settings.bracketPairs) {
@@ -39,20 +39,18 @@ export default class TextLine {
                         unmatchedOpenBracketCount += this.bracketColors[key].length;
                     });
 
-                    console.log(unmatchedOpenBracketCount);
-                    colorIndex = unmatchedOpenBracketCount;
+                    colorIndex = unmatchedOpenBracketCount % bracketPair.colors.length;
                 }
                 else {
-                    colorIndex = this.bracketColors[bracketPair.openCharacter].length;
+                    colorIndex = this.bracketColors[bracketPair.openCharacter].length % bracketPair.colors.length;
                 }
-
-                if (this.settings.ensureUniqueOpeningColor && colorIndex === this.lastCloseBracketColorIndex) {
-                    colorIndex++;
-                }
-
-                colorIndex %= bracketPair.colors.length;
 
                 let color = bracketPair.colors[colorIndex];
+
+                if (this.settings.ensureUniqueOpeningColor && color === this.lastBracketColor) {
+                    colorIndex = (colorIndex + 1) % bracketPair.colors.length;
+                    color = bracketPair.colors[colorIndex];
+                }
 
                 let colorRanges = this.colorRanges.get(color);
                 if (colorRanges !== undefined) {
@@ -63,32 +61,29 @@ export default class TextLine {
                 }
                 this.bracketColors[bracketPair.openCharacter].push(colorIndex);
 
+                this.lastBracketColor = color;
                 return;
             }
             else if (bracketPair.closeCharacter === bracket) {
                 // If close bracket, and has an open pair
-                this.lastCloseBracketColorIndex = this.bracketColors[bracketPair.openCharacter].pop();
-                if (this.lastCloseBracketColorIndex !== undefined) {
-                    let color = bracketPair.colors[this.lastCloseBracketColorIndex];
-
-                    let colorRanges = this.colorRanges.get(color);
-                    if (colorRanges !== undefined) {
-                        colorRanges.push(range);
-                    }
-                    else {
-                        this.colorRanges.set(color, [range]);
-                    }
+                let colorIndex = this.bracketColors[bracketPair.openCharacter].pop();
+                let color: string;
+                if (colorIndex !== undefined) {
+                    color = bracketPair.colors[colorIndex];
                 }
-                // If no more open brackets, close bracket is an 'orphan'
                 else {
-                    let colorRanges = this.colorRanges.get(bracketPair.orphanColor);
-                    if (colorRanges !== undefined) {
-                        colorRanges.push(range);
-                    }
-                    else {
-                        this.colorRanges.set(bracketPair.orphanColor, [range]);
-                    }
+                    color = bracketPair.orphanColor;
                 }
+
+                let colorRanges = this.colorRanges.get(color);
+                if (colorRanges !== undefined) {
+                    colorRanges.push(range);
+                }
+                else {
+                    this.colorRanges.set(color, [range]);
+                }
+
+                this.lastBracketColor = color;
                 return;
             }
         }
