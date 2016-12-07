@@ -33,6 +33,11 @@
                     "default": 200,
                     "description": "How long the user should idle for, before the document is colorized. Set to 0 to disable"
                 },
+                "bracketPairColorizer.ensureUniqueOpeningColor" : {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Ensure that an opening brackets color does not match the previous closed brackets color"
+                },
                 "bracketPairColorizer.colorMode": {
                     "type": "string",
                     "enum": [
