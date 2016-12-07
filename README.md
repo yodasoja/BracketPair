@@ -32,7 +32,7 @@ Set to 0 to disable.
 ![Disabled](images/forceUniqueOpeningColorDisabled.png "forceUniqueOpeningColor Disabled")
 ![Enabled](images/forceUniqueOpeningColorEnabled.png "forceUniqueOpeningColor Enabled")
 
-> `"bracketPairColorizer.forceIterationColorCycle"`
+> `"bracketPairColorizer.forceIterationColorCycle"`  
 ![Enabled](images/forceIterationColorCycleEnabled.png "forceIterationColorCycle Enabled")
 
 
