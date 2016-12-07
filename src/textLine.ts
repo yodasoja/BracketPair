@@ -6,9 +6,8 @@ import ColorMode from './colorMode';
 
 export default class TextLine {
     colorRanges = new Map<string, vscode.Range[]>();
-    private bracketColorIndexes: { [character: string]: number[]; } = {};
+    private bracketColors: { [character: string]: number[]; } = {};
     private readonly settings: Settings;
-    consecutiveColorCount = 0;
     lastCloseBracketColorIndex?: number;
 
     constructor(settings: Settings, previousLine?: TextLine) {
@@ -16,16 +15,15 @@ export default class TextLine {
 
         if (previousLine !== undefined) {
             // Mantain previous lines bracket count, so if lines are invalidated, not everything has to be recalculated
-            for (let key in previousLine.bracketColorIndexes) {
-                this.bracketColorIndexes[key] = previousLine.bracketColorIndexes[key].slice();
+            for (let key in previousLine.bracketColors) {
+                this.bracketColors[key] = previousLine.bracketColors[key].slice();
             }
-            this.consecutiveColorCount = previousLine.consecutiveColorCount;
             this.lastCloseBracketColorIndex = previousLine.lastCloseBracketColorIndex;
         }
         else {
             for (let bracketPair of settings.bracketPairs) {
-                this.bracketColorIndexes[bracketPair.openCharacter] = [];
-                this.bracketColorIndexes[bracketPair.closeCharacter] = [];
+                this.bracketColors[bracketPair.openCharacter] = [];
+                this.bracketColors[bracketPair.closeCharacter] = [];
             }
         }
     }
@@ -36,16 +34,23 @@ export default class TextLine {
             if (bracketPair.openCharacter === bracket) {
                 let colorIndex: number;
                 if (this.settings.colorMode === ColorMode.Consecutive) {
-                    colorIndex = this.consecutiveColorCount % bracketPair.colors.length;
-                    if (colorIndex === this.lastCloseBracketColorIndex) {
-                        colorIndex = (colorIndex + 1) % bracketPair.colors.length;
-                        this.consecutiveColorCount++;
-                    }
-                    this.consecutiveColorCount++;
+                    let unmatchedOpenBracketCount = 0;
+                    Object.keys(this.bracketColors).forEach(key => {
+                        unmatchedOpenBracketCount += this.bracketColors[key].length;
+                    });
+
+                    console.log(unmatchedOpenBracketCount);
+                    colorIndex = unmatchedOpenBracketCount;
                 }
                 else {
-                    colorIndex = this.bracketColorIndexes[bracketPair.openCharacter].length % bracketPair.colors.length;
+                    colorIndex = this.bracketColors[bracketPair.openCharacter].length;
                 }
+
+                if (this.settings.ensureUniqueOpeningColor && colorIndex === this.lastCloseBracketColorIndex) {
+                    colorIndex++;
+                }
+
+                colorIndex %= bracketPair.colors.length;
 
                 let color = bracketPair.colors[colorIndex];
 
@@ -56,17 +61,14 @@ export default class TextLine {
                 else {
                     this.colorRanges.set(color, [range]);
                 }
-                this.bracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
+                this.bracketColors[bracketPair.openCharacter].push(colorIndex);
 
                 return;
             }
             else if (bracketPair.closeCharacter === bracket) {
                 // If close bracket, and has an open pair
-                this.lastCloseBracketColorIndex = this.bracketColorIndexes[bracketPair.openCharacter].pop();
+                this.lastCloseBracketColorIndex = this.bracketColors[bracketPair.openCharacter].pop();
                 if (this.lastCloseBracketColorIndex !== undefined) {
-                    if (this.settings.colorMode === ColorMode.Consecutive) {
-                        this.consecutiveColorCount--;
-                    }
                     let color = bracketPair.colors[this.lastCloseBracketColorIndex];
 
                     let colorRanges = this.colorRanges.get(color);
