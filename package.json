@@ -33,19 +33,24 @@
                     "default": 200,
                     "description": "How long the user should idle for, before the document is colorized. Set to 0 to disable"
                 },
-                "bracketPairColorizer.ensureUniqueOpeningColor" : {
+                "bracketPairColorizer.forceUniqueOpeningColor" : {
                     "type": "boolean",
-                    "default": true,
-                    "description": "Ensure that an opening brackets color does not match the previous closed brackets color"
+                    "default": false,
+                    "description": "Ensure that an opening brackets color does not match a previous brackets color"
+                },
+                "bracketPairColorizer.forceIterationColorCycle" : {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should opening brackets iterate the color cycle even if they are not nested"
                 },
                 "bracketPairColorizer.colorMode": {
                     "type": "string",
                     "enum": [
                         "Consecutive",
-                        "Independant"
+                        "Independent"
                     ],
                     "default": "Consecutive",
-                    "description": "Should different brackets share a color group (Consecutive), or use their own color group (Independant)"
+                    "description": "Should different brackets share a color group (Consecutive), or use their own color group (Independent)"
                 },
                 "bracketPairColorizer.consecutivePairColors": {
                     "type": "array",
@@ -62,7 +67,7 @@
                     ],
                     "description": "Define paired characters and their shared color group"
                 },
-                "bracketPairColorizer.independantPairColors": {
+                "bracketPairColorizer.independentPairColors": {
                     "type": [
                         "array"
                     ],

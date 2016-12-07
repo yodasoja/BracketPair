@@ -8,6 +8,7 @@ import ColorMode from './colorMode';
 export default class Settings {
     readonly timeOutLength: number;
     readonly ensureUniqueOpeningColor : boolean;
+    readonly forceIterationColorCycle : boolean;
     readonly bracketPairs: BracketPair[] = [];
     readonly regexPattern: string;
     readonly decorations: Map<string, vscode.TextEditorDecorationType>;
@@ -15,7 +16,8 @@ export default class Settings {
 
     constructor() {
         let configuration = vscode.workspace.getConfiguration();
-        this.ensureUniqueOpeningColor = configuration.get("bracketPairColorizer.ensureUniqueOpeningColor") as boolean;
+        this.ensureUniqueOpeningColor = configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
+        this.forceIterationColorCycle = configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
         let colorModeString = configuration.get("bracketPairColorizer.colorMode") as string;
         this.colorMode = (<any>ColorMode)[colorModeString];
 
@@ -37,10 +39,10 @@ export default class Settings {
             });
         }
         else {
-            let independantSettings = configuration.get("bracketPairColorizer.independantPairColors") as [[{}]];
+            let independentSettings = configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
 
-            independantSettings.forEach((setting, index) => {
-                assert(setting.length === 3, "independantSetting [" + index + "] does not have 3 elements");
+            independentSettings.forEach((setting, index) => {
+                assert(setting.length === 3, "independentSetting [" + index + "] does not have 3 elements");
 
                 let brackets = setting[0] as string;
                 assert(brackets.length === 2, "User defined brackets must be two characters");

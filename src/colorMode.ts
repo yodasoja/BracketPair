@@ -2,7 +2,7 @@
 
 enum ColorMode {
     Consecutive,
-    Independant
+    Independent
 }
 
 export default ColorMode;

@@ -28,9 +28,19 @@ Screenshot:
 Configure how long the editor should be idle for before updating the document.  
 Set to 0 to disable.
 
+> `"bracketPairColorizer.forceUniqueOpeningColor"`  
+![Disabled](images/forceUniqueOpeningColorDisabled.png "forceUniqueOpeningColor Disabled")
+![Enabled](images/forceUniqueOpeningColorEnabled.png "forceUniqueOpeningColor Enabled")
+
+> `"bracketPairColorizer.forceIterationColorCycle"`
+![Enabled](images/forceIterationColorCycleEnabled.png "forceIterationColorCycle Enabled")
+
+
 >`"bracketPairColorizer.colorMode"`  
-![Consecutive](images/consecutiveExample.png "Consecutive Example")  
-![Independant](images/independantExample.png "Independant Example")
+Consecutive brackets share a color pool for all bracket types  
+Independent brackets allow each bracket type to use its own color pool  
+![Consecutive](images/consecutiveExample.png "Consecutive Example")
+![Independent](images/independentExample.png "Independent Example")
 
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
@@ -50,7 +60,7 @@ Set to 0 to disable.
 >]
 >````
 
-> `"bracketPairColorizer.independantPairColors"`   
+> `"bracketPairColorizer.independentPairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
 > Example for matching '<>'
 >````
