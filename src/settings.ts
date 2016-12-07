@@ -7,22 +7,36 @@ import ColorMode from './colorMode';
 
 export default class Settings {
     readonly timeOutLength: number;
-    readonly forceUniqueOpeningColor : boolean;
-    readonly forceIterationColorCycle : boolean;
+    readonly forceUniqueOpeningColor: boolean;
+    readonly forceIterationColorCycle: boolean;
     readonly bracketPairs: BracketPair[] = [];
     readonly regexPattern: string;
     readonly decorations: Map<string, vscode.TextEditorDecorationType>;
     readonly colorMode: ColorMode;
 
-    constructor() {
+    constructor(
+        timeOutLength?: number,
+        forceUniqueOpeningColor?: boolean,
+        forceIterationColorCycle?: boolean,
+        colorMode?: ColorMode,
+        consecutiveSettings?: [{}],
+        independentSettings?: [[{}]]
+    ) {
         let configuration = vscode.workspace.getConfiguration();
-        this.forceUniqueOpeningColor = configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
-        this.forceIterationColorCycle = configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
-        let colorModeString = configuration.get("bracketPairColorizer.colorMode") as string;
-        this.colorMode = (<any>ColorMode)[colorModeString];
+
+        this.forceUniqueOpeningColor = forceUniqueOpeningColor ?
+            forceUniqueOpeningColor : configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
+
+        this.forceIterationColorCycle = forceIterationColorCycle ?
+            forceIterationColorCycle : configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
+
+        this.colorMode = colorMode ? colorMode : (<any>ColorMode)[configuration.get("bracketPairColorizer.colorMode") as string];
+
+        this.timeOutLength = timeOutLength ? timeOutLength : configuration.get("bracketPairColorizer.timeOut") as number;
 
         if (this.colorMode === ColorMode.Consecutive) {
-            let consecutiveSettings = configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
+            consecutiveSettings = consecutiveSettings
+                ? consecutiveSettings : configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
 
             assert(consecutiveSettings.length >= 3, "consecutiveSettings does not have any brackets specified");
 
@@ -39,7 +53,8 @@ export default class Settings {
             });
         }
         else {
-            let independentSettings = configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
+            independentSettings = independentSettings
+                ? independentSettings : configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
 
             independentSettings.forEach((setting, index) => {
                 assert(setting.length === 3, "independentSetting [" + index + "] does not have 3 elements");
@@ -57,7 +72,6 @@ export default class Settings {
             });
         }
 
-        this.timeOutLength = configuration.get("bracketPairColorizer.timeOut") as number;
         this.regexPattern = this.createRegex(this.bracketPairs);
         this.decorations = this.createDecorations(this.bracketPairs);
     }

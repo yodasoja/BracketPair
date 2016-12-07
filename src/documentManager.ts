@@ -6,7 +6,11 @@ import Settings from "./settings";
 
 export default class DocumentManager {
     documents = new Map<string, Document>();
-    private readonly settings = new Settings();
+    private readonly settings: Settings;
+
+    constructor(settings?: Settings) {
+        this.settings = settings ? settings : new Settings();
+    }
 
     public updateDecorations(textEditor: vscode.TextEditor) {
         this.getDocument(textEditor).triggerUpdateDecorations();
