@@ -1,7 +1,6 @@
 'use string';
 
 import * as vscode from 'vscode';
-import * as assert from 'assert';
 import BracketPair from "./bracketPair";
 import ColorMode from './colorMode';
 
@@ -24,10 +23,10 @@ export default class Settings {
     ) {
         let configuration = vscode.workspace.getConfiguration();
 
-        this.forceUniqueOpeningColor = forceUniqueOpeningColor ?
+        this.forceUniqueOpeningColor = forceUniqueOpeningColor !== undefined ?
             forceUniqueOpeningColor : configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
 
-        this.forceIterationColorCycle = forceIterationColorCycle ?
+        this.forceIterationColorCycle = forceIterationColorCycle !== undefined ?
             forceIterationColorCycle : configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
 
         this.colorMode = colorMode ? colorMode : (<any>ColorMode)[configuration.get("bracketPairColorizer.colorMode") as string];
@@ -38,17 +37,12 @@ export default class Settings {
             consecutiveSettings = consecutiveSettings
                 ? consecutiveSettings : configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
 
-            assert(consecutiveSettings.length >= 3, "consecutiveSettings does not have any brackets specified");
-
             let orphanColor = consecutiveSettings.pop() as string;
-            assert(orphanColor && orphanColor.length > 0, "User defined orphan color must not be empty");
 
             let colors = consecutiveSettings.pop() as [string];
-            assert(colors && colors.length > 0, "User defined bracket colors must not be empty");
 
             consecutiveSettings.forEach((value, index) => {
                 let brackets = value as string;
-                assert(brackets.length === 2, "User defined consecutive brackets [" + index + "] must be two characters");
                 this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
             });
         }
@@ -57,16 +51,12 @@ export default class Settings {
                 ? independentSettings : configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
 
             independentSettings.forEach((setting, index) => {
-                assert(setting.length === 3, "independentSetting [" + index + "] does not have 3 elements");
 
                 let brackets = setting[0] as string;
-                assert(brackets.length === 2, "User defined brackets must be two characters");
 
                 let colors = setting[1] as string[];
-                assert(colors.length > 0, "User defined bracket colors must not be empty");
 
                 let orphanColor = setting[2] as string;
-                assert(orphanColor.length > 0, "User defined orphan color must not be empty");
 
                 this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
             });
