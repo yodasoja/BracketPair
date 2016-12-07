@@ -2,7 +2,7 @@
     "name": "bracket-pair-colorizer",
     "displayName": "Bracket Pair Colorizer",
     "description": "A customizable extension for colorizing matching brackets",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "publisher": "CoenraadS",
     "engines": {
         "vscode": "^1.5.0"
@@ -33,12 +33,12 @@
                     "default": 200,
                     "description": "How long the user should idle for, before the document is colorized. Set to 0 to disable"
                 },
-                "bracketPairColorizer.forceUniqueOpeningColor" : {
+                "bracketPairColorizer.forceUniqueOpeningColor": {
                     "type": "boolean",
                     "default": false,
                     "description": "Ensure that an opening brackets color does not match a previous brackets color"
                 },
-                "bracketPairColorizer.forceIterationColorCycle" : {
+                "bracketPairColorizer.forceIterationColorCycle": {
                     "type": "boolean",
                     "default": false,
                     "description": "Should opening brackets iterate the color cycle even if they are not nested"
