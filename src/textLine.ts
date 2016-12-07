@@ -67,7 +67,7 @@ export default class TextLine {
 
                 let color = bracketPair.colors[colorIndex];
 
-                if (this.settings.ensureUniqueOpeningColor && color === this.previousBracketColor) {
+                if (this.settings.forceUniqueOpeningColor && color === this.previousBracketColor) {
                     colorIndex = (colorIndex + 1) % bracketPair.colors.length;
                     color = bracketPair.colors[colorIndex];
                 }

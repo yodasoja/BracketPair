@@ -7,7 +7,7 @@ import ColorMode from './colorMode';
 
 export default class Settings {
     readonly timeOutLength: number;
-    readonly ensureUniqueOpeningColor : boolean;
+    readonly forceUniqueOpeningColor : boolean;
     readonly forceIterationColorCycle : boolean;
     readonly bracketPairs: BracketPair[] = [];
     readonly regexPattern: string;
@@ -16,7 +16,7 @@ export default class Settings {
 
     constructor() {
         let configuration = vscode.workspace.getConfiguration();
-        this.ensureUniqueOpeningColor = configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
+        this.forceUniqueOpeningColor = configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
         this.forceIterationColorCycle = configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
         let colorModeString = configuration.get("bracketPairColorizer.colorMode") as string;
         this.colorMode = (<any>ColorMode)[colorModeString];
