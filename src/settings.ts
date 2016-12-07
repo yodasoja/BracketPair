@@ -29,26 +29,26 @@ export default class Settings {
         this.forceIterationColorCycle = forceIterationColorCycle !== undefined ?
             forceIterationColorCycle : configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
 
-        this.colorMode = colorMode ? colorMode : (<any>ColorMode)[configuration.get("bracketPairColorizer.colorMode") as string];
+        this.colorMode = colorMode !== undefined ? colorMode : (<any>ColorMode)[configuration.get("bracketPairColorizer.colorMode") as string];
 
-        this.timeOutLength = timeOutLength ? timeOutLength : configuration.get("bracketPairColorizer.timeOut") as number;
+        this.timeOutLength = timeOutLength !== undefined ? timeOutLength : configuration.get("bracketPairColorizer.timeOut") as number;
 
         if (this.colorMode === ColorMode.Consecutive) {
-            consecutiveSettings = consecutiveSettings
-                ? consecutiveSettings : configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
+            consecutiveSettings = consecutiveSettings !== undefined ?
+                consecutiveSettings : configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
 
             let orphanColor = consecutiveSettings.pop() as string;
 
             let colors = consecutiveSettings.pop() as [string];
 
-            consecutiveSettings.forEach((value, index) => {
+            consecutiveSettings.forEach(value => {
                 let brackets = value as string;
                 this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
             });
         }
         else {
-            independentSettings = independentSettings
-                ? independentSettings : configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
+            independentSettings = independentSettings !== undefined ?
+                independentSettings : configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
 
             independentSettings.forEach((setting, index) => {
 
@@ -95,5 +95,4 @@ export default class Settings {
 
         return decorations;
     }
-
 }

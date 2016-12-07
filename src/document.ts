@@ -33,7 +33,7 @@ export default class Document {
 
     // Lines are stored in an array, if line is requested outside of array bounds
     // add emptys lines until array is correctly sized
-    private getLine(index: number): TextLine {
+    public getLine(index: number): TextLine {
         if (index < this.lines.length) {
             return this.lines[index];
         }

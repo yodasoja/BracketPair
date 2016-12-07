@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import Document from "./document";
 import Settings from "./settings";
 
-
 export default class DocumentManager {
     documents = new Map<string, Document>();
     private readonly settings: Settings;

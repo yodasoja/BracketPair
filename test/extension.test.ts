@@ -12,14 +12,15 @@ import * as vscode from 'vscode';
 import * as myExtension from '../src/extension';
 import Settings from "../src/settings";
 import ColorMode from "../src/colorMode";
+import Document from "../src/Document";
 
 // Defines a Mocha test suite to group tests of similar kind together
 suite("Settings Tests", () => {
 
     // Defines a Mocha unit test
     test("bracketPairColorizer.timeOut", () => {
-        let settings = new Settings(200);
-        assert.equal(settings.timeOutLength, 200);
+        let settings = new Settings(0);
+        assert.equal(settings.timeOutLength, 0);
     });
 
     test("bracketPairColorizer.forceUniqueOpeningColor", () => {
@@ -101,5 +102,110 @@ suite("Settings Tests", () => {
 
         assert.equal(settings.bracketPairs[0].orphanColor, "orphanColor0");
         assert.equal(settings.bracketPairs[1].orphanColor, "orphanColor1");
+    });
+
+    // TODO Why is bracketPairs undefined in this test? Outside of tests it works...
+    // test("Default Settings", () => {
+    //     let settings = new Settings();
+    //     assert.equal(settings.timeOutLength, 200);
+    //     assert.equal(settings.forceUniqueOpeningColor, false);
+    //     assert.equal(settings.forceIterationColorCycle, false);
+    //     assert.equal(settings.colorMode, ColorMode.Consecutive);
+
+    //     assert.equal(settings.bracketPairs.length, 3);
+    //     assert.equal(settings.bracketPairs[0].openCharacter, "(");
+    //     assert.equal(settings.bracketPairs[0].closeCharacter, ")");
+    //     assert.equal(settings.bracketPairs[1].openCharacter, "[");
+    //     assert.equal(settings.bracketPairs[1].closeCharacter, "]");
+    //     assert.equal(settings.bracketPairs[2].openCharacter, "{");
+    //     assert.equal(settings.bracketPairs[2].closeCharacter, "}");
+
+    //     assert.equal(settings.bracketPairs[0].colors[0], "Gold");
+    //     assert.equal(settings.bracketPairs[0].colors[1], "Orchid");
+    //     assert.equal(settings.bracketPairs[0].colors[2], "LightSkyBlue");
+    //     assert.equal(settings.bracketPairs[1].colors[0], "Gold");
+    //     assert.equal(settings.bracketPairs[1].colors[1], "Orchid");
+    //     assert.equal(settings.bracketPairs[1].colors[2], "LightSkyBlue");
+    //     assert.equal(settings.bracketPairs[2].colors[0], "Gold");
+    //     assert.equal(settings.bracketPairs[2].colors[1], "Orchid");
+    //     assert.equal(settings.bracketPairs[2].colors[2], "LightSkyBlue");
+
+    //     assert.equal(settings.bracketPairs[0].orphanColor, "Red");
+    //     assert.equal(settings.bracketPairs[1].orphanColor, "Red");
+    //     assert.equal(settings.bracketPairs[2].orphanColor, "Red");
+    // });
+});
+
+suite("Coloring Test", () => {
+    test("Document Consecutive Coloring", () => {
+        {
+            let settings = new Settings(0, false, false, ColorMode.Consecutive,
+                [
+                    "()",
+                    "[]",
+                    "{}",
+                    [
+                        "Gold",
+                        "Orchid",
+                        "LightSkyBlue"
+                    ],
+                    "Red"
+                ]);
+
+            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            document.triggerUpdateDecorations();
+            let line0 = document.getLine(0);
+            let colorRangesGold = line0.colorRanges.get("Gold");
+
+            if (colorRangesGold !== undefined) {
+                assert.equal(colorRangesGold.length, 2);
+                assert(colorRangesGold[0].start.line === 0 &&
+                    colorRangesGold[0].start.character === 0 &&
+                    colorRangesGold[0].end.line === 0 &&
+                    colorRangesGold[0].end.character === 1);
+
+                assert(colorRangesGold[1].start.line === 0 &&
+                    colorRangesGold[1].start.character === 5 &&
+                    colorRangesGold[1].end.line === 0 &&
+                    colorRangesGold[1].end.character === 6);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesOrchid = line0.colorRanges.get("Orchid");
+            if (colorRangesOrchid !== undefined) {
+                assert.equal(colorRangesOrchid.length, 2);
+                assert(colorRangesOrchid[0].start.line === 0 &&
+                    colorRangesOrchid[0].start.character === 1 &&
+                    colorRangesOrchid[0].end.line === 0 &&
+                    colorRangesOrchid[0].end.character === 2);
+
+                assert(colorRangesOrchid[1].start.line === 0 &&
+                    colorRangesOrchid[1].start.character === 4 &&
+                    colorRangesOrchid[1].end.line === 0 &&
+                    colorRangesOrchid[1].end.character === 5);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
+            if (colorRangesLightSkyBlue !== undefined) {
+                assert.equal(colorRangesLightSkyBlue.length, 2);
+                assert(colorRangesLightSkyBlue[0].start.line === 0 &&
+                    colorRangesLightSkyBlue[0].start.character === 2 &&
+                    colorRangesLightSkyBlue[0].end.line === 0 &&
+                    colorRangesLightSkyBlue[0].end.character === 3);
+
+                assert(colorRangesLightSkyBlue[1].start.line === 0 &&
+                    colorRangesLightSkyBlue[1].start.character === 3 &&
+                    colorRangesLightSkyBlue[1].end.line === 0 &&
+                    colorRangesLightSkyBlue[1].end.character === 4);
+            }
+            else {
+                assert(false);
+            }
+        }
     });
 });

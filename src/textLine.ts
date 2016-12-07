@@ -6,7 +6,7 @@ import ColorMode from './colorMode';
 
 export default class TextLine {
     colorRanges = new Map<string, vscode.Range[]>();
-    bracketColors: { [character: string]: number[]; } = {};
+    bracketColorIndexes: { [character: string]: number[]; } = {};
     previousOpenBracketIndexes: { [character: string]: number; } = {};
     previousOpenBracketIndex = -1;
     private readonly settings: Settings;
@@ -17,8 +17,8 @@ export default class TextLine {
 
         if (previousLine !== undefined) {
             // Mantain previous lines bracket count, so if lines are invalidated, not everything has to be recalculated
-            Object.keys(previousLine.bracketColors).forEach(key => {
-                this.bracketColors[key] = previousLine.bracketColors[key].slice();
+            Object.keys(previousLine.bracketColorIndexes).forEach(key => {
+                this.bracketColorIndexes[key] = previousLine.bracketColorIndexes[key].slice();
             });
 
             Object.keys(previousLine.previousOpenBracketIndexes).forEach(key => {
@@ -30,8 +30,8 @@ export default class TextLine {
         }
         else {
             for (let bracketPair of settings.bracketPairs) {
-                this.bracketColors[bracketPair.openCharacter] = [];
-                this.bracketColors[bracketPair.closeCharacter] = [];
+                this.bracketColorIndexes[bracketPair.openCharacter] = [];
+                this.bracketColorIndexes[bracketPair.closeCharacter] = [];
                 this.previousOpenBracketIndexes[bracketPair.openCharacter] = -1;
             }
         }
@@ -50,8 +50,8 @@ export default class TextLine {
                     }
                     else {
                         let unmatchedOpenBracketCount = 0;
-                        Object.keys(this.bracketColors).forEach(key => {
-                            unmatchedOpenBracketCount += this.bracketColors[key].length;
+                        Object.keys(this.bracketColorIndexes).forEach(key => {
+                            unmatchedOpenBracketCount += this.bracketColorIndexes[key].length;
                         });
                         colorIndex = unmatchedOpenBracketCount % bracketPair.colors.length;
                     }
@@ -61,7 +61,7 @@ export default class TextLine {
                         colorIndex = (this.previousOpenBracketIndexes[bracket] + 1) % bracketPair.colors.length;
                     }
                     else {
-                        colorIndex = this.bracketColors[bracket].length % bracketPair.colors.length;
+                        colorIndex = this.bracketColorIndexes[bracket].length % bracketPair.colors.length;
                     }
                 }
 
@@ -79,7 +79,7 @@ export default class TextLine {
                 else {
                     this.colorRanges.set(color, [range]);
                 }
-                this.bracketColors[bracket].push(colorIndex);
+                this.bracketColorIndexes[bracket].push(colorIndex);
                 this.previousBracketColor = color;
 
                 if (this.settings.colorMode === ColorMode.Consecutive) {
@@ -92,7 +92,7 @@ export default class TextLine {
             }
             else if (bracketPair.closeCharacter === bracket) {
                 // If close bracket, and has an open pair
-                let colorIndex = this.bracketColors[bracketPair.openCharacter].pop();
+                let colorIndex = this.bracketColorIndexes[bracketPair.openCharacter].pop();
                 let color: string;
                 if (colorIndex !== undefined) {
                     color = bracketPair.colors[colorIndex];
