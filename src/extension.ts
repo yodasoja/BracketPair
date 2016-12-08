@@ -14,10 +14,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    if (activeEditor) {
-        documentManager.updateDecorations(activeEditor);
-    }
-
     vscode.window.onDidChangeActiveTextEditor(editor => {
         activeEditor = editor;
         if (activeEditor) {
@@ -34,6 +30,11 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidCloseTextDocument(event => {
         if (activeEditor) {
             documentManager.onDidCloseTextDocument(event);
+            vscode.window.visibleTextEditors.forEach(editor => {
+                if (editor) {
+                    documentManager.updateDecorations(editor);
+                }
+            });
         }
     }, null, context.subscriptions);
 }

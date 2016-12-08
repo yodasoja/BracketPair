@@ -29,9 +29,11 @@ export default class Settings {
         this.forceIterationColorCycle = forceIterationColorCycle !== undefined ?
             forceIterationColorCycle : configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
 
-        this.colorMode = colorMode !== undefined ? colorMode : (<any>ColorMode)[configuration.get("bracketPairColorizer.colorMode") as string];
+        this.colorMode = colorMode !== undefined ?
+            colorMode : (<any>ColorMode)[configuration.get("bracketPairColorizer.colorMode") as string];
 
-        this.timeOutLength = timeOutLength !== undefined ? timeOutLength : configuration.get("bracketPairColorizer.timeOut") as number;
+        this.timeOutLength = timeOutLength !== undefined ?
+            timeOutLength : configuration.get("bracketPairColorizer.timeOut") as number;
 
         if (this.colorMode === ColorMode.Consecutive) {
             consecutiveSettings = consecutiveSettings !== undefined ?
