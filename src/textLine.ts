@@ -8,7 +8,7 @@ export default class TextLine {
     colorRanges = new Map<string, vscode.Range[]>();
     bracketColorIndexes: { [character: string]: number[]; } = {};
     previousOpenBracketIndexes: { [character: string]: number; } = {};
-    previousOpenBracketIndex = -1;
+    previousOpenConsecutiveBracketIndex = -1;
     private readonly settings: Settings;
     private previousBracketColor = "";
 
@@ -25,7 +25,7 @@ export default class TextLine {
                 this.previousOpenBracketIndexes[key] = previousLine.previousOpenBracketIndexes[key];
             });
 
-            this.previousOpenBracketIndex = previousLine.previousOpenBracketIndex;
+            this.previousOpenConsecutiveBracketIndex = previousLine.previousOpenConsecutiveBracketIndex;
             this.previousBracketColor = previousLine.previousBracketColor;
         }
         else {
@@ -46,7 +46,7 @@ export default class TextLine {
 
                 if (this.settings.colorMode === ColorMode.Consecutive) {
                     if (this.settings.forceIterationColorCycle) {
-                        colorIndex = (this.previousOpenBracketIndex + 1) % bracketPair.colors.length;
+                        colorIndex = (this.previousOpenConsecutiveBracketIndex + 1) % bracketPair.colors.length;
                     }
                     else {
                         let unmatchedOpenBracketCount = 0;
@@ -83,7 +83,7 @@ export default class TextLine {
                 this.previousBracketColor = color;
 
                 if (this.settings.colorMode === ColorMode.Consecutive) {
-                    this.previousOpenBracketIndex = colorIndex;
+                    this.previousOpenConsecutiveBracketIndex = colorIndex;
                 }
                 else {
                     this.previousOpenBracketIndexes[bracket] = colorIndex;

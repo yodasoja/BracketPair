@@ -701,9 +701,9 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 1 &&
-                    colorRangesGold[0].start.character === 2 &&
+                    colorRangesGold[0].start.character === 0 &&
                     colorRangesGold[0].end.line === 1 &&
-                    colorRangesGold[0].end.character === 3);
+                    colorRangesGold[0].end.character === 1);
             }
             else {
                 assert(false);
@@ -713,9 +713,9 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 1);
                 assert(colorRangesOrchid[0].start.line === 1 &&
-                    colorRangesOrchid[0].start.character === 0 &&
+                    colorRangesOrchid[0].start.character === 1 &&
                     colorRangesOrchid[0].end.line === 1 &&
-                    colorRangesOrchid[0].end.character === 1);
+                    colorRangesOrchid[0].end.character === 2);
             }
             else {
                 assert(false);
@@ -725,9 +725,9 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 1);
                 assert(colorRangesLightSkyBlue[0].start.line === 1 &&
-                    colorRangesLightSkyBlue[0].start.character === 1 &&
+                    colorRangesLightSkyBlue[0].start.character === 2 &&
                     colorRangesLightSkyBlue[0].end.line === 1 &&
-                    colorRangesLightSkyBlue[0].end.character === 2);
+                    colorRangesLightSkyBlue[0].end.character === 3);
             }
             else {
                 assert(false);
@@ -748,9 +748,9 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 2 &&
-                    colorRangesGold[0].start.character === 0 &&
+                    colorRangesGold[0].start.character === 2 &&
                     colorRangesGold[0].end.line === 2 &&
-                    colorRangesGold[0].end.character === 1);
+                    colorRangesGold[0].end.character === 3);
             }
             else {
                 assert(false);
@@ -760,9 +760,9 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 1);
                 assert(colorRangesOrchid[0].start.line === 2 &&
-                    colorRangesOrchid[0].start.character === 2 &&
+                    colorRangesOrchid[0].start.character === 1 &&
                     colorRangesOrchid[0].end.line === 2 &&
-                    colorRangesOrchid[0].end.character === 3);
+                    colorRangesOrchid[0].end.character === 2);
             }
             else {
                 assert(false);
@@ -772,9 +772,9 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 1);
                 assert(colorRangesLightSkyBlue[0].start.line === 2 &&
-                    colorRangesLightSkyBlue[0].start.character === 1 &&
+                    colorRangesLightSkyBlue[0].start.character === 0 &&
                     colorRangesLightSkyBlue[0].end.line === 2 &&
-                    colorRangesLightSkyBlue[0].end.character === 2);
+                    colorRangesLightSkyBlue[0].end.character === 1);
             }
             else {
                 assert(false);
@@ -818,7 +818,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
             let colorRangesGold = line4.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 4);
+                assert.equal(colorRangesGold.length, 2);
                 assert(colorRangesGold[0].start.line === 4 &&
                     colorRangesGold[0].start.character === 0 &&
                     colorRangesGold[0].end.line === 4 &&
@@ -828,16 +828,6 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                     colorRangesGold[1].start.character === 1 &&
                     colorRangesGold[1].end.line === 4 &&
                     colorRangesGold[1].end.character === 2);
-
-                assert(colorRangesGold[2].start.line === 4 &&
-                    colorRangesGold[2].start.character === 4 &&
-                    colorRangesGold[2].end.line === 4 &&
-                    colorRangesGold[2].end.character === 5);
-
-                assert(colorRangesGold[3].start.line === 4 &&
-                    colorRangesGold[3].start.character === 5 &&
-                    colorRangesGold[3].end.line === 4 &&
-                    colorRangesGold[3].end.character === 6);
             }
             else {
                 assert(false);
@@ -862,7 +852,21 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
 
             let colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
-            assert.equal(colorRangesLightSkyBlue, undefined);
+            if (colorRangesLightSkyBlue !== undefined) {
+                assert.equal(colorRangesLightSkyBlue.length, 2);
+                assert(colorRangesLightSkyBlue[0].start.line === 4 &&
+                    colorRangesLightSkyBlue[0].start.character === 4 &&
+                    colorRangesLightSkyBlue[0].end.line === 4 &&
+                    colorRangesLightSkyBlue[0].end.character === 5);
+
+                assert(colorRangesLightSkyBlue[1].start.line === 4 &&
+                    colorRangesLightSkyBlue[1].start.character === 5 &&
+                    colorRangesLightSkyBlue[1].end.line === 4 &&
+                    colorRangesLightSkyBlue[1].end.character === 6);
+            }
+            else {
+                assert(false);
+            }
         }
     });
 });
