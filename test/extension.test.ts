@@ -371,7 +371,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
             "Red"
         ]);
 
-    test("First Line Document Consecutive Coloring", () => {
+    test("First Line Document Consecutive Coloring Unique Opening Color", () => {
         {
             let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
@@ -433,7 +433,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Second Line Document Consecutive Coloring", () => {
+    test("Second Line Document Consecutive Coloring Unique Opening Color", () => {
         {
             let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
@@ -480,7 +480,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Third Line Document Consecutive Coloring", () => {
+    test("Third Line Document Consecutive Coloring Unique Opening Color", () => {
         {
             let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
@@ -527,7 +527,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Fourth Line Document Consecutive Coloring", () => {
+    test("Fourth Line Document Consecutive Coloring Unique Opening Color", () => {
         {
             let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
@@ -552,7 +552,262 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Fifth Line Document Consecutive Coloring", () => {
+    test("Fifth Line Document Consecutive Coloring Unique Opening Color", () => {
+        {
+            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            document.triggerUpdateDecorations();
+            let line4 = document.getLine(4);
+
+            let colorRangesError = line4.colorRanges.get("Red");
+            assert.equal(colorRangesError, undefined);
+
+            let colorRangesGold = line4.colorRanges.get("Gold");
+            if (colorRangesGold !== undefined) {
+                assert.equal(colorRangesGold.length, 4);
+                assert(colorRangesGold[0].start.line === 4 &&
+                    colorRangesGold[0].start.character === 0 &&
+                    colorRangesGold[0].end.line === 4 &&
+                    colorRangesGold[0].end.character === 1);
+
+                assert(colorRangesGold[1].start.line === 4 &&
+                    colorRangesGold[1].start.character === 1 &&
+                    colorRangesGold[1].end.line === 4 &&
+                    colorRangesGold[1].end.character === 2);
+
+                assert(colorRangesGold[2].start.line === 4 &&
+                    colorRangesGold[2].start.character === 4 &&
+                    colorRangesGold[2].end.line === 4 &&
+                    colorRangesGold[2].end.character === 5);
+
+                assert(colorRangesGold[3].start.line === 4 &&
+                    colorRangesGold[3].start.character === 5 &&
+                    colorRangesGold[3].end.line === 4 &&
+                    colorRangesGold[3].end.character === 6);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesOrchid = line4.colorRanges.get("Orchid");
+            if (colorRangesOrchid !== undefined) {
+                assert.equal(colorRangesOrchid.length, 2);
+                assert(colorRangesOrchid[0].start.line === 4 &&
+                    colorRangesOrchid[0].start.character === 2 &&
+                    colorRangesOrchid[0].end.line === 4 &&
+                    colorRangesOrchid[0].end.character === 3);
+
+                assert(colorRangesOrchid[1].start.line === 4 &&
+                    colorRangesOrchid[1].start.character === 3 &&
+                    colorRangesOrchid[1].end.line === 4 &&
+                    colorRangesOrchid[1].end.character === 4);
+            }
+            else {
+                assert(false);
+            }
+
+
+            let colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
+            assert.equal(colorRangesLightSkyBlue, undefined);
+        }
+    });
+});
+
+suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
+    let settings = new Settings(0, undefined, true, ColorMode.Consecutive,
+        [
+            "()",
+            "[]",
+            "{}",
+            [
+                "Gold",
+                "Orchid",
+                "LightSkyBlue"
+            ],
+            "Red"
+        ]);
+
+    test("First Line Document Consecutive Force Iteration Color Cycle", () => {
+        {
+            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            document.triggerUpdateDecorations();
+            let line0 = document.getLine(0);
+
+            let colorRangesError = line0.colorRanges.get("Red");
+            assert.equal(colorRangesError, undefined);
+
+            let colorRangesGold = line0.colorRanges.get("Gold");
+            if (colorRangesGold !== undefined) {
+                assert.equal(colorRangesGold.length, 2);
+                assert(colorRangesGold[0].start.line === 0 &&
+                    colorRangesGold[0].start.character === 0 &&
+                    colorRangesGold[0].end.line === 0 &&
+                    colorRangesGold[0].end.character === 1);
+
+                assert(colorRangesGold[1].start.line === 0 &&
+                    colorRangesGold[1].start.character === 5 &&
+                    colorRangesGold[1].end.line === 0 &&
+                    colorRangesGold[1].end.character === 6);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesOrchid = line0.colorRanges.get("Orchid");
+            if (colorRangesOrchid !== undefined) {
+                assert.equal(colorRangesOrchid.length, 2);
+                assert(colorRangesOrchid[0].start.line === 0 &&
+                    colorRangesOrchid[0].start.character === 1 &&
+                    colorRangesOrchid[0].end.line === 0 &&
+                    colorRangesOrchid[0].end.character === 2);
+
+                assert(colorRangesOrchid[1].start.line === 0 &&
+                    colorRangesOrchid[1].start.character === 4 &&
+                    colorRangesOrchid[1].end.line === 0 &&
+                    colorRangesOrchid[1].end.character === 5);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
+            if (colorRangesLightSkyBlue !== undefined) {
+                assert.equal(colorRangesLightSkyBlue.length, 2);
+                assert(colorRangesLightSkyBlue[0].start.line === 0 &&
+                    colorRangesLightSkyBlue[0].start.character === 2 &&
+                    colorRangesLightSkyBlue[0].end.line === 0 &&
+                    colorRangesLightSkyBlue[0].end.character === 3);
+
+                assert(colorRangesLightSkyBlue[1].start.line === 0 &&
+                    colorRangesLightSkyBlue[1].start.character === 3 &&
+                    colorRangesLightSkyBlue[1].end.line === 0 &&
+                    colorRangesLightSkyBlue[1].end.character === 4);
+            }
+            else {
+                assert(false);
+            }
+        }
+    });
+
+    test("Second Line Document Consecutive Force Iteration Color Cycle", () => {
+        {
+            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            document.triggerUpdateDecorations();
+            let line1 = document.getLine(1);
+
+            let colorRangesError = line1.colorRanges.get("Red");
+            assert.equal(colorRangesError, undefined);
+
+            let colorRangesGold = line1.colorRanges.get("Gold");
+            if (colorRangesGold !== undefined) {
+                assert.equal(colorRangesGold.length, 1);
+                assert(colorRangesGold[0].start.line === 1 &&
+                    colorRangesGold[0].start.character === 2 &&
+                    colorRangesGold[0].end.line === 1 &&
+                    colorRangesGold[0].end.character === 3);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesOrchid = line1.colorRanges.get("Orchid");
+            if (colorRangesOrchid !== undefined) {
+                assert.equal(colorRangesOrchid.length, 1);
+                assert(colorRangesOrchid[0].start.line === 1 &&
+                    colorRangesOrchid[0].start.character === 0 &&
+                    colorRangesOrchid[0].end.line === 1 &&
+                    colorRangesOrchid[0].end.character === 1);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
+            if (colorRangesLightSkyBlue !== undefined) {
+                assert.equal(colorRangesLightSkyBlue.length, 1);
+                assert(colorRangesLightSkyBlue[0].start.line === 1 &&
+                    colorRangesLightSkyBlue[0].start.character === 1 &&
+                    colorRangesLightSkyBlue[0].end.line === 1 &&
+                    colorRangesLightSkyBlue[0].end.character === 2);
+            }
+            else {
+                assert(false);
+            }
+        }
+    });
+
+    test("Third Line Document Consecutive Force Iteration Color Cycle", () => {
+        {
+            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            document.triggerUpdateDecorations();
+            let line2 = document.getLine(2);
+
+            let colorRangesError = line2.colorRanges.get("Red");
+            assert.equal(colorRangesError, undefined);
+
+            let colorRangesGold = line2.colorRanges.get("Gold");
+            if (colorRangesGold !== undefined) {
+                assert.equal(colorRangesGold.length, 1);
+                assert(colorRangesGold[0].start.line === 2 &&
+                    colorRangesGold[0].start.character === 0 &&
+                    colorRangesGold[0].end.line === 2 &&
+                    colorRangesGold[0].end.character === 1);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesOrchid = line2.colorRanges.get("Orchid");
+            if (colorRangesOrchid !== undefined) {
+                assert.equal(colorRangesOrchid.length, 1);
+                assert(colorRangesOrchid[0].start.line === 2 &&
+                    colorRangesOrchid[0].start.character === 2 &&
+                    colorRangesOrchid[0].end.line === 2 &&
+                    colorRangesOrchid[0].end.character === 3);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
+            if (colorRangesLightSkyBlue !== undefined) {
+                assert.equal(colorRangesLightSkyBlue.length, 1);
+                assert(colorRangesLightSkyBlue[0].start.line === 2 &&
+                    colorRangesLightSkyBlue[0].start.character === 1 &&
+                    colorRangesLightSkyBlue[0].end.line === 2 &&
+                    colorRangesLightSkyBlue[0].end.character === 2);
+            }
+            else {
+                assert(false);
+            }
+        }
+    });
+
+    test("Fourth Line Document Consecutive Force Iteration Color Cycle", () => {
+        {
+            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            document.triggerUpdateDecorations();
+            let line3 = document.getLine(3);
+
+            let colorRangesError = line3.colorRanges.get("Red");
+            if (colorRangesError !== undefined) {
+                assert.equal(colorRangesError.length, 1);
+            }
+            else {
+                assert(false);
+            }
+
+            let colorRangesGold = line3.colorRanges.get("Gold");
+            assert.equal(colorRangesGold, undefined);
+
+            let colorRangesOrchid = line3.colorRanges.get("Orchid");
+            assert.equal(colorRangesOrchid, undefined);
+
+            let colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
+            assert.equal(colorRangesLightSkyBlue, undefined);
+        }
+    });
+
+    test("Fifth Line Document Consecutive Coloring Force Iteration Color Cycle", () => {
         {
             let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
