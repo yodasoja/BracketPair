@@ -2,6 +2,7 @@
 import BracketState from './bracketState';
 import Settings from "./settings";
 import BracketPair from "./bracketPair";
+import * as assert from 'assert';
 
 export default class IndependentBracketState implements BracketState {
     private readonly settings: Settings;
@@ -14,6 +15,18 @@ export default class IndependentBracketState implements BracketState {
         bracketColorIndexes?: { [character: string]: number[]; },
         previousOpenBracketIndexes?: { [character: string]: number; },
         previousBracketColor?: string) {
+
+        // TODO Optional values are tightly coupled, should be all or nothing. Find a better way of doing this.
+        assert((
+            bracketColorIndexes !== undefined &&
+            previousOpenBracketIndexes !== undefined &&
+            previousBracketColor !== undefined)
+            ||
+            (
+                bracketColorIndexes === undefined &&
+                previousOpenBracketIndexes === undefined &&
+                previousBracketColor === undefined));
+
         this.settings = settings;
 
         if (bracketColorIndexes !== undefined) {

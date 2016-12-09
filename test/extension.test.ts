@@ -12,7 +12,7 @@ import * as vscode from 'vscode';
 import * as myExtension from '../src/extension';
 import Settings from "../src/settings";
 import ColorMode from "../src/colorMode";
-import Document from "../src/Document";
+import DocumentDecoration from "../src/DocumentDecoration";
 
 // Defines a Mocha test suite to group tests of similar kind together
 suite("Settings Tests", () => {
@@ -152,7 +152,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("First Line Document Consecutive Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line0 = document.getLine(0);
 
@@ -214,7 +214,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Second Line Document Consecutive Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line1 = document.getLine(1);
 
@@ -261,7 +261,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Third Line Document Consecutive Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line2 = document.getLine(2);
 
@@ -308,7 +308,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Fourth Line Document Consecutive Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line3 = document.getLine(3);
 
@@ -333,7 +333,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Fifth Line Document Consecutive Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line4 = document.getLine(4);
 
@@ -373,7 +373,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("First Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line0 = document.getLine(0);
 
@@ -435,7 +435,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Second Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line1 = document.getLine(1);
 
@@ -482,7 +482,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Third Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line2 = document.getLine(2);
 
@@ -529,7 +529,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Fourth Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line3 = document.getLine(3);
 
@@ -554,7 +554,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Fifth Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line4 = document.getLine(4);
 
@@ -628,7 +628,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("First Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line0 = document.getLine(0);
 
@@ -690,7 +690,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Second Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line1 = document.getLine(1);
 
@@ -737,7 +737,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Third Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line2 = document.getLine(2);
 
@@ -784,7 +784,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Fourth Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line3 = document.getLine(3);
 
@@ -809,7 +809,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Fifth Line Document Consecutive Coloring Force Iteration Color Cycle", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line4 = document.getLine(4);
 
@@ -887,7 +887,7 @@ suite("Independent Coloring Test", () => {
 
     test("First Line Document Independent Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line0 = document.getLine(0);
 
@@ -949,7 +949,7 @@ suite("Independent Coloring Test", () => {
 
     test("Second Line Document Independent Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line1 = document.getLine(1);
 
@@ -989,7 +989,7 @@ suite("Independent Coloring Test", () => {
 
     test("Third Line Document Independent Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line2 = document.getLine(2);
 
@@ -1029,7 +1029,7 @@ suite("Independent Coloring Test", () => {
 
     test("Fourth Line Document Independent Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line3 = document.getLine(3);
 
@@ -1054,7 +1054,7 @@ suite("Independent Coloring Test", () => {
 
     test("Fifth Line Document Independent Coloring", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line4 = document.getLine(4);
 
@@ -1094,7 +1094,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("First Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line0 = document.getLine(0);
 
@@ -1156,7 +1156,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Second Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line1 = document.getLine(1);
 
@@ -1199,7 +1199,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Third Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line2 = document.getLine(2);
 
@@ -1242,7 +1242,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Fourth Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line3 = document.getLine(3);
 
@@ -1267,7 +1267,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Fifth Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new Document(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
             let line4 = document.getLine(4);
 

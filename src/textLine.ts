@@ -32,9 +32,7 @@ export default class TextLine {
 
     addBracket(bracket: string, range: vscode.Range) {
         for (let bracketPair of this.settings.bracketPairs) {
-            // If open bracket matches
             if (bracketPair.openCharacter === bracket) {
-
                 let color = this.bracketState.getColor(bracketPair);
 
                 let colorRanges = this.colorRanges.get(color);
@@ -45,11 +43,9 @@ export default class TextLine {
                 else {
                     this.colorRanges.set(color, [range]);
                 }
-
                 return;
             }
             else if (bracketPair.closeCharacter === bracket) {
-                // If close bracket, and has an open pair
                 let color = this.bracketState.popColor(bracketPair);
 
                 let colorRanges = this.colorRanges.get(color);

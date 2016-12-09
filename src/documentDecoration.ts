@@ -3,11 +3,10 @@ import * as vscode from 'vscode';
 import TextLine from "./textLine";
 import Settings from "./settings";
 
-export default class Document {
+export default class DocumentDecoration {
     private timeout: NodeJS.Timer | null;
     // This program caches non-changes lines, and will only analyze linenumbers including & above a changed line
     private lineToUpdateWhenTimeoutEnds = Infinity;
-
     private lines: TextLine[] = [];
     private readonly uri: string;
     private readonly settings: Settings;
@@ -81,6 +80,7 @@ export default class Document {
             return;
         }
 
+        // Only have to analyze the first document, since it is shared between the editors
         let document = editors[0].document;
 
         if (lineNumber === undefined) {
@@ -107,6 +107,10 @@ export default class Document {
             currentLine.addBracket(match[0], range);
         }
 
+        this.colorDecorations(editors);
+    }
+
+    private colorDecorations(editors: vscode.TextEditor[]) {
         let colorMap = new Map<string, vscode.Range[]>();
 
         // Reduce all the colors/ranges of the lines into a singular map

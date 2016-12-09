@@ -1,29 +1,29 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import DocumentManager from "./documentManager";
+import DocumentDecorationManager from "./documentDecorationManager";
 
 export function activate(context: vscode.ExtensionContext) {
-    let documentManager = new DocumentManager();
+    let documentManager = new DocumentDecorationManager();
 
     let activeEditor = vscode.window.activeTextEditor;
 
     vscode.window.visibleTextEditors.forEach(editor => {
         if (editor) {
-            documentManager.updateDecorations(editor);
+            documentManager.updateDecorations(editor.document);
         }
     });
 
     vscode.window.onDidChangeActiveTextEditor(editor => {
         activeEditor = editor;
         if (activeEditor) {
-            documentManager.updateDecorations(activeEditor);
+            documentManager.updateDecorations(activeEditor.document);
         }
     }, null, context.subscriptions);
 
     vscode.workspace.onDidChangeTextDocument(event => {
         if (activeEditor && event.document === activeEditor.document) {
-            documentManager.onDidChangeTextDocument(activeEditor, event.contentChanges);
+            documentManager.onDidChangeTextDocument(activeEditor.document, event.contentChanges);
         }
     }, null, context.subscriptions);
 
@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
             documentManager.onDidCloseTextDocument(event);
             vscode.window.visibleTextEditors.forEach(editor => {
                 if (editor) {
-                    documentManager.updateDecorations(editor);
+                    documentManager.updateDecorations(editor.document);
                 }
             });
         }
