@@ -3,7 +3,7 @@ import BracketPair from "./bracketPair";
 import ColorIndexes from "./colorIndexes";
 import * as assert from 'assert';
 
-export default class ConsecutiveColorIndexes implements ColorIndexes {
+export default class SingularIndex implements ColorIndexes {
     private currentOpenBracketColorIndexes: number[] = [];
     private previousOpenBracketColorIndex: number = -1;
 
@@ -50,7 +50,7 @@ export default class ConsecutiveColorIndexes implements ColorIndexes {
     }
 
     deepCopy() {
-        return new ConsecutiveColorIndexes(
+        return new SingularIndex(
             this.currentOpenBracketColorIndexes.slice(),
             this.previousOpenBracketColorIndex);
     }

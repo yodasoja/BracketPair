@@ -4,7 +4,7 @@ import ColorIndexes from "./colorIndexes";
 import * as assert from 'assert';
 import Settings from "./settings";
 
-export default class IndependentColorIndexes implements ColorIndexes {
+export default class MultipleIndexes implements ColorIndexes {
     private currentOpenBracketColorIndexes: { [character: string]: number[]; } = {};
     private previousOpenBracketColorIndexes: { [character: string]: number; } = {};
     private readonly settings: Settings;
@@ -76,7 +76,7 @@ export default class IndependentColorIndexes implements ColorIndexes {
             previousOpenBracketIndexesCopy[key] = this.previousOpenBracketColorIndexes[key];
         });
 
-        return new IndependentColorIndexes(
+        return new MultipleIndexes(
             this.settings,
             bracketColorIndexesCopy,
             previousOpenBracketIndexesCopy);

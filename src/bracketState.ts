@@ -4,8 +4,8 @@ import BracketPair from "./bracketPair";
 import Settings from "./settings";
 import ColorIndexes from "./colorIndexes";
 import ColorMode from './colorMode';
-import ConsecutiveColorIndexes from './consecutiveColorIndexes';
-import IndependentColorIndexes from './independentColorIndexes';
+import SingularIndex from './singularIndex';
+import MultipleIndexes from './MultipleIndexes';
 import * as assert from 'assert';
 
 export default class BracketState {
@@ -33,9 +33,9 @@ export default class BracketState {
         }
         else {
             switch (settings.colorMode) {
-                case ColorMode.Consecutive: this.colorIndexes = new ConsecutiveColorIndexes();
+                case ColorMode.Consecutive: this.colorIndexes = new SingularIndex();
                     break;
-                case ColorMode.Independent: this.colorIndexes = new IndependentColorIndexes(settings);
+                case ColorMode.Independent: this.colorIndexes = new MultipleIndexes(settings);
                     break;
                 default: throw new RangeError("Not implemented enum value");
             }
