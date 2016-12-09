@@ -54,7 +54,6 @@ export default class LineState {
 
         this.previousBracketColor = color;
         this.colorIndexes.setCurrent(bracketPair, colorIndex);
-        this.colorIndexes.setPrevious(bracketPair, colorIndex);
 
         return color;
     };

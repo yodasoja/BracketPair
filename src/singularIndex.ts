@@ -18,16 +18,13 @@ export default class SingularIndex implements ColorIndexes {
         }
     }
 
-    setPrevious(bracketPair: BracketPair, colorIndex: number) {
-        this.previousOpenBracketColorIndex = colorIndex;
-    }
-
     getPrevious(bracketPair: BracketPair): number {
         return this.previousOpenBracketColorIndex;
     }
 
     setCurrent(bracketPair: BracketPair, colorIndex: number) {
         this.currentOpenBracketColorIndexes.push(colorIndex);
+        this.previousOpenBracketColorIndex = colorIndex;
     }
 
     getCurrentLength(bracketPair: BracketPair): number {

@@ -29,16 +29,13 @@ export default class MultipleIndexes implements ColorIndexes {
         }
     }
 
-    setPrevious(bracketPair: BracketPair, colorIndex: number) {
-        this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = colorIndex;
-    }
-
     getPrevious(bracketPair: BracketPair): number {
         return this.previousOpenBracketColorIndexes[bracketPair.openCharacter];
     }
 
     setCurrent(bracketPair: BracketPair, colorIndex: number) {
         this.currentOpenBracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
+        this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = colorIndex;
     }
 
     getCurrentLength(bracketPair: BracketPair): number {
