@@ -78,7 +78,7 @@ export default class LineState {
         return new LineState(
             this.settings,
             {
-                colorIndexes: this.colorIndexes.deepCopy(),
+                colorIndexes: this.colorIndexes.clone(),
                 bracketColor: this.previousBracketColor
             });
     }

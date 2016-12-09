@@ -30,10 +30,6 @@ export default class SingularIndex implements ColorIndexes {
         this.currentOpenBracketColorIndexes.push(colorIndex);
     }
 
-    getCurrent(bracketPair: BracketPair): number {
-        return this.currentOpenBracketColorIndexes[this.currentOpenBracketColorIndexes.length - 1];
-    }
-
     getCurrentLength(bracketPair: BracketPair): number {
         return this.currentOpenBracketColorIndexes.length;
     }
@@ -42,7 +38,7 @@ export default class SingularIndex implements ColorIndexes {
         return this.currentOpenBracketColorIndexes.pop();
     }
 
-    deepCopy() {
+    clone() {
         return new SingularIndex(
             {
                 currentOpenBracketColorIndexes: this.currentOpenBracketColorIndexes.slice(),

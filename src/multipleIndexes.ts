@@ -41,10 +41,6 @@ export default class MultipleIndexes implements ColorIndexes {
         this.currentOpenBracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
     }
 
-    getCurrent(bracketPair: BracketPair): number {
-        return this.currentOpenBracketColorIndexes[bracketPair.openCharacter][this.currentOpenBracketColorIndexes[bracketPair.openCharacter].length - 1];
-    }
-
     getCurrentLength(bracketPair: BracketPair): number {
         return this.currentOpenBracketColorIndexes[bracketPair.openCharacter].length;
     }
@@ -53,7 +49,7 @@ export default class MultipleIndexes implements ColorIndexes {
         return this.currentOpenBracketColorIndexes[bracketPair.openCharacter].pop();
     }
 
-    deepCopy(): ColorIndexes {
+    clone(): ColorIndexes {
         let bracketColorIndexesCopy: { [character: string]: number[]; } = {};
 
         Object.keys(this.currentOpenBracketColorIndexes).forEach(key => {
