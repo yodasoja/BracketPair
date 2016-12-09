@@ -2,21 +2,21 @@
 
 import * as vscode from 'vscode';
 import Settings from "./settings";
-import BracketState from './bracketState';
+import LineState from './lineState';
 
 export default class TextLine {
-    private lineState: BracketState;
+    private lineState: LineState;
     colorRanges = new Map<string, vscode.Range[]>();
     private readonly settings: Settings;
 
-    constructor(settings: Settings, bracketState?: BracketState) {
+    constructor(settings: Settings, bracketState?: LineState) {
         this.settings = settings;
 
         if (bracketState !== undefined) {
             this.lineState = bracketState;
         }
         else {
-            this.lineState = new BracketState(settings);
+            this.lineState = new LineState(settings);
         }
     }
 
