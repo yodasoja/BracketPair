@@ -3,12 +3,13 @@
 import * as vscode from 'vscode';
 import Settings from "./settings";
 import ColorMode from './colorMode';
+import BracketState from './bracketState';
+import IndependentBracketState from "./independentBracketState";
+import ConsecutiveBracketState from "./consecutiveBracketState";
 
 export default class TextLine {
+    bracketState: BracketState;
     colorRanges = new Map<string, vscode.Range[]>();
-    bracketColorIndexes: { [character: string]: number[]; } = {};
-    previousOpenBracketIndexes: { [character: string]: number; } = {};
-    previousOpenConsecutiveBracketIndex = -1;
     private readonly settings: Settings;
     private previousBracketColor = "";
 
@@ -17,22 +18,16 @@ export default class TextLine {
 
         if (previousLine !== undefined) {
             // Mantain previous lines bracket count, so if lines are invalidated, not everything has to be recalculated
-            Object.keys(previousLine.bracketColorIndexes).forEach(key => {
-                this.bracketColorIndexes[key] = previousLine.bracketColorIndexes[key].slice();
-            });
-
-            Object.keys(previousLine.previousOpenBracketIndexes).forEach(key => {
-                this.previousOpenBracketIndexes[key] = previousLine.previousOpenBracketIndexes[key];
-            });
-
-            this.previousOpenConsecutiveBracketIndex = previousLine.previousOpenConsecutiveBracketIndex;
+            this.bracketState = previousLine.bracketState.deepCopy();
             this.previousBracketColor = previousLine.previousBracketColor;
         }
         else {
-            for (let bracketPair of settings.bracketPairs) {
-                this.bracketColorIndexes[bracketPair.openCharacter] = [];
-                this.bracketColorIndexes[bracketPair.closeCharacter] = [];
-                this.previousOpenBracketIndexes[bracketPair.openCharacter] = -1;
+            switch (settings.colorMode) {
+                case ColorMode.Consecutive: this.bracketState = new ConsecutiveBracketState(settings);
+                    break;
+                case ColorMode.Independent: this.bracketState = new IndependentBracketState(settings);
+                    break;
+                default: throw new RangeError("Not implemented enum value");
             }
         }
     }
@@ -42,28 +37,7 @@ export default class TextLine {
             // If open bracket matches
             if (bracketPair.openCharacter === bracket) {
 
-                let colorIndex: number;
-
-                if (this.settings.colorMode === ColorMode.Consecutive) {
-                    if (this.settings.forceIterationColorCycle) {
-                        colorIndex = (this.previousOpenConsecutiveBracketIndex + 1) % bracketPair.colors.length;
-                    }
-                    else {
-                        let unmatchedOpenBracketCount = 0;
-                        Object.keys(this.bracketColorIndexes).forEach(key => {
-                            unmatchedOpenBracketCount += this.bracketColorIndexes[key].length;
-                        });
-                        colorIndex = unmatchedOpenBracketCount % bracketPair.colors.length;
-                    }
-                }
-                else {
-                    if (this.settings.forceIterationColorCycle) {
-                        colorIndex = (this.previousOpenBracketIndexes[bracket] + 1) % bracketPair.colors.length;
-                    }
-                    else {
-                        colorIndex = this.bracketColorIndexes[bracket].length % bracketPair.colors.length;
-                    }
-                }
+                let colorIndex = this.bracketState.getColorIndex(bracketPair);
 
                 let color = bracketPair.colors[colorIndex];
 
@@ -79,20 +53,14 @@ export default class TextLine {
                 else {
                     this.colorRanges.set(color, [range]);
                 }
-                this.bracketColorIndexes[bracket].push(colorIndex);
                 this.previousBracketColor = color;
 
-                if (this.settings.colorMode === ColorMode.Consecutive) {
-                    this.previousOpenConsecutiveBracketIndex = colorIndex;
-                }
-                else {
-                    this.previousOpenBracketIndexes[bracket] = colorIndex;
-                }
+                this.bracketState.setColorIndex(bracket, colorIndex);
                 return;
             }
             else if (bracketPair.closeCharacter === bracket) {
                 // If close bracket, and has an open pair
-                let colorIndex = this.bracketColorIndexes[bracketPair.openCharacter].pop();
+                let colorIndex = this.bracketState.popColorIndex(bracketPair.openCharacter);
                 let color: string;
                 if (colorIndex !== undefined) {
                     color = bracketPair.colors[colorIndex];
