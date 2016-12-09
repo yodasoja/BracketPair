@@ -1,27 +1,20 @@
 'use strict';
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./colorIndexes";
-import * as assert from 'assert';
 
 export default class SingularIndex implements ColorIndexes {
     private currentOpenBracketColorIndexes: number[] = [];
     private previousOpenBracketColorIndex: number = -1;
 
-    constructor(currentOpenBracketColorIndexes?: number[], previousOpenBracketColorIndex?: number) {
-        // TODO Optional values are tightly coupled, should be all or nothing. Find a better way of doing this.
-        assert((
-            currentOpenBracketColorIndexes !== undefined &&
-            previousOpenBracketColorIndex !== undefined)
-            ||
-            (currentOpenBracketColorIndexes === undefined &&
-                previousOpenBracketColorIndex === undefined));
+    constructor(
+        previousState?: {
+            currentOpenBracketColorIndexes: number[],
+            previousOpenBracketColorIndex: number
+        }) {
 
-        if (currentOpenBracketColorIndexes !== undefined) {
-            this.currentOpenBracketColorIndexes = currentOpenBracketColorIndexes;
-        }
-
-        if (previousOpenBracketColorIndex !== undefined) {
-            this.previousOpenBracketColorIndex = previousOpenBracketColorIndex;
+        if (previousState !== undefined) {
+            this.currentOpenBracketColorIndexes = previousState.currentOpenBracketColorIndexes;
+            this.previousOpenBracketColorIndex = previousState.previousOpenBracketColorIndex;
         }
     }
 
@@ -51,7 +44,9 @@ export default class SingularIndex implements ColorIndexes {
 
     deepCopy() {
         return new SingularIndex(
-            this.currentOpenBracketColorIndexes.slice(),
-            this.previousOpenBracketColorIndex);
+            {
+                currentOpenBracketColorIndexes: this.currentOpenBracketColorIndexes.slice(),
+                previousOpenBracketColorIndex: this.previousOpenBracketColorIndex
+            });
     }
 }

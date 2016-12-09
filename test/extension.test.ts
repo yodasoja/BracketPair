@@ -103,37 +103,6 @@ suite("Settings Tests", () => {
         assert.equal(settings.bracketPairs[0].orphanColor, "orphanColor0");
         assert.equal(settings.bracketPairs[1].orphanColor, "orphanColor1");
     });
-
-    // TODO Why is bracketPairs undefined in this test? Outside of tests it works...
-    // test("Default Settings", () => {
-    //     let settings = new Settings();
-    //     assert.equal(settings.timeOutLength, 200);
-    //     assert.equal(settings.forceUniqueOpeningColor, false);
-    //     assert.equal(settings.forceIterationColorCycle, false);
-    //     assert.equal(settings.colorMode, ColorMode.Consecutive);
-
-    //     assert.equal(settings.bracketPairs.length, 3);
-    //     assert.equal(settings.bracketPairs[0].openCharacter, "(");
-    //     assert.equal(settings.bracketPairs[0].closeCharacter, ")");
-    //     assert.equal(settings.bracketPairs[1].openCharacter, "[");
-    //     assert.equal(settings.bracketPairs[1].closeCharacter, "]");
-    //     assert.equal(settings.bracketPairs[2].openCharacter, "{");
-    //     assert.equal(settings.bracketPairs[2].closeCharacter, "}");
-
-    //     assert.equal(settings.bracketPairs[0].colors[0], "Gold");
-    //     assert.equal(settings.bracketPairs[0].colors[1], "Orchid");
-    //     assert.equal(settings.bracketPairs[0].colors[2], "LightSkyBlue");
-    //     assert.equal(settings.bracketPairs[1].colors[0], "Gold");
-    //     assert.equal(settings.bracketPairs[1].colors[1], "Orchid");
-    //     assert.equal(settings.bracketPairs[1].colors[2], "LightSkyBlue");
-    //     assert.equal(settings.bracketPairs[2].colors[0], "Gold");
-    //     assert.equal(settings.bracketPairs[2].colors[1], "Orchid");
-    //     assert.equal(settings.bracketPairs[2].colors[2], "LightSkyBlue");
-
-    //     assert.equal(settings.bracketPairs[0].orphanColor, "Red");
-    //     assert.equal(settings.bracketPairs[1].orphanColor, "Red");
-    //     assert.equal(settings.bracketPairs[2].orphanColor, "Red");
-    // });
 });
 
 suite("Consecutive Coloring Test", () => {

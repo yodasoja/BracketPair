@@ -6,30 +6,23 @@ import ColorIndexes from "./colorIndexes";
 import ColorMode from './colorMode';
 import SingularIndex from './singularIndex';
 import MultipleIndexes from './MultipleIndexes';
-import * as assert from 'assert';
 
 export default class BracketState {
     protected readonly settings: Settings;
     protected previousBracketColor = "";
     protected colorIndexes: ColorIndexes;
 
-    constructor(settings: Settings, colorIndexes?: ColorIndexes, previousBracketColor?: string) {
+    constructor(
+        settings: Settings,
+        previousState?: {
+            colorIndexes: ColorIndexes,
+            bracketColor: string
+        }) {
         this.settings = settings;
 
-        // TODO Optional values are tightly coupled, should be all or nothing. Find a better way of doing this.
-        assert((
-            previousBracketColor !== undefined &&
-            colorIndexes !== undefined)
-            ||
-            (previousBracketColor === undefined &&
-                colorIndexes === undefined));
-
-        if (previousBracketColor !== undefined) {
-            this.previousBracketColor = previousBracketColor;
-        }
-
-        if (colorIndexes !== undefined) {
-            this.colorIndexes = colorIndexes;
+        if (previousState !== undefined) {
+            this.previousBracketColor = previousState.bracketColor;
+            this.colorIndexes = previousState.colorIndexes;
         }
         else {
             switch (settings.colorMode) {
@@ -82,6 +75,11 @@ export default class BracketState {
     }
 
     public deepCopy() {
-        return new BracketState(this.settings, this.colorIndexes.deepCopy(), this.previousBracketColor);
+        return new BracketState(
+            this.settings,
+            {
+                colorIndexes: this.colorIndexes.deepCopy(),
+                bracketColor: this.previousBracketColor
+            });
     }
 }

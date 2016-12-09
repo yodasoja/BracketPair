@@ -1,7 +1,6 @@
 'use strict';
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./colorIndexes";
-import * as assert from 'assert';
 import Settings from "./settings";
 
 export default class MultipleIndexes implements ColorIndexes {
@@ -9,31 +8,22 @@ export default class MultipleIndexes implements ColorIndexes {
     private previousOpenBracketColorIndexes: { [character: string]: number; } = {};
     private readonly settings: Settings;
 
-    constructor(settings: Settings, currentOpenBracketColorIndexes?: { [character: string]: number[]; }, previousOpenBracketColorIndexes?: { [character: string]: number; }) {
+    constructor(
+        settings: Settings,
+        previousState?: {
+            currentOpenBracketColorIndexes: { [character: string]: number[]; },
+            previousOpenBracketColorIndexes: { [character: string]: number; }
+        }) {
         this.settings = settings;
 
-        // TODO Optional values are tightly coupled, should be all or nothing. Find a better way of doing this.
-        assert((
-            currentOpenBracketColorIndexes !== undefined &&
-            previousOpenBracketColorIndexes !== undefined)
-            ||
-            (currentOpenBracketColorIndexes === undefined &&
-                previousOpenBracketColorIndexes === undefined));
+        if (previousState !== undefined) {
+            this.currentOpenBracketColorIndexes = previousState.currentOpenBracketColorIndexes;
+            this.previousOpenBracketColorIndexes = previousState.previousOpenBracketColorIndexes;
 
-        if (currentOpenBracketColorIndexes !== undefined) {
-            this.currentOpenBracketColorIndexes = currentOpenBracketColorIndexes;
         }
         else {
             settings.bracketPairs.forEach(bracketPair => {
                 this.currentOpenBracketColorIndexes[bracketPair.openCharacter] = [];
-            });
-        }
-
-        if (previousOpenBracketColorIndexes !== undefined) {
-            this.previousOpenBracketColorIndexes = previousOpenBracketColorIndexes;
-        }
-        else {
-            settings.bracketPairs.forEach(bracketPair => {
                 this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = -1;
             });
         }
@@ -78,7 +68,9 @@ export default class MultipleIndexes implements ColorIndexes {
 
         return new MultipleIndexes(
             this.settings,
-            bracketColorIndexesCopy,
-            previousOpenBracketIndexesCopy);
+            {
+                currentOpenBracketColorIndexes: bracketColorIndexesCopy,
+                previousOpenBracketColorIndexes: previousOpenBracketIndexesCopy
+            });
     }
 }
