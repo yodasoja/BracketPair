@@ -6,7 +6,7 @@ import BracketPair from "./bracketPair";
 export default class IndependentBracketState implements BracketState {
     private readonly settings: Settings;
     private bracketColorIndexes: { [character: string]: number[]; } = {};
-    previousOpenBracketIndexes: { [character: string]: number; } = {};
+    private previousOpenBracketIndexes: { [character: string]: number; } = {};
     private previousBracketColor = "";
 
     constructor(
@@ -70,7 +70,6 @@ export default class IndependentBracketState implements BracketState {
 
         let color = bracketPair.colors[colorIndex];
 
-        // Duplicate 2
         if (this.settings.forceUniqueOpeningColor && color === this.previousBracketColor) {
             colorIndex = (colorIndex + 1) % bracketPair.colors.length;
             color = bracketPair.colors[colorIndex];
@@ -80,13 +79,11 @@ export default class IndependentBracketState implements BracketState {
         return colorIndex;
     };
 
-    // Duplicate 3
     setColorIndex(bracketPair: BracketPair, colorIndex: number): void {
         this.bracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
         this.previousOpenBracketIndexes[bracketPair.orphanColor] = colorIndex;
     }
 
-    // Duplicate 1
     popColor(bracketPair: BracketPair): string {
         let colorIndex = this.bracketColorIndexes[bracketPair.openCharacter].pop();
         let color: string;

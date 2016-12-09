@@ -5,28 +5,23 @@ import BracketPair from "./bracketPair";
 
 export default class ConsecutiveBracketState implements BracketState {
     private readonly settings: Settings;
-    private previousOpenConsecutiveBracketIndex: number = -1;
-    private bracketColorIndexes: { [character: string]: number[]; } = {};
+    private bracketColorIndexes: number[] = [];
+    private lastColorIndex: number = -1;
     private previousBracketColor = "";
 
     constructor(
         settings: Settings,
-        previousOpenConsecutiveBracketIndex?: number,
-        bracketColorIndexes?: { [character: string]: number[]; },
+        lastColorIndex?: number,
+        bracketColorIndexes?: number[],
         previousBracketColor?: string) {
         this.settings = settings;
 
-        if (previousOpenConsecutiveBracketIndex !== undefined) {
-            this.previousOpenConsecutiveBracketIndex = previousOpenConsecutiveBracketIndex;
+        if (lastColorIndex !== undefined) {
+            this.lastColorIndex = lastColorIndex;
         }
 
         if (bracketColorIndexes !== undefined) {
             this.bracketColorIndexes = bracketColorIndexes;
-        }
-        else {
-            this.settings.bracketPairs.forEach(element => {
-                this.bracketColorIndexes[element.openCharacter] = [];
-            });
         }
 
         if (previousBracketColor !== undefined) {
@@ -35,16 +30,10 @@ export default class ConsecutiveBracketState implements BracketState {
     }
 
     deepCopy(): BracketState {
-        let bracketColorIndexesCopy: { [character: string]: number[]; } = {};
-
-        Object.keys(this.bracketColorIndexes).forEach(key => {
-            bracketColorIndexesCopy[key] = this.bracketColorIndexes[key].slice();
-        });
-
         return new ConsecutiveBracketState(
-            this.settings, 
-            this.previousOpenConsecutiveBracketIndex, 
-            bracketColorIndexesCopy, 
+            this.settings,
+            this.lastColorIndex,
+            this.bracketColorIndexes.slice(),
             this.previousBracketColor);
     }
 
@@ -52,19 +41,14 @@ export default class ConsecutiveBracketState implements BracketState {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
-            colorIndex = (this.previousOpenConsecutiveBracketIndex + 1) % bracketPair.colors.length;
+            colorIndex = (this.lastColorIndex + 1) % bracketPair.colors.length;
         }
         else {
-            let unmatchedOpenBracketCount = 0;
-            Object.keys(this.bracketColorIndexes).forEach(key => {
-                unmatchedOpenBracketCount += this.bracketColorIndexes[key].length;
-            });
-            colorIndex = unmatchedOpenBracketCount % bracketPair.colors.length;
+            colorIndex = this.bracketColorIndexes.length % bracketPair.colors.length;
         }
 
         let color = bracketPair.colors[colorIndex];
 
-        // Duplicate 2
         if (this.settings.forceUniqueOpeningColor && color === this.previousBracketColor) {
             colorIndex = (colorIndex + 1) % bracketPair.colors.length;
             color = bracketPair.colors[colorIndex];
@@ -74,15 +58,13 @@ export default class ConsecutiveBracketState implements BracketState {
         return colorIndex;
     };
 
-    // Duplicate 3
     setColorIndex(bracketPair: BracketPair, colorIndex: number): void {
-        this.bracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
-        this.previousOpenConsecutiveBracketIndex = colorIndex;
+        this.bracketColorIndexes.push(colorIndex);
+        this.lastColorIndex = colorIndex;
     }
 
-    // Duplicate 1
     popColor(bracketPair: BracketPair): string {
-        let colorIndex = this.bracketColorIndexes[bracketPair.openCharacter].pop();
+        let colorIndex = this.bracketColorIndexes.pop();
         let color: string;
 
         if (colorIndex !== undefined) {
