@@ -2,33 +2,54 @@
 
 import BracketPair from "./bracketPair";
 import Settings from "./settings";
+import ColorIndexes from "./colorIndexes";
+import ColorMode from './colorMode';
+import ConsecutiveColorIndexes from './consecutiveColorIndexes';
+import IndependentColorIndexes from './independentColorIndexes';
+import * as assert from 'assert';
 
-
-abstract class BracketState {
+export default class BracketState {
     protected readonly settings: Settings;
     protected previousBracketColor = "";
+    protected colorIndexes: ColorIndexes;
 
-    constructor(settings: Settings) {
+    constructor(settings: Settings, colorIndexes?: ColorIndexes, previousBracketColor?: string) {
         this.settings = settings;
+
+        // TODO Optional values are tightly coupled, should be all or nothing. Find a better way of doing this.
+        assert((
+            previousBracketColor !== undefined &&
+            colorIndexes !== undefined)
+            ||
+            (previousBracketColor === undefined &&
+                colorIndexes === undefined));
+
+        if (previousBracketColor !== undefined) {
+            this.previousBracketColor = previousBracketColor;
+        }
+
+        if (colorIndexes !== undefined) {
+            this.colorIndexes = colorIndexes;
+        }
+        else {
+            switch (settings.colorMode) {
+                case ColorMode.Consecutive: this.colorIndexes = new ConsecutiveColorIndexes();
+                    break;
+                case ColorMode.Independent: this.colorIndexes = new IndependentColorIndexes(settings);
+                    break;
+                default: throw new RangeError("Not implemented enum value");
+            }
+        }
     }
-
-    abstract deepCopy(): BracketState;
-
-    protected abstract getPreviousColorIndex(bracketPair: BracketPair): number;
-    protected abstract setPreviousColorIndex(bracketPair: BracketPair, colorIndex: number): void;
-    protected abstract getCurrentColorIndex(bracketPair: BracketPair): number;
-    protected abstract setCurrentColorIndex(bracketPair: BracketPair, colorIndex: number): void;
-    protected abstract getAmountOfOpenBrackets(bracketPair: BracketPair): number;
-    protected abstract popCurrentColorIndex(bracketPair: BracketPair): number | undefined;
 
     public getOpenBracketColor(bracketPair: BracketPair): string {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
-            colorIndex = (this.getPreviousColorIndex(bracketPair) + 1) % bracketPair.colors.length;
+            colorIndex = (this.colorIndexes.getPrevious(bracketPair) + 1) % bracketPair.colors.length;
         }
         else {
-            colorIndex = this.getAmountOfOpenBrackets(bracketPair) % bracketPair.colors.length;
+            colorIndex = this.colorIndexes.getCurrentLength(bracketPair) % bracketPair.colors.length;
         }
 
         let color = bracketPair.colors[colorIndex];
@@ -37,16 +58,16 @@ abstract class BracketState {
             colorIndex = (colorIndex + 1) % bracketPair.colors.length;
             color = bracketPair.colors[colorIndex];
         }
-        this.previousBracketColor = color;
 
-        this.setCurrentColorIndex(bracketPair, colorIndex);
-        this.setPreviousColorIndex(bracketPair, colorIndex);
+        this.previousBracketColor = color;
+        this.colorIndexes.setCurrent(bracketPair, colorIndex);
+        this.colorIndexes.setPrevious(bracketPair, colorIndex);
 
         return color;
     };
 
     public getCloseBracketColor(bracketPair: BracketPair): string {
-        let colorIndex = this.popCurrentColorIndex(bracketPair);
+        let colorIndex = this.colorIndexes.popCurrent(bracketPair);
         let color: string;
         if (colorIndex !== undefined) {
             color = bracketPair.colors[colorIndex];
@@ -56,8 +77,11 @@ abstract class BracketState {
         }
 
         this.previousBracketColor = color;
+
         return color;
     }
-}
 
-export default BracketState;
+    public deepCopy() {
+        return new BracketState(this.settings, this.colorIndexes.deepCopy(), this.previousBracketColor);
+    }
+}

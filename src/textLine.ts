@@ -2,10 +2,7 @@
 
 import * as vscode from 'vscode';
 import Settings from "./settings";
-import ColorMode from './colorMode';
 import BracketState from './bracketState';
-import IndependentBracketState from "./independentBracketState";
-import ConsecutiveBracketState from "./consecutiveBracketState";
 
 export default class TextLine {
     bracketState: BracketState;
@@ -20,13 +17,7 @@ export default class TextLine {
             this.bracketState = previousLine.bracketState.deepCopy();
         }
         else {
-            switch (settings.colorMode) {
-                case ColorMode.Consecutive: this.bracketState = new ConsecutiveBracketState(settings);
-                    break;
-                case ColorMode.Independent: this.bracketState = new IndependentBracketState(settings);
-                    break;
-                default: throw new RangeError("Not implemented enum value");
-            }
+            this.bracketState = new BracketState(settings);
         }
     }
 
