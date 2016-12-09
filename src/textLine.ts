@@ -35,9 +35,7 @@ export default class TextLine {
             // If open bracket matches
             if (bracketPair.openCharacter === bracket) {
 
-                let colorIndex = this.bracketState.getColorIndex(bracketPair);
-
-                let color = bracketPair.colors[colorIndex];
+                let color = this.bracketState.getColor(bracketPair);
 
                 let colorRanges = this.colorRanges.get(color);
 
@@ -48,7 +46,6 @@ export default class TextLine {
                     this.colorRanges.set(color, [range]);
                 }
 
-                this.bracketState.setColorIndex(bracketPair, colorIndex);
                 return;
             }
             else if (bracketPair.closeCharacter === bracket) {

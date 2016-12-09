@@ -4,8 +4,7 @@ import BracketPair from "./bracketPair";
 
 interface BracketState {
     deepCopy(): BracketState;
-    getColorIndex(bracketPair: BracketPair): number;
-    setColorIndex(bracketPair: BracketPair, colorIndex: number): void;
+    getColor(bracketPair: BracketPair): string;
     popColor(bracketPair: BracketPair): string;
 }
 

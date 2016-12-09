@@ -37,7 +37,7 @@ export default class ConsecutiveBracketState implements BracketState {
             this.previousBracketColor);
     }
 
-    getColorIndex(bracketPair: BracketPair): number {
+    getColor(bracketPair: BracketPair): string {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
@@ -55,13 +55,11 @@ export default class ConsecutiveBracketState implements BracketState {
         }
         this.previousBracketColor = color;
 
-        return colorIndex;
-    };
-
-    setColorIndex(bracketPair: BracketPair, colorIndex: number): void {
         this.bracketColorIndexes.push(colorIndex);
         this.lastColorIndex = colorIndex;
-    }
+
+        return color;
+    };
 
     popColor(bracketPair: BracketPair): string {
         let colorIndex = this.bracketColorIndexes.pop();

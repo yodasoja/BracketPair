@@ -59,7 +59,7 @@ export default class IndependentBracketState implements BracketState {
             this.previousBracketColor);
     }
 
-    getColorIndex(bracketPair: BracketPair): number {
+    getColor(bracketPair: BracketPair): string {
         let colorIndex: number;
         if (this.settings.forceIterationColorCycle) {
             colorIndex = (this.previousOpenBracketIndexes[bracketPair.openCharacter] + 1) % bracketPair.colors.length;
@@ -76,13 +76,11 @@ export default class IndependentBracketState implements BracketState {
         }
         this.previousBracketColor = color;
 
-        return colorIndex;
-    };
-
-    setColorIndex(bracketPair: BracketPair, colorIndex: number): void {
         this.bracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
         this.previousOpenBracketIndexes[bracketPair.orphanColor] = colorIndex;
-    }
+
+        return color;
+    };
 
     popColor(bracketPair: BracketPair): string {
         let colorIndex = this.bracketColorIndexes[bracketPair.openCharacter].pop();
