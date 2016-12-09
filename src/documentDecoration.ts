@@ -37,10 +37,17 @@ export default class DocumentDecoration {
             return this.lines[index];
         }
         else {
+            if (this.lines.length === 0) {
+                this.lines.push(new TextLine(this.settings));
+            }
+
             for (let i = this.lines.length; i <= index; i++) {
-                let newLine = new TextLine(this.settings, this.lines[i - 1]);
+                let previousLine = this.lines[this.lines.length - 1];
+                let newLine = previousLine.clone();
+
                 this.lines.push(newLine);
             }
+
             let lineToReturn = this.lines[this.lines.length - 1];
             return lineToReturn;
         }

@@ -5,26 +5,30 @@ import Settings from "./settings";
 import BracketState from './bracketState';
 
 export default class TextLine {
-    bracketState: BracketState;
+    private lineState: BracketState;
     colorRanges = new Map<string, vscode.Range[]>();
     private readonly settings: Settings;
 
-    constructor(settings: Settings, previousLine?: TextLine) {
+    constructor(settings: Settings, bracketState?: BracketState) {
         this.settings = settings;
 
-        if (previousLine !== undefined) {
-            // Mantain previous lines bracket count, so if lines are invalidated, not everything has to be recalculated
-            this.bracketState = previousLine.bracketState.deepCopy();
+        if (bracketState !== undefined) {
+            this.lineState = bracketState;
         }
         else {
-            this.bracketState = new BracketState(settings);
+            this.lineState = new BracketState(settings);
         }
+    }
+
+    // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
+    clone(): TextLine {
+        return new TextLine(this.settings, this.lineState.clone());
     }
 
     addBracket(bracket: string, range: vscode.Range) {
         for (let bracketPair of this.settings.bracketPairs) {
             if (bracketPair.openCharacter === bracket) {
-                let color = this.bracketState.getOpenBracketColor(bracketPair);
+                let color = this.lineState.getOpenBracketColor(bracketPair);
 
                 let colorRanges = this.colorRanges.get(color);
 
@@ -37,7 +41,7 @@ export default class TextLine {
                 return;
             }
             else if (bracketPair.closeCharacter === bracket) {
-                let color = this.bracketState.getCloseBracketColor(bracketPair);
+                let color = this.lineState.getCloseBracketColor(bracketPair);
 
                 let colorRanges = this.colorRanges.get(color);
                 if (colorRanges !== undefined) {

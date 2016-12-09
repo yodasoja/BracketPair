@@ -74,7 +74,7 @@ export default class BracketState {
         return color;
     }
 
-    public deepCopy() {
+    public clone() {
         return new BracketState(
             this.settings,
             {
