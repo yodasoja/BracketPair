@@ -80,6 +80,10 @@ Independent brackets allow each bracket type to use its own color pool
 
 ## Release Notes
 
+### 0.2.1
+forceUniqueOpeningColor now works with independent color pools  
+forceIterationColorCycle now works with independent color pools  
+
 ### 0.2.0
 Added forceUniqueOpeningColor  
 Added forceIterationColorCycle
