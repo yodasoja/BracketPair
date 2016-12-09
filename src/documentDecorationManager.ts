@@ -11,6 +11,14 @@ export default class DocumentDecorationManager {
         this.settings = settings !== undefined ? settings : new Settings();
     }
 
+    public updateVisibleEditors() {
+        vscode.window.visibleTextEditors.forEach(editor => {
+            if (editor) {
+                this.updateDecorations(editor.document);
+            }
+        });
+    }
+
     public updateDecorations(document: vscode.TextDocument) {
         this.getDocumentDecorations(document).triggerUpdateDecorations();
     }

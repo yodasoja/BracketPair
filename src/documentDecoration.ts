@@ -4,7 +4,7 @@ import TextLine from "./textLine";
 import Settings from "./settings";
 
 export default class DocumentDecoration {
-    private timeout: NodeJS.Timer | null;
+    private updateDecorationTimeout: NodeJS.Timer | null;
     // This program caches non-changes lines, and will only analyze linenumbers including & above a changed line
     private lineToUpdateWhenTimeoutEnds = Infinity;
     private lines: TextLine[] = [];
@@ -51,12 +51,12 @@ export default class DocumentDecoration {
             // Have to keep a reference to this or everything breaks
             let self = this;
 
-            if (this.timeout) {
-                clearTimeout(this.timeout);
+            if (this.updateDecorationTimeout) {
+                clearTimeout(this.updateDecorationTimeout);
             }
 
             this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, lineNumber);
-            this.timeout = setTimeout(function () {
+            this.updateDecorationTimeout = setTimeout(function () {
                 self.updateDecorations();
                 self.lineToUpdateWhenTimeoutEnds = Infinity;
             }, this.settings.timeOutLength);
