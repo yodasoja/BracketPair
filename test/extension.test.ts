@@ -4,22 +4,22 @@
 //
 
 // The module 'assert' provides assertion methods from node
-import * as assert from 'assert';
+import * as assert from "assert";
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import * as vscode from 'vscode';
-import * as myExtension from '../src/extension';
-import Settings from "../src/settings";
+import * as vscode from "vscode";
 import ColorMode from "../src/colorMode";
 import DocumentDecoration from "../src/DocumentDecoration";
+import * as myExtension from "../src/extension";
+import Settings from "../src/settings";
 
 // Defines a Mocha test suite to group tests of similar kind together
 suite("Settings Tests", () => {
 
     // Defines a Mocha unit test
     test("bracketPairColorizer.timeOut", () => {
-        let settings = new Settings(0);
+        const settings = new Settings(0);
         assert.equal(settings.timeOutLength, 0);
     });
 
@@ -48,9 +48,9 @@ suite("Settings Tests", () => {
     });
 
     test("bracketPairColorizer.consecutivePairColors", () => {
-        let consecutiveSettings: [{}] = ["ab", "cd", ["color0", "color1"], "orphanColor"];
+        const consecutiveSettings: [{}] = ["ab", "cd", ["color0", "color1"], "orphanColor"];
 
-        let settings = new Settings(undefined, undefined, undefined, ColorMode.Consecutive, consecutiveSettings);
+        const settings = new Settings(undefined, undefined, undefined, ColorMode.Consecutive, consecutiveSettings);
         assert.equal(settings.colorMode, ColorMode.Consecutive);
 
         assert.equal(settings.bracketPairs[0].openCharacter, "a");
@@ -68,7 +68,7 @@ suite("Settings Tests", () => {
     });
 
     test("bracketPairColorizer.independentPairColors", () => {
-        let independentSettings: [[{}]] =
+        const independentSettings: [[{}]] =
             [
                 [
                     "ab",
@@ -76,7 +76,7 @@ suite("Settings Tests", () => {
                         "color0",
                         "color1",
                     ],
-                    "orphanColor0"
+                    "orphanColor0",
                 ],
                 [
                     "cd",
@@ -84,11 +84,11 @@ suite("Settings Tests", () => {
                         "color2",
                         "color3",
                     ],
-                    "orphanColor1"
-                ]
+                    "orphanColor1",
+                ],
             ];
 
-        let settings = new Settings(0, false, false, ColorMode.Independent, undefined, independentSettings);
+        const settings = new Settings(0, false, false, ColorMode.Independent, undefined, independentSettings);
         assert.equal(settings.colorMode, ColorMode.Independent);
         assert.equal(settings.bracketPairs[0].openCharacter, "a");
         assert.equal(settings.bracketPairs[0].closeCharacter, "b");
@@ -106,7 +106,7 @@ suite("Settings Tests", () => {
 });
 
 suite("Consecutive Coloring Test", () => {
-    let settings = new Settings(0, false, false, ColorMode.Consecutive,
+    const settings = new Settings(0, false, false, ColorMode.Consecutive,
         [
             "()",
             "[]",
@@ -114,21 +114,21 @@ suite("Consecutive Coloring Test", () => {
             [
                 "Gold",
                 "Orchid",
-                "LightSkyBlue"
+                "LightSkyBlue",
             ],
-            "Red"
+            "Red",
         ]);
 
     test("First Line Document Consecutive Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line0 = document.getLine(0);
+            const line0 = document.getLine(0);
 
-            let colorRangesError = line0.colorRanges.get("Red");
+            const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line0.colorRanges.get("Gold");
+            const colorRangesGold = line0.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 2);
                 assert(colorRangesGold[0].start.line === 0 &&
@@ -145,7 +145,7 @@ suite("Consecutive Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line0.colorRanges.get("Orchid");
+            const colorRangesOrchid = line0.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 0 &&
@@ -162,7 +162,7 @@ suite("Consecutive Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 2);
                 assert(colorRangesLightSkyBlue[0].start.line === 0 &&
@@ -183,14 +183,14 @@ suite("Consecutive Coloring Test", () => {
 
     test("Second Line Document Consecutive Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line1 = document.getLine(1);
+            const line1 = document.getLine(1);
 
-            let colorRangesError = line1.colorRanges.get("Red");
+            const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line1.colorRanges.get("Gold");
+            const colorRangesGold = line1.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 1 &&
@@ -202,7 +202,7 @@ suite("Consecutive Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line1.colorRanges.get("Orchid");
+            const colorRangesOrchid = line1.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 1);
                 assert(colorRangesOrchid[0].start.line === 1 &&
@@ -214,7 +214,7 @@ suite("Consecutive Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 1);
                 assert(colorRangesLightSkyBlue[0].start.line === 1 &&
@@ -230,14 +230,14 @@ suite("Consecutive Coloring Test", () => {
 
     test("Third Line Document Consecutive Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line2 = document.getLine(2);
+            const line2 = document.getLine(2);
 
-            let colorRangesError = line2.colorRanges.get("Red");
+            const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line2.colorRanges.get("Gold");
+            const colorRangesGold = line2.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 2 &&
@@ -249,7 +249,7 @@ suite("Consecutive Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line2.colorRanges.get("Orchid");
+            const colorRangesOrchid = line2.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 1);
                 assert(colorRangesOrchid[0].start.line === 2 &&
@@ -261,7 +261,7 @@ suite("Consecutive Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 1);
                 assert(colorRangesLightSkyBlue[0].start.line === 2 &&
@@ -277,11 +277,11 @@ suite("Consecutive Coloring Test", () => {
 
     test("Fourth Line Document Consecutive Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line3 = document.getLine(3);
+            const line3 = document.getLine(3);
 
-            let colorRangesError = line3.colorRanges.get("Red");
+            const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
                 assert.equal(colorRangesError.length, 1);
             }
@@ -289,27 +289,27 @@ suite("Consecutive Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesGold = line3.colorRanges.get("Gold");
+            const colorRangesGold = line3.colorRanges.get("Gold");
             assert.equal(colorRangesGold, undefined);
 
-            let colorRangesOrchid = line3.colorRanges.get("Orchid");
+            const colorRangesOrchid = line3.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-            let colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Fifth Line Document Consecutive Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line4 = document.getLine(4);
+            const line4 = document.getLine(4);
 
-            let colorRangesError = line4.colorRanges.get("Red");
+            const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line4.colorRanges.get("Gold");
+            const colorRangesGold = line4.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 6);
             }
@@ -317,17 +317,17 @@ suite("Consecutive Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line4.colorRanges.get("Orchid");
+            const colorRangesOrchid = line4.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-            let colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 });
 
 suite("Consecutive Coloring Test Unique Opening Color", () => {
-    let settings = new Settings(0, true, false, ColorMode.Consecutive,
+    const settings = new Settings(0, true, false, ColorMode.Consecutive,
         [
             "()",
             "[]",
@@ -335,21 +335,21 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
             [
                 "Gold",
                 "Orchid",
-                "LightSkyBlue"
+                "LightSkyBlue",
             ],
-            "Red"
+            "Red",
         ]);
 
     test("First Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line0 = document.getLine(0);
+            const line0 = document.getLine(0);
 
-            let colorRangesError = line0.colorRanges.get("Red");
+            const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line0.colorRanges.get("Gold");
+            const colorRangesGold = line0.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 2);
                 assert(colorRangesGold[0].start.line === 0 &&
@@ -366,7 +366,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line0.colorRanges.get("Orchid");
+            const colorRangesOrchid = line0.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 0 &&
@@ -383,7 +383,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 2);
                 assert(colorRangesLightSkyBlue[0].start.line === 0 &&
@@ -404,14 +404,14 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Second Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line1 = document.getLine(1);
+            const line1 = document.getLine(1);
 
-            let colorRangesError = line1.colorRanges.get("Red");
+            const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line1.colorRanges.get("Gold");
+            const colorRangesGold = line1.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 1 &&
@@ -423,7 +423,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line1.colorRanges.get("Orchid");
+            const colorRangesOrchid = line1.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 1);
                 assert(colorRangesOrchid[0].start.line === 1 &&
@@ -435,7 +435,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 1);
                 assert(colorRangesLightSkyBlue[0].start.line === 1 &&
@@ -451,14 +451,14 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Third Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line2 = document.getLine(2);
+            const line2 = document.getLine(2);
 
-            let colorRangesError = line2.colorRanges.get("Red");
+            const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line2.colorRanges.get("Gold");
+            const colorRangesGold = line2.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 2 &&
@@ -470,7 +470,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line2.colorRanges.get("Orchid");
+            const colorRangesOrchid = line2.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 1);
                 assert(colorRangesOrchid[0].start.line === 2 &&
@@ -482,7 +482,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 1);
                 assert(colorRangesLightSkyBlue[0].start.line === 2 &&
@@ -498,11 +498,11 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Fourth Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line3 = document.getLine(3);
+            const line3 = document.getLine(3);
 
-            let colorRangesError = line3.colorRanges.get("Red");
+            const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
                 assert.equal(colorRangesError.length, 1);
             }
@@ -510,27 +510,27 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesGold = line3.colorRanges.get("Gold");
+            const colorRangesGold = line3.colorRanges.get("Gold");
             assert.equal(colorRangesGold, undefined);
 
-            let colorRangesOrchid = line3.colorRanges.get("Orchid");
+            const colorRangesOrchid = line3.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-            let colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Fifth Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line4 = document.getLine(4);
+            const line4 = document.getLine(4);
 
-            let colorRangesError = line4.colorRanges.get("Red");
+            const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line4.colorRanges.get("Gold");
+            const colorRangesGold = line4.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 4);
                 assert(colorRangesGold[0].start.line === 4 &&
@@ -557,7 +557,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line4.colorRanges.get("Orchid");
+            const colorRangesOrchid = line4.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 4 &&
@@ -574,15 +574,14 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-
-            let colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 });
 
 suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
-    let settings = new Settings(0, false, true, ColorMode.Consecutive,
+    const settings = new Settings(0, false, true, ColorMode.Consecutive,
         [
             "()",
             "[]",
@@ -590,21 +589,21 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
             [
                 "Gold",
                 "Orchid",
-                "LightSkyBlue"
+                "LightSkyBlue",
             ],
-            "Red"
+            "Red",
         ]);
 
     test("First Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line0 = document.getLine(0);
+            const line0 = document.getLine(0);
 
-            let colorRangesError = line0.colorRanges.get("Red");
+            const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line0.colorRanges.get("Gold");
+            const colorRangesGold = line0.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 2);
                 assert(colorRangesGold[0].start.line === 0 &&
@@ -621,7 +620,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line0.colorRanges.get("Orchid");
+            const colorRangesOrchid = line0.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 0 &&
@@ -638,7 +637,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 2);
                 assert(colorRangesLightSkyBlue[0].start.line === 0 &&
@@ -659,14 +658,14 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Second Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line1 = document.getLine(1);
+            const line1 = document.getLine(1);
 
-            let colorRangesError = line1.colorRanges.get("Red");
+            const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line1.colorRanges.get("Gold");
+            const colorRangesGold = line1.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 1 &&
@@ -678,7 +677,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line1.colorRanges.get("Orchid");
+            const colorRangesOrchid = line1.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 1);
                 assert(colorRangesOrchid[0].start.line === 1 &&
@@ -690,7 +689,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 1);
                 assert(colorRangesLightSkyBlue[0].start.line === 1 &&
@@ -706,14 +705,14 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Third Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line2 = document.getLine(2);
+            const line2 = document.getLine(2);
 
-            let colorRangesError = line2.colorRanges.get("Red");
+            const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line2.colorRanges.get("Gold");
+            const colorRangesGold = line2.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 2 &&
@@ -725,7 +724,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line2.colorRanges.get("Orchid");
+            const colorRangesOrchid = line2.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 1);
                 assert(colorRangesOrchid[0].start.line === 2 &&
@@ -737,7 +736,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 1);
                 assert(colorRangesLightSkyBlue[0].start.line === 2 &&
@@ -753,11 +752,11 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Fourth Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line3 = document.getLine(3);
+            const line3 = document.getLine(3);
 
-            let colorRangesError = line3.colorRanges.get("Red");
+            const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
                 assert.equal(colorRangesError.length, 1);
             }
@@ -765,27 +764,27 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-            let colorRangesGold = line3.colorRanges.get("Gold");
+            const colorRangesGold = line3.colorRanges.get("Gold");
             assert.equal(colorRangesGold, undefined);
 
-            let colorRangesOrchid = line3.colorRanges.get("Orchid");
+            const colorRangesOrchid = line3.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-            let colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Fifth Line Document Consecutive Coloring Force Iteration Color Cycle", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line4 = document.getLine(4);
+            const line4 = document.getLine(4);
 
-            let colorRangesError = line4.colorRanges.get("Red");
+            const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line4.colorRanges.get("Gold");
+            const colorRangesGold = line4.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 2);
                 assert(colorRangesGold[0].start.line === 4 &&
@@ -802,7 +801,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line4.colorRanges.get("Orchid");
+            const colorRangesOrchid = line4.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 4 &&
@@ -819,8 +818,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
                 assert(false);
             }
 
-
-            let colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 2);
                 assert(colorRangesLightSkyBlue[0].start.line === 4 &&
@@ -841,7 +839,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 });
 
 suite("Independent Coloring Test", () => {
-    let settings = new Settings(0, false, false, ColorMode.Independent,
+    const settings = new Settings(0, false, false, ColorMode.Independent,
         [
             "()",
             "[]",
@@ -849,21 +847,21 @@ suite("Independent Coloring Test", () => {
             [
                 "Gold",
                 "Orchid",
-                "LightSkyBlue"
+                "LightSkyBlue",
             ],
-            "Red"
+            "Red",
         ]);
 
     test("First Line Document Independent Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line0 = document.getLine(0);
+            const line0 = document.getLine(0);
 
-            let colorRangesError = line0.colorRanges.get("Red");
+            const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line0.colorRanges.get("Gold");
+            const colorRangesGold = line0.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 2);
                 assert(colorRangesGold[0].start.line === 0 &&
@@ -880,7 +878,7 @@ suite("Independent Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line0.colorRanges.get("Orchid");
+            const colorRangesOrchid = line0.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 0 &&
@@ -897,7 +895,7 @@ suite("Independent Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 2);
                 assert(colorRangesLightSkyBlue[0].start.line === 0 &&
@@ -918,14 +916,14 @@ suite("Independent Coloring Test", () => {
 
     test("Second Line Document Independent Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line1 = document.getLine(1);
+            const line1 = document.getLine(1);
 
-            let colorRangesError = line1.colorRanges.get("Red");
+            const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line1.colorRanges.get("Gold");
+            const colorRangesGold = line1.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 3);
                 assert(colorRangesGold[0].start.line === 1 &&
@@ -947,25 +945,24 @@ suite("Independent Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line1.colorRanges.get("Orchid");
+            const colorRangesOrchid = line1.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-
-            let colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Third Line Document Independent Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line2 = document.getLine(2);
+            const line2 = document.getLine(2);
 
-            let colorRangesError = line2.colorRanges.get("Red");
+            const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line2.colorRanges.get("Gold");
+            const colorRangesGold = line2.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 3);
                 assert(colorRangesGold[0].start.line === 2 &&
@@ -987,22 +984,21 @@ suite("Independent Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line2.colorRanges.get("Orchid");
+            const colorRangesOrchid = line2.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-
-            let colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Fourth Line Document Independent Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line3 = document.getLine(3);
+            const line3 = document.getLine(3);
 
-            let colorRangesError = line3.colorRanges.get("Red");
+            const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
                 assert.equal(colorRangesError.length, 1);
             }
@@ -1010,27 +1006,27 @@ suite("Independent Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesGold = line3.colorRanges.get("Gold");
+            const colorRangesGold = line3.colorRanges.get("Gold");
             assert.equal(colorRangesGold, undefined);
 
-            let colorRangesOrchid = line3.colorRanges.get("Orchid");
+            const colorRangesOrchid = line3.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-            let colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Fifth Line Document Independent Coloring", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line4 = document.getLine(4);
+            const line4 = document.getLine(4);
 
-            let colorRangesError = line4.colorRanges.get("Red");
+            const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line4.colorRanges.get("Gold");
+            const colorRangesGold = line4.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 6);
             }
@@ -1038,17 +1034,17 @@ suite("Independent Coloring Test", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line4.colorRanges.get("Orchid");
+            const colorRangesOrchid = line4.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-            let colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 });
 
 suite("Independent Coloring Test Unique Opening Color", () => {
-    let settings = new Settings(0, true, false, ColorMode.Independent,
+    const settings = new Settings(0, true, false, ColorMode.Independent,
         [
             "()",
             "[]",
@@ -1056,21 +1052,21 @@ suite("Independent Coloring Test Unique Opening Color", () => {
             [
                 "Gold",
                 "Orchid",
-                "LightSkyBlue"
+                "LightSkyBlue",
             ],
-            "Red"
+            "Red",
         ]);
 
     test("First Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line0 = document.getLine(0);
+            const line0 = document.getLine(0);
 
-            let colorRangesError = line0.colorRanges.get("Red");
+            const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line0.colorRanges.get("Gold");
+            const colorRangesGold = line0.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 2);
                 assert(colorRangesGold[0].start.line === 0 &&
@@ -1087,7 +1083,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line0.colorRanges.get("Orchid");
+            const colorRangesOrchid = line0.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 0 &&
@@ -1104,7 +1100,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line0.colorRanges.get("LightSkyBlue");
             if (colorRangesLightSkyBlue !== undefined) {
                 assert.equal(colorRangesLightSkyBlue.length, 2);
                 assert(colorRangesLightSkyBlue[0].start.line === 0 &&
@@ -1125,14 +1121,14 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Second Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line1 = document.getLine(1);
+            const line1 = document.getLine(1);
 
-            let colorRangesError = line1.colorRanges.get("Red");
+            const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line1.colorRanges.get("Gold");
+            const colorRangesGold = line1.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 1 &&
@@ -1144,7 +1140,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line1.colorRanges.get("Orchid");
+            const colorRangesOrchid = line1.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 1 &&
@@ -1161,21 +1157,21 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line1.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Third Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line2 = document.getLine(2);
+            const line2 = document.getLine(2);
 
-            let colorRangesError = line2.colorRanges.get("Red");
+            const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line2.colorRanges.get("Gold");
+            const colorRangesGold = line2.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 1);
                 assert(colorRangesGold[0].start.line === 2 &&
@@ -1187,7 +1183,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line2.colorRanges.get("Orchid");
+            const colorRangesOrchid = line2.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert.equal(colorRangesOrchid.length, 2);
                 assert(colorRangesOrchid[0].start.line === 2 &&
@@ -1204,18 +1200,18 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line2.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Fourth Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line3 = document.getLine(3);
+            const line3 = document.getLine(3);
 
-            let colorRangesError = line3.colorRanges.get("Red");
+            const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
                 assert.equal(colorRangesError.length, 1);
             }
@@ -1223,27 +1219,27 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesGold = line3.colorRanges.get("Gold");
+            const colorRangesGold = line3.colorRanges.get("Gold");
             assert.equal(colorRangesGold, undefined);
 
-            let colorRangesOrchid = line3.colorRanges.get("Orchid");
+            const colorRangesOrchid = line3.colorRanges.get("Orchid");
             assert.equal(colorRangesOrchid, undefined);
 
-            let colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line3.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
 
     test("Fifth Line Document Independent Coloring Unique Opening Color", () => {
         {
-            let document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            let line4 = document.getLine(4);
+            const line4 = document.getLine(4);
 
-            let colorRangesError = line4.colorRanges.get("Red");
+            const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
 
-            let colorRangesGold = line4.colorRanges.get("Gold");
+            const colorRangesGold = line4.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 4);
                 assert(colorRangesGold[0].start.line === 4 &&
@@ -1270,7 +1266,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesOrchid = line4.colorRanges.get("Orchid");
+            const colorRangesOrchid = line4.colorRanges.get("Orchid");
             if (colorRangesOrchid !== undefined) {
                 assert(colorRangesOrchid[0].start.line === 4 &&
                     colorRangesOrchid[0].start.character === 2 &&
@@ -1286,7 +1282,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                 assert(false);
             }
 
-            let colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
+            const colorRangesLightSkyBlue = line4.colorRanges.get("LightSkyBlue");
             assert.equal(colorRangesLightSkyBlue, undefined);
         }
     });
