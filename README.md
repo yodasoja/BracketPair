@@ -80,7 +80,7 @@ Independent brackets allow each bracket type to use its own color pool
 
 ## Release Notes
 
-### 0.2.2
+### 0.3.0
 Fix colorizing all editors, including terminals. Now it will only colorize documents.
 
 ### 0.2.1
