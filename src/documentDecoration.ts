@@ -44,7 +44,6 @@ export default class DocumentDecoration {
 
     public triggerUpdateDecorations(lineNumber: number = 0) {
         if (this.settings.timeOutLength > 0) {
-            // Have to keep a reference to this or everything breaks
 
             if (this.updateDecorationTimeout) {
                 clearTimeout(this.updateDecorationTimeout);
