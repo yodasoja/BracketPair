@@ -2,10 +2,6 @@
 	"extends": "tslint:latest",
 	"rules": {
 		"curly": true,
-		"no-console": [
-			true,
-			"error"
-		],
 		"whitespace": [
 			
 		],

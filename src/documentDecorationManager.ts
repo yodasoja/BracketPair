@@ -29,12 +29,8 @@ export default class DocumentDecorationManager {
         let documentDecorations = this.documents.get(uri);
 
         if (documentDecorations === undefined) {
-            console.log("Creating new document: " + uri);
             documentDecorations = new DocumentDecoration(uri, this.settings);
             this.documents.set(uri, documentDecorations);
-        }
-        else {
-            console.log("Existing document: " + uri);
         }
 
         return documentDecorations;
