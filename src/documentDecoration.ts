@@ -76,7 +76,7 @@ export default class DocumentDecoration {
 
         // One document may be shared by multiple editors (side by side view)
         vscode.window.visibleTextEditors.forEach((editor) => {
-            if (editor.document && this.uri === editor.document.uri.toString()) {
+            if (editor.document && editor.document.lineCount !== 0 && this.uri === editor.document.uri.toString()) {
                 editors.push(editor);
             }
         });
@@ -87,10 +87,6 @@ export default class DocumentDecoration {
 
         // Only have to analyze the first document, since it is shared between the editors
         const document = editors[0].document;
-        if (document.lineCount === 0) {
-            // Sometimes document seems to be empty, just ignore until better solution found
-            return;
-        }
 
         if (lineNumber === undefined) {
             lineNumber = this.lineToUpdateWhenTimeoutEnds;
@@ -103,6 +99,7 @@ export default class DocumentDecoration {
 
         const text = document.getText();
         const regex = new RegExp(this.settings.regexPattern, "g");
+
         regex.lastIndex = document.offsetAt(new vscode.Position(lineNumber, 0));
 
         let match: RegExpExecArray | null;
