@@ -1,7 +1,6 @@
-'use strict';
-import * as vscode from 'vscode';
-import TextLine from "./textLine";
+import * as vscode from "vscode";
 import Settings from "./settings";
+import TextLine from "./textLine";
 
 export default class DocumentDecoration {
     private updateDecorationTimeout: NodeJS.Timer | null;
@@ -16,18 +15,8 @@ export default class DocumentDecoration {
         this.uri = uri;
     }
 
-    onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
+    public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         this.triggerUpdateDecorations(this.getLowestLineNumberChanged(contentChanges));
-    }
-
-    private getLowestLineNumberChanged(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        let lowestLineNumberChanged = Infinity;
-
-        for (let contentChange of contentChanges) {
-            lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
-        }
-
-        return lowestLineNumberChanged;
     }
 
     // Lines are stored in an array, if line is requested outside of array bounds
@@ -42,30 +31,29 @@ export default class DocumentDecoration {
             }
 
             for (let i = this.lines.length; i <= index; i++) {
-                let previousLine = this.lines[this.lines.length - 1];
-                let newLine = previousLine.clone();
+                const previousLine = this.lines[this.lines.length - 1];
+                const newLine = previousLine.clone();
 
                 this.lines.push(newLine);
             }
 
-            let lineToReturn = this.lines[this.lines.length - 1];
+            const lineToReturn = this.lines[this.lines.length - 1];
             return lineToReturn;
         }
     }
 
-    triggerUpdateDecorations(lineNumber: number = 0) {
+    public triggerUpdateDecorations(lineNumber: number = 0) {
         if (this.settings.timeOutLength > 0) {
             // Have to keep a reference to this or everything breaks
-            let self = this;
 
             if (this.updateDecorationTimeout) {
                 clearTimeout(this.updateDecorationTimeout);
             }
 
             this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, lineNumber);
-            this.updateDecorationTimeout = setTimeout(function () {
-                self.updateDecorations();
-                self.lineToUpdateWhenTimeoutEnds = Infinity;
+            this.updateDecorationTimeout = setTimeout(() => {
+                this.updateDecorations();
+                this.lineToUpdateWhenTimeoutEnds = Infinity;
             }, this.settings.timeOutLength);
         }
         else {
@@ -73,11 +61,21 @@ export default class DocumentDecoration {
         }
     }
 
+    private getLowestLineNumberChanged(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
+        let lowestLineNumberChanged = Infinity;
+
+        for (const contentChange of contentChanges) {
+            lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
+        }
+
+        return lowestLineNumberChanged;
+    }
+
     private updateDecorations(lineNumber?: number) {
-        let editors: vscode.TextEditor[] = [];
+        const editors: vscode.TextEditor[] = [];
 
         // One document may be shared by multiple editors (side by side view)
-        vscode.window.visibleTextEditors.forEach(editor => {
+        vscode.window.visibleTextEditors.forEach((editor) => {
             if (editor.document && this.uri === editor.document.uri.toString()) {
                 editors.push(editor);
             }
@@ -88,29 +86,31 @@ export default class DocumentDecoration {
         }
 
         // Only have to analyze the first document, since it is shared between the editors
-        let document = editors[0].document;
+        const document = editors[0].document;
 
         if (lineNumber === undefined) {
             lineNumber = this.lineToUpdateWhenTimeoutEnds;
         }
 
-        let amountToRemove = this.lines.length - lineNumber;
+        const amountToRemove = this.lines.length - lineNumber;
 
         // Remove cached lines that need to be updated
         this.lines.splice(lineNumber, amountToRemove);
 
-        let text = document.getText();
-        let regex = new RegExp(this.settings.regexPattern, "g");
+        const text = document.getText();
+        const regex = new RegExp(this.settings.regexPattern, "g");
+
         regex.lastIndex = document.offsetAt(new vscode.Position(lineNumber, 0));
 
         let match: RegExpExecArray | null;
+        // tslint:disable-next-line:no-conditional-assignment
         while ((match = regex.exec(text)) !== null) {
-            let startPos = document.positionAt(match.index);
+            const startPos = document.positionAt(match.index);
 
-            let endPos = startPos.translate(0, match[0].length);
-            let range = new vscode.Range(startPos, endPos);
+            const endPos = startPos.translate(0, match[0].length);
+            const range = new vscode.Range(startPos, endPos);
 
-            let currentLine = this.getLine(startPos.line);
+            const currentLine = this.getLine(startPos.line);
             currentLine.addBracket(match[0], range);
         }
 
@@ -118,13 +118,13 @@ export default class DocumentDecoration {
     }
 
     private colorDecorations(editors: vscode.TextEditor[]) {
-        let colorMap = new Map<string, vscode.Range[]>();
+        const colorMap = new Map<string, vscode.Range[]>();
 
         // Reduce all the colors/ranges of the lines into a singular map
-        for (let line of this.lines) {
+        for (const line of this.lines) {
             {
-                for (let [color, ranges] of line.colorRanges) {
-                    let existingRanges = colorMap.get(color);
+                for (const [color, ranges] of line.colorRanges) {
+                    const existingRanges = colorMap.get(color);
 
                     if (existingRanges !== undefined) {
                         existingRanges.push(...ranges);
@@ -138,9 +138,9 @@ export default class DocumentDecoration {
             }
         }
 
-        for (let [color, decoration] of this.settings.decorations) {
-            let ranges = colorMap.get(color);
-            editors.forEach(editor => {
+        for (const [color, decoration] of this.settings.decorations) {
+            const ranges = colorMap.get(color);
+            editors.forEach((editor) => {
                 if (ranges !== undefined) {
                     editor.setDecorations(decoration, ranges);
                 }

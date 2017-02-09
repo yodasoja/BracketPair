@@ -1,17 +1,15 @@
-'use string';
-
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
-import ColorMode from './colorMode';
+import ColorMode from "./colorMode";
 
 export default class Settings {
-    readonly timeOutLength: number;
-    readonly forceUniqueOpeningColor: boolean;
-    readonly forceIterationColorCycle: boolean;
-    readonly bracketPairs: BracketPair[] = [];
-    readonly regexPattern: string;
-    readonly decorations: Map<string, vscode.TextEditorDecorationType>;
-    readonly colorMode: ColorMode;
+    public readonly timeOutLength: number;
+    public readonly forceUniqueOpeningColor: boolean;
+    public readonly forceIterationColorCycle: boolean;
+    public readonly bracketPairs: BracketPair[] = [];
+    public readonly regexPattern: string;
+    public readonly decorations: Map<string, vscode.TextEditorDecorationType>;
+    public readonly colorMode: ColorMode;
 
     constructor(
         timeOutLength?: number,
@@ -19,9 +17,9 @@ export default class Settings {
         forceIterationColorCycle?: boolean,
         colorMode?: ColorMode,
         consecutiveSettings?: [{}],
-        independentSettings?: [[{}]]
+        independentSettings?: [[{}]],
     ) {
-        let configuration = vscode.workspace.getConfiguration();
+        const configuration = vscode.workspace.getConfiguration();
 
         this.forceUniqueOpeningColor = forceUniqueOpeningColor !== undefined ?
             forceUniqueOpeningColor : configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
@@ -30,7 +28,7 @@ export default class Settings {
             forceIterationColorCycle : configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
 
         this.colorMode = colorMode !== undefined ?
-            colorMode : (<any>ColorMode)[configuration.get("bracketPairColorizer.colorMode") as string];
+            colorMode : (ColorMode as any)[configuration.get("bracketPairColorizer.colorMode") as string];
 
         this.timeOutLength = timeOutLength !== undefined ?
             timeOutLength : configuration.get("bracketPairColorizer.timeOut") as number;
@@ -39,12 +37,12 @@ export default class Settings {
             consecutiveSettings = consecutiveSettings !== undefined ?
                 consecutiveSettings : configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
 
-            let orphanColor = consecutiveSettings.pop() as string;
+            const orphanColor = consecutiveSettings.pop() as string;
 
-            let colors = consecutiveSettings.pop() as [string];
+            const colors = consecutiveSettings.pop() as [string];
 
-            consecutiveSettings.forEach(value => {
-                let brackets = value as string;
+            consecutiveSettings.forEach((value) => {
+                const brackets = value as string;
                 this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
             });
         }
@@ -54,11 +52,11 @@ export default class Settings {
 
             independentSettings.forEach((setting, index) => {
 
-                let brackets = setting[0] as string;
+                const brackets = setting[0] as string;
 
-                let colors = setting[1] as string[];
+                const colors = setting[1] as string[];
 
-                let orphanColor = setting[2] as string;
+                const orphanColor = setting[2] as string;
 
                 this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
             });
@@ -73,7 +71,7 @@ export default class Settings {
     private createRegex(bracketPairs: BracketPair[]): string {
         let regex = "[";
 
-        for (let bracketPair of bracketPairs) {
+        for (const bracketPair of bracketPairs) {
             regex += `\\${bracketPair.openCharacter}\\${bracketPair.closeCharacter}`;
         }
 
@@ -83,15 +81,15 @@ export default class Settings {
     }
 
     private createDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
-        let decorations = new Map<string, vscode.TextEditorDecorationType>();
+        const decorations = new Map<string, vscode.TextEditorDecorationType>();
 
-        for (let bracketPair of bracketPairs) {
-            for (let color of bracketPair.colors) {
-                let decoration = vscode.window.createTextEditorDecorationType({ color: color });
+        for (const bracketPair of bracketPairs) {
+            for (const color of bracketPair.colors) {
+                const decoration = vscode.window.createTextEditorDecorationType({ color });
                 decorations.set(color, decoration);
             }
 
-            let errorDecoration = vscode.window.createTextEditorDecorationType({ color: bracketPair.orphanColor });
+            const errorDecoration = vscode.window.createTextEditorDecorationType({ color: bracketPair.orphanColor });
             decorations.set(bracketPair.orphanColor, errorDecoration);
         }
 

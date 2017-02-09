@@ -1,13 +1,11 @@
-'use strict';
 import BracketPair from "./bracketPair";
 
-interface ColorIndex
-{
+interface IColorIndex {
     getPrevious(bracketPair: BracketPair): number;
     setCurrent(bracketPair: BracketPair, colorIndex: number): void;
     getCurrentLength(bracketPair: BracketPair): number;
     popCurrent(bracketPair: BracketPair): number | undefined;
-    clone() : ColorIndex;
+    clone(): IColorIndex;
 }
 
-export default ColorIndex;
+export default IColorIndex;

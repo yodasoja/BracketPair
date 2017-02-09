@@ -1,12 +1,10 @@
-'use strict';
-
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import LineState from "./lineState";
 import Settings from "./settings";
-import LineState from './lineState';
 
 export default class TextLine {
+    public colorRanges = new Map<string, vscode.Range[]>();
     private lineState: LineState;
-    colorRanges = new Map<string, vscode.Range[]>();
     private readonly settings: Settings;
 
     constructor(settings: Settings, bracketState?: LineState) {
@@ -21,16 +19,16 @@ export default class TextLine {
     }
 
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
-    clone(): TextLine {
+    public clone(): TextLine {
         return new TextLine(this.settings, this.lineState.clone());
     }
 
-    addBracket(bracket: string, range: vscode.Range) {
-        for (let bracketPair of this.settings.bracketPairs) {
+    public addBracket(bracket: string, range: vscode.Range) {
+        for (const bracketPair of this.settings.bracketPairs) {
             if (bracketPair.openCharacter === bracket) {
-                let color = this.lineState.getOpenBracketColor(bracketPair);
+                const color = this.lineState.getOpenBracketColor(bracketPair);
 
-                let colorRanges = this.colorRanges.get(color);
+                const colorRanges = this.colorRanges.get(color);
 
                 if (colorRanges !== undefined) {
                     colorRanges.push(range);
@@ -41,9 +39,9 @@ export default class TextLine {
                 return;
             }
             else if (bracketPair.closeCharacter === bracket) {
-                let color = this.lineState.getCloseBracketColor(bracketPair);
+                const color = this.lineState.getCloseBracketColor(bracketPair);
 
-                let colorRanges = this.colorRanges.get(color);
+                const colorRanges = this.colorRanges.get(color);
                 if (colorRanges !== undefined) {
                     colorRanges.push(range);
                 }

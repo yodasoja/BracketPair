@@ -1,11 +1,9 @@
-'use strict';
-
 import BracketPair from "./bracketPair";
+import ColorMode from "./colorMode";
+import ColorIndexes from "./IColorIndexes";
+import MultipleIndexes from "./MultipleIndexes";
 import Settings from "./settings";
-import ColorIndexes from "./colorIndexes";
-import ColorMode from './colorMode';
-import SingularIndex from './singularIndex';
-import MultipleIndexes from './MultipleIndexes';
+import SingularIndex from "./singularIndex";
 
 export default class LineState {
     protected readonly settings: Settings;
@@ -16,7 +14,7 @@ export default class LineState {
         settings: Settings,
         previousState?: {
             colorIndexes: ColorIndexes,
-            bracketColor: string
+            bracketColor: string,
         }) {
         this.settings = settings;
 
@@ -59,7 +57,7 @@ export default class LineState {
     };
 
     public getCloseBracketColor(bracketPair: BracketPair): string {
-        let colorIndex = this.colorIndexes.popCurrent(bracketPair);
+        const colorIndex = this.colorIndexes.popCurrent(bracketPair);
         let color: string;
         if (colorIndex !== undefined) {
             color = bracketPair.colors[colorIndex];
@@ -77,8 +75,8 @@ export default class LineState {
         return new LineState(
             this.settings,
             {
+                bracketColor: this.previousBracketColor,
                 colorIndexes: this.colorIndexes.clone(),
-                bracketColor: this.previousBracketColor
             });
     }
 }

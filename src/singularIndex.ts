@@ -1,6 +1,5 @@
-'use strict';
 import BracketPair from "./bracketPair";
-import ColorIndexes from "./colorIndexes";
+import ColorIndexes from "./IColorIndexes";
 
 export default class SingularIndex implements ColorIndexes {
     private currentOpenBracketColorIndexes: number[] = [];
@@ -9,7 +8,7 @@ export default class SingularIndex implements ColorIndexes {
     constructor(
         previousState?: {
             currentOpenBracketColorIndexes: number[],
-            previousOpenBracketColorIndex: number
+            previousOpenBracketColorIndex: number,
         }) {
 
         if (previousState !== undefined) {
@@ -18,28 +17,28 @@ export default class SingularIndex implements ColorIndexes {
         }
     }
 
-    getPrevious(bracketPair: BracketPair): number {
+    public clone() {
+        return new SingularIndex(
+            {
+                currentOpenBracketColorIndexes: this.currentOpenBracketColorIndexes.slice(),
+                previousOpenBracketColorIndex: this.previousOpenBracketColorIndex,
+            });
+    }
+
+    public getPrevious(bracketPair: BracketPair): number {
         return this.previousOpenBracketColorIndex;
     }
 
-    setCurrent(bracketPair: BracketPair, colorIndex: number) {
+    public setCurrent(bracketPair: BracketPair, colorIndex: number) {
         this.currentOpenBracketColorIndexes.push(colorIndex);
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
-    getCurrentLength(bracketPair: BracketPair): number {
+    public getCurrentLength(bracketPair: BracketPair): number {
         return this.currentOpenBracketColorIndexes.length;
     }
 
-    popCurrent(bracketPair: BracketPair): number | undefined {
+    public popCurrent(bracketPair: BracketPair): number | undefined {
         return this.currentOpenBracketColorIndexes.pop();
-    }
-
-    clone() {
-        return new SingularIndex(
-            {
-                currentOpenBracketColorIndexes: this.currentOpenBracketColorIndexes.slice(),
-                previousOpenBracketColorIndex: this.previousOpenBracketColorIndex
-            });
     }
 }

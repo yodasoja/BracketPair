@@ -1,6 +1,5 @@
-'use strict';
 import BracketPair from "./bracketPair";
-import ColorIndexes from "./colorIndexes";
+import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
 
 export default class MultipleIndexes implements ColorIndexes {
@@ -12,7 +11,7 @@ export default class MultipleIndexes implements ColorIndexes {
         settings: Settings,
         previousState?: {
             currentOpenBracketColorIndexes: { [character: string]: number[]; },
-            previousOpenBracketColorIndexes: { [character: string]: number; }
+            previousOpenBracketColorIndexes: { [character: string]: number; },
         }) {
         this.settings = settings;
 
@@ -22,40 +21,40 @@ export default class MultipleIndexes implements ColorIndexes {
 
         }
         else {
-            settings.bracketPairs.forEach(bracketPair => {
+            settings.bracketPairs.forEach((bracketPair) => {
                 this.currentOpenBracketColorIndexes[bracketPair.openCharacter] = [];
                 this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = -1;
             });
         }
     }
 
-    getPrevious(bracketPair: BracketPair): number {
+    public getPrevious(bracketPair: BracketPair): number {
         return this.previousOpenBracketColorIndexes[bracketPair.openCharacter];
     }
 
-    setCurrent(bracketPair: BracketPair, colorIndex: number) {
+    public setCurrent(bracketPair: BracketPair, colorIndex: number) {
         this.currentOpenBracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
         this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = colorIndex;
     }
 
-    getCurrentLength(bracketPair: BracketPair): number {
+    public getCurrentLength(bracketPair: BracketPair): number {
         return this.currentOpenBracketColorIndexes[bracketPair.openCharacter].length;
     }
 
-    popCurrent(bracketPair: BracketPair): number | undefined {
+    public popCurrent(bracketPair: BracketPair): number | undefined {
         return this.currentOpenBracketColorIndexes[bracketPair.openCharacter].pop();
     }
 
-    clone(): ColorIndexes {
-        let bracketColorIndexesCopy: { [character: string]: number[]; } = {};
+    public clone(): ColorIndexes {
+        const bracketColorIndexesCopy: { [character: string]: number[]; } = {};
 
-        Object.keys(this.currentOpenBracketColorIndexes).forEach(key => {
+        Object.keys(this.currentOpenBracketColorIndexes).forEach((key) => {
             bracketColorIndexesCopy[key] = this.currentOpenBracketColorIndexes[key].slice();
         });
 
-        let previousOpenBracketIndexesCopy: { [character: string]: number; } = {};
+        const previousOpenBracketIndexesCopy: { [character: string]: number; } = {};
 
-        Object.keys(this.previousOpenBracketColorIndexes).forEach(key => {
+        Object.keys(this.previousOpenBracketColorIndexes).forEach((key) => {
             previousOpenBracketIndexesCopy[key] = this.previousOpenBracketColorIndexes[key];
         });
 
@@ -63,7 +62,7 @@ export default class MultipleIndexes implements ColorIndexes {
             this.settings,
             {
                 currentOpenBracketColorIndexes: bracketColorIndexesCopy,
-                previousOpenBracketColorIndexes: previousOpenBracketIndexesCopy
+                previousOpenBracketColorIndexes: previousOpenBracketIndexesCopy,
             });
     }
 }
