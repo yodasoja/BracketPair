@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.4.0
+Fix an error where editor.document can return undefined
+
 ### 0.3.2
 Fix an error where active editor may be undefined at startup
 
