@@ -32,8 +32,12 @@ export function activate(context: vscode.ExtensionContext) {
     }, null, context.subscriptions);
 }
 
-function isValidDocument(document: vscode.TextDocument): boolean {
-    return document !== undefined && document.uri.scheme === "file" || document.uri.scheme === "untitled";
+function isValidDocument(document?: vscode.TextDocument): boolean {
+    if (document === undefined) {
+        return false;
+    }
+
+    return document.uri.scheme === "file" || document.uri.scheme === "untitled";
 }
 
 export function deactivate() {
