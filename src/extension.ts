@@ -4,10 +4,10 @@ import DocumentDecorationManager from "./documentDecorationManager";
 export function activate(context: vscode.ExtensionContext) {
     const documentDecorationManager = new DocumentDecorationManager();
 
-    let activeEditor = vscode.window.activeTextEditor;
+    let activeEditor : vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 
     vscode.window.visibleTextEditors.forEach((editor) => {
-        if (editor && isValidDocument(activeEditor.document)) {
+        if (editor && isValidDocument(editor.document)) {
             documentDecorationManager.updateDecorations(editor.document);
         }
     });
@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function isValidDocument(document: vscode.TextDocument): boolean {
-    return document.uri.scheme === "file" || document.uri.scheme === "untitled";
+    return document !== undefined && document.uri.scheme === "file" || document.uri.scheme === "untitled";
 }
 
 export function deactivate() {
