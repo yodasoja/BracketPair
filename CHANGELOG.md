@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.3.2
+Fix an error where active editor may be undefined at startup
+
 ### 0.3.1
 Internal logic cleanup  
 Markdown cleanup
