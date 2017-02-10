@@ -4,7 +4,7 @@ import DocumentDecorationManager from "./documentDecorationManager";
 export function activate(context: vscode.ExtensionContext) {
     const documentDecorationManager = new DocumentDecorationManager();
 
-    let activeEditor : vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 
     vscode.window.visibleTextEditors.forEach((editor) => {
         if (editor && isValidDocument(editor.document)) {
@@ -30,7 +30,6 @@ export function activate(context: vscode.ExtensionContext) {
             documentDecorationManager.onDidCloseTextDocument(event);
         }
     }, null, context.subscriptions);
-
 }
 
 function isValidDocument(document: vscode.TextDocument): boolean {
