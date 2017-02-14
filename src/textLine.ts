@@ -38,10 +38,6 @@ export default class TextLine {
                     return;
                 }
             }
-
-            if (this.lineState.isComment) {
-                return;
-            }
         }
 
         this.lastBracketPos = range.start.character;
