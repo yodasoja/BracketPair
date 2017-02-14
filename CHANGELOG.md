@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.5.1
+Added support for multiline comments
+
 ### 0.5.0
 Ignore brackets in comments by default  
 Added `"bracketPairColorizer.colorizeComments"` setting to toggle
