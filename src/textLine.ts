@@ -6,6 +6,7 @@ export default class TextLine {
     public colorRanges = new Map<string, vscode.Range[]>();
     private lastBracketPos = 0;
     private lineState: LineState;
+    private isComment = false;
     private readonly settings: Settings;
     private readonly contents: string;
 
@@ -32,7 +33,7 @@ export default class TextLine {
         if (!this.settings.colorizeComments) {
             this.updateCommentState(range.start.character, this.lastBracketPos);
 
-            if (this.lineState.isComment) {
+            if (this.isComment || this.lineState.isMultilineComment) {
                 return;
             }
         }
@@ -72,23 +73,33 @@ export default class TextLine {
         const commentStatus = this.checkBackwardsForComment(startPos, endPos);
 
         switch (commentStatus) {
-            case "start": this.lineState.isComment = true;
+            case "single": this.isComment = true;
                 break;
-            case "none": break;
-            case "end": this.lineState.isComment = false;
-            break;
+            case "multi": this.lineState.isMultilineComment = true;
+                break;
+            case "none":
+                break;
+            case "end": this.lineState.isMultilineComment = false;
+                break;
             default: throw new Error("Not implemented enum");
         }
     }
 
-    private checkBackwardsForComment(startPos: number, endPos: number): "start" | "none" | "end" {
+    private checkBackwardsForComment(startPos: number, endPos: number): "single" | "multi" | "none" | "end" {
         for (let i = startPos - 2; i >= endPos; i--) {
-            if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
-                return "end";
+            if (this.lineState.isMultilineComment) {
+                if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
+                    return "end";
+                }
             }
-            if (this.contents[i] === "/" && (this.contents[i + 1] === "/" || this.contents[i + 1] === "*")) {
-                this.lineState.isComment = true;
-                return "start";;
+            else if (this.contents[i] === "/") {
+                if (this.contents[i + 1] === "/") {
+                    return "single";
+                }
+
+                if (this.contents[i + 1] === "*") {
+                    return "multi";
+                }
             }
         }
 

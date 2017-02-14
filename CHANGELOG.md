@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.6.1
+Second attempt at adding support for multiline comments
+
+### 0.6
+Rollback to equivalent of 0.5.0 because comments broke 
+
 ### 0.5.1
 Added support for multiline comments
 
