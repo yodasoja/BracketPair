@@ -40,17 +40,19 @@ suite("Settings Tests", () => {
     });
 
     test("bracketPairColorizer.colorMode", () => {
-        let settings = new Settings(undefined, undefined, undefined, ColorMode.Independent);
+        let settings = new Settings(undefined, undefined, undefined, undefined, ColorMode.Independent);
         assert.equal(settings.colorMode, ColorMode.Independent);
 
-        settings = new Settings(undefined, undefined, undefined, ColorMode.Consecutive);
+        settings = new Settings(undefined, undefined, undefined, undefined, ColorMode.Consecutive);
         assert.equal(settings.colorMode, ColorMode.Consecutive);
     });
 
     test("bracketPairColorizer.consecutivePairColors", () => {
         const consecutiveSettings: [{}] = ["ab", "cd", ["color0", "color1"], "orphanColor"];
 
-        const settings = new Settings(undefined, undefined, undefined, ColorMode.Consecutive, consecutiveSettings);
+        const settings = new Settings(undefined, undefined, undefined, undefined,
+            ColorMode.Consecutive, consecutiveSettings);
+
         assert.equal(settings.colorMode, ColorMode.Consecutive);
 
         assert.equal(settings.bracketPairs[0].openCharacter, "a");
@@ -88,7 +90,7 @@ suite("Settings Tests", () => {
                 ],
             ];
 
-        const settings = new Settings(0, false, false, ColorMode.Independent, undefined, independentSettings);
+        const settings = new Settings(0, false, false, false, ColorMode.Independent, undefined, independentSettings);
         assert.equal(settings.colorMode, ColorMode.Independent);
         assert.equal(settings.bracketPairs[0].openCharacter, "a");
         assert.equal(settings.bracketPairs[0].closeCharacter, "b");
@@ -106,7 +108,7 @@ suite("Settings Tests", () => {
 });
 
 suite("Consecutive Coloring Test", () => {
-    const settings = new Settings(0, false, false, ColorMode.Consecutive,
+    const settings = new Settings(0, false, false, false, ColorMode.Consecutive,
         [
             "()",
             "[]",
@@ -332,7 +334,7 @@ suite("Consecutive Coloring Test", () => {
 });
 
 suite("Consecutive Coloring Test Unique Opening Color", () => {
-    const settings = new Settings(0, true, false, ColorMode.Consecutive,
+    const settings = new Settings(0, true, false, false, ColorMode.Consecutive,
         [
             "()",
             "[]",
@@ -591,7 +593,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 });
 
 suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
-    const settings = new Settings(0, false, true, ColorMode.Consecutive,
+    const settings = new Settings(0, false, true, false, ColorMode.Consecutive,
         [
             "()",
             "[]",
@@ -854,7 +856,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 });
 
 suite("Independent Coloring Test", () => {
-    const settings = new Settings(0, false, false, ColorMode.Independent,
+    const settings = new Settings(0, false, false, false, ColorMode.Independent,
         [
             "()",
             "[]",
@@ -1064,7 +1066,7 @@ suite("Independent Coloring Test", () => {
 });
 
 suite("Independent Coloring Test Unique Opening Color", () => {
-    const settings = new Settings(0, true, false, ColorMode.Independent,
+    const settings = new Settings(0, true, false, false, ColorMode.Independent,
         [
             "()",
             "[]",

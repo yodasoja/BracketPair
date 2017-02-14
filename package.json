@@ -28,6 +28,11 @@
             "type": "object",
             "title": "BracketPair",
             "properties": {
+                "bracketPairColorizer.colorizeComments": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Determines if brackets in comments also be colorized"
+                },
                 "bracketPairColorizer.timeOut": {
                     "type": "number",
                     "default": 200,

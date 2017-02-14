@@ -27,12 +27,14 @@ export default class TextLine {
     }
 
     public addBracket(bracket: string, range: vscode.Range) {
-        for (let i = range.start.character - 2; i >= this.lastBracketPos; i--) {
-            if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
-                break;
-            }
-            if (this.contents[i] === "/" && (this.contents[i + 1] === "/" || this.contents[i + 1] === "*")) {
-                return;
+        if (!this.settings.colorizeComments) {
+            for (let i = range.start.character - 2; i >= this.lastBracketPos; i--) {
+                if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
+                    break;
+                }
+                if (this.contents[i] === "/" && (this.contents[i + 1] === "/" || this.contents[i + 1] === "*")) {
+                    return;
+                }
             }
         }
 

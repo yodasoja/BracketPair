@@ -43,6 +43,9 @@ Independent brackets allow each bracket type to use its own color pool
 ![Consecutive](images/consecutiveExample.png "Consecutive Example")
 ![Independent](images/independentExample.png "Independent Example")
 
+>`"bracketPairColorizer.colorizeComments"`  
+Determines if brackets in comments should be colorized
+
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
 > Example for matching '<>'

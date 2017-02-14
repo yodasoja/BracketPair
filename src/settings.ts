@@ -6,6 +6,7 @@ export default class Settings {
     public readonly timeOutLength: number;
     public readonly forceUniqueOpeningColor: boolean;
     public readonly forceIterationColorCycle: boolean;
+    public readonly colorizeComments: boolean;
     public readonly bracketPairs: BracketPair[] = [];
     public readonly regexPattern: string;
     public readonly decorations: Map<string, vscode.TextEditorDecorationType>;
@@ -15,6 +16,7 @@ export default class Settings {
         timeOutLength?: number,
         forceUniqueOpeningColor?: boolean,
         forceIterationColorCycle?: boolean,
+        colorizeComments?: boolean,
         colorMode?: ColorMode,
         consecutiveSettings?: [{}],
         independentSettings?: [[{}]],
@@ -26,6 +28,9 @@ export default class Settings {
 
         this.forceIterationColorCycle = forceIterationColorCycle !== undefined ?
             forceIterationColorCycle : configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
+
+        this.colorizeComments = colorizeComments !== undefined ?
+            colorizeComments : configuration.get("bracketPairColorizer.colorizeComments") as boolean;
 
         this.colorMode = colorMode !== undefined ?
             colorMode : (ColorMode as any)[configuration.get("bracketPairColorizer.colorMode") as string];
