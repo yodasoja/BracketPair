@@ -20,20 +20,24 @@ export default class TextLine {
         else {
             this.lineState = new LineState(settings);
         }
-
-        this.updateCommentState(this.contents.length, 0);
     }
 
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
     public cloneState() {
+        // Update state for whole line before returning
+        this.checkBackwardsForStringModifiers(this.contents.length);
         return this.lineState.clone();
     }
 
     public addBracket(bracket: string, range: vscode.Range) {
         if (!this.settings.colorizeComments) {
-            this.updateCommentState(range.start.character, this.lastBracketPos);
+            this.checkBackwardsForStringModifiers(range.start.character);
 
-            if (this.isComment || this.lineState.isMultilineComment) {
+            if (this.isComment ||
+                this.lineState.multilineModifiers !== 0 ||
+                this.lineState.doubleQuoteModifiers !== 0 ||
+                this.lineState.singleQuoteModifiers !== 0) {
+                this.lastBracketPos = range.start.character;
                 return;
             }
         }
@@ -69,41 +73,69 @@ export default class TextLine {
         }
     }
 
-    private updateCommentState(startPos: number, endPos: number) {
-        const commentStatus = this.checkBackwardsForComment(startPos, endPos);
-
-        switch (commentStatus) {
-            case "single": this.isComment = true;
-                break;
-            case "multi": this.lineState.isMultilineComment = true;
-                break;
-            case "none":
-                break;
-            case "end": this.lineState.isMultilineComment = false;
-                break;
-            default: throw new Error("Not implemented enum");
+    private checkBackwardsForStringModifiers(startPos: number): void {
+        // If it's already commented, nothing can change
+        if (this.isComment) {
+            return;
         }
-    }
 
-    private checkBackwardsForComment(startPos: number, endPos: number): "single" | "multi" | "none" | "end" {
-        for (let i = startPos - 2; i >= endPos; i--) {
-            if (this.lineState.isMultilineComment) {
+        for (let i = startPos; i >= this.lastBracketPos; i--) {
+
+            // If its multi-line commented, check for end of multiline
+            if (this.lineState.multilineModifiers > 0) {
                 if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
-                    return "end";
+                    this.lineState.multilineModifiers--;
+                    return;
+                }
+                else {
+                    continue;
                 }
             }
-            else if (this.contents[i] === "/") {
+
+            // If single quotes open, only check for closing quotes
+            if (this.lineState.singleQuoteModifiers > 0) {
+                if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                    this.lineState.singleQuoteModifiers--;
+                    return;
+                }
+                else {
+                    continue;
+                }
+            }
+
+            // If double quotes open, only check for closing quotes
+            if (this.lineState.doubleQuoteModifiers > 0) {
+                if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                    this.lineState.doubleQuoteModifiers--;
+                    return;
+                }
+                else {
+                    continue;
+                }
+            }
+
+            // Else check for opening modifiers
+            if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                this.lineState.singleQuoteModifiers++;
+                return;
+            }
+
+            if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                this.lineState.doubleQuoteModifiers++;
+                return;
+            }
+
+            if (this.contents[i] === "/") {
                 if (this.contents[i + 1] === "/") {
-                    return "single";
+                    this.isComment = true;
+                    return;
                 }
 
                 if (this.contents[i + 1] === "*") {
-                    return "multi";
+                    this.lineState.multilineModifiers++;
+                    return;
                 }
             }
         }
-
-        return "none";
     }
-
 }

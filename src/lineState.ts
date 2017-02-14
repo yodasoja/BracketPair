@@ -6,7 +6,9 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class LineState {
-    public isMultilineComment = false;
+    public multilineModifiers = 0;
+    public singleQuoteModifiers = 0;
+    public doubleQuoteModifiers = 0;
     protected readonly settings: Settings;
     protected previousBracketColor = "";
     protected colorIndexes: ColorIndexes;
@@ -16,14 +18,18 @@ export default class LineState {
         previousState?: {
             colorIndexes: ColorIndexes,
             bracketColor: string,
-            isComment: boolean,
+            multilineModifiers: number,
+            singleQuoteModifiers: number,
+            doubleQuoteModifiers: number,
         }) {
         this.settings = settings;
 
         if (previousState !== undefined) {
             this.previousBracketColor = previousState.bracketColor;
             this.colorIndexes = previousState.colorIndexes;
-            this.isMultilineComment = previousState.isComment;
+            this.multilineModifiers = previousState.multilineModifiers;
+            this.singleQuoteModifiers = previousState.singleQuoteModifiers;
+            this.doubleQuoteModifiers = previousState.doubleQuoteModifiers;
         }
         else {
             switch (settings.colorMode) {
@@ -80,7 +86,9 @@ export default class LineState {
             {
                 bracketColor: this.previousBracketColor,
                 colorIndexes: this.colorIndexes.clone(),
-                isComment: this.isMultilineComment,
+                doubleQuoteModifiers: this.doubleQuoteModifiers,
+                multilineModifiers: this.multilineModifiers,
+                singleQuoteModifiers: this.singleQuoteModifiers,
             });
     }
 }
