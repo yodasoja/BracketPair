@@ -10,9 +10,9 @@ export default class TextLine {
     private readonly settings: Settings;
     private readonly contents: string;
 
-    constructor(settings: Settings, contents: string, bracketState?: LineState) {
+    constructor(settings: Settings, index: number, document: vscode.TextDocument, bracketState?: LineState) {
         this.settings = settings;
-        this.contents = contents;
+        this.contents = document.lineAt(index).text;
 
         if (bracketState !== undefined) {
             this.lineState = bracketState;
