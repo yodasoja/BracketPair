@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 0.5.0
+Ignore brackets in comments by default  
+Added `"bracketPairColorizer.colorizeComments"` setting to toggle
+
 ### 0.4.0
 Fix an error where editor.document can return undefined
 
