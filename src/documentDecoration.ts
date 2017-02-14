@@ -4,7 +4,7 @@ import TextLine from "./textLine";
 
 export default class DocumentDecoration {
     private updateDecorationTimeout: NodeJS.Timer | null;
-    // This program caches non-changes lines, and will only analyze linenumbers including & above a changed line
+    // This program caches lines, and will only analyze linenumbers including or above a modified line
     private lineToUpdateWhenTimeoutEnds = Infinity;
     private lines: TextLine[] = [];
     private readonly uri: string;
@@ -21,18 +21,18 @@ export default class DocumentDecoration {
 
     // Lines are stored in an array, if line is requested outside of array bounds
     // add emptys lines until array is correctly sized
-    public getLine(index: number): TextLine {
+    public getLine(index: number, document: vscode.TextDocument): TextLine {
         if (index < this.lines.length) {
             return this.lines[index];
         }
         else {
             if (this.lines.length === 0) {
-                this.lines.push(new TextLine(this.settings));
+                this.lines.push(new TextLine(this.settings, document.lineAt(index).text));
             }
 
             for (let i = this.lines.length; i <= index; i++) {
                 const previousLine = this.lines[this.lines.length - 1];
-                const newLine = previousLine.clone();
+                const newLine = new TextLine(this.settings, document.lineAt(index).text, previousLine.cloneState());
 
                 this.lines.push(newLine);
             }
@@ -109,7 +109,7 @@ export default class DocumentDecoration {
             const endPos = startPos.translate(0, match[0].length);
             const range = new vscode.Range(startPos, endPos);
 
-            const currentLine = this.getLine(startPos.line);
+            const currentLine = this.getLine(startPos.line, document);
             currentLine.addBracket(match[0], range);
         }
 

@@ -121,9 +121,10 @@ suite("Consecutive Coloring Test", () => {
 
     test("First Line Document Consecutive Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line0 = document.getLine(0);
+            const line0 = document.getLine(0, textDocument);
 
             const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -183,9 +184,10 @@ suite("Consecutive Coloring Test", () => {
 
     test("Second Line Document Consecutive Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line1 = document.getLine(1);
+            const line1 = document.getLine(1, textDocument);
 
             const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -230,9 +232,10 @@ suite("Consecutive Coloring Test", () => {
 
     test("Third Line Document Consecutive Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line2 = document.getLine(2);
+            const line2 = document.getLine(2, textDocument);
 
             const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -277,9 +280,10 @@ suite("Consecutive Coloring Test", () => {
 
     test("Fourth Line Document Consecutive Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line3 = document.getLine(3);
+            const line3 = document.getLine(3, textDocument);
 
             const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
@@ -302,9 +306,10 @@ suite("Consecutive Coloring Test", () => {
 
     test("Fifth Line Document Consecutive Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line4 = document.getLine(4);
+            const line4 = document.getLine(4, textDocument);
 
             const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -342,9 +347,10 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("First Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line0 = document.getLine(0);
+            const line0 = document.getLine(0, textDocument);
 
             const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -404,9 +410,10 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Second Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line1 = document.getLine(1);
+            const line1 = document.getLine(1, textDocument);
 
             const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -451,9 +458,10 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Third Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line2 = document.getLine(2);
+            const line2 = document.getLine(2, textDocument);
 
             const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -498,9 +506,10 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Fourth Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line3 = document.getLine(3);
+            const line3 = document.getLine(3, textDocument);
 
             const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
@@ -523,9 +532,10 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Fifth Line Document Consecutive Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line4 = document.getLine(4);
+            const line4 = document.getLine(4, textDocument);
 
             const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -596,9 +606,10 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("First Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line0 = document.getLine(0);
+            const line0 = document.getLine(0, textDocument);
 
             const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -658,9 +669,10 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Second Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line1 = document.getLine(1);
+            const line1 = document.getLine(1, textDocument);
 
             const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -705,9 +717,10 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Third Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line2 = document.getLine(2);
+            const line2 = document.getLine(2, textDocument);
 
             const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -752,9 +765,10 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Fourth Line Document Consecutive Force Iteration Color Cycle", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line3 = document.getLine(3);
+            const line3 = document.getLine(3, textDocument);
 
             const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
@@ -777,9 +791,10 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Fifth Line Document Consecutive Coloring Force Iteration Color Cycle", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line4 = document.getLine(4);
+            const line4 = document.getLine(4, textDocument);
 
             const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -854,9 +869,10 @@ suite("Independent Coloring Test", () => {
 
     test("First Line Document Independent Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line0 = document.getLine(0);
+            const line0 = document.getLine(0, textDocument);
 
             const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -916,9 +932,10 @@ suite("Independent Coloring Test", () => {
 
     test("Second Line Document Independent Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line1 = document.getLine(1);
+            const line1 = document.getLine(1, textDocument);
 
             const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -955,9 +972,10 @@ suite("Independent Coloring Test", () => {
 
     test("Third Line Document Independent Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line2 = document.getLine(2);
+            const line2 = document.getLine(2, textDocument);
 
             const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -994,9 +1012,10 @@ suite("Independent Coloring Test", () => {
 
     test("Fourth Line Document Independent Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line3 = document.getLine(3);
+            const line3 = document.getLine(3, textDocument);
 
             const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
@@ -1019,9 +1038,10 @@ suite("Independent Coloring Test", () => {
 
     test("Fifth Line Document Independent Coloring", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line4 = document.getLine(4);
+            const line4 = document.getLine(4, textDocument);
 
             const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -1059,9 +1079,10 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("First Line Document Independent Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line0 = document.getLine(0);
+            const line0 = document.getLine(0, textDocument);
 
             const colorRangesError = line0.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -1121,9 +1142,10 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Second Line Document Independent Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line1 = document.getLine(1);
+            const line1 = document.getLine(1, textDocument);
 
             const colorRangesError = line1.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -1164,9 +1186,10 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Third Line Document Independent Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line2 = document.getLine(2);
+            const line2 = document.getLine(2, textDocument);
 
             const colorRangesError = line2.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
@@ -1207,9 +1230,10 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Fourth Line Document Independent Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line3 = document.getLine(3);
+            const line3 = document.getLine(3, textDocument);
 
             const colorRangesError = line3.colorRanges.get("Red");
             if (colorRangesError !== undefined) {
@@ -1232,9 +1256,10 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Fifth Line Document Independent Coloring Unique Opening Color", () => {
         {
-            const document = new DocumentDecoration(vscode.window.activeTextEditor.document.uri.toString(), settings);
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line4 = document.getLine(4);
+            const line4 = document.getLine(4, textDocument);
 
             const colorRangesError = line4.colorRanges.get("Red");
             assert.equal(colorRangesError, undefined);
