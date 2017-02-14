@@ -72,55 +72,57 @@ export default class TextLine {
 
     private checkBackwardsForStringModifiers(startPos: number): void {
         // If it's already commented, nothing can change
-        if (!this.isComment) {
-            for (let i = startPos - 1; i >= this.lastModifierCheckPos; i--) {
 
-                // If its multi-line commented, check for end of multiline
-                if (this.lineState.multilineModifiers > 0) {
-                    if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
-                        this.lineState.multilineModifiers--;
-                    }
-                    continue;
+        for (let i = startPos - 1; i >= this.lastModifierCheckPos; i--) {
+            // Double line comments consume everything else
+            if (this.isComment) {
+                break;
+            }
+
+            // If its multi-line commented, check for end of multiline
+            if (this.lineState.multilineModifiers > 0) {
+                if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
+                    this.lineState.multilineModifiers--;
                 }
+                continue;
+            }
 
-                // If single quotes open, only check for closing quotes
-                if (this.lineState.singleQuoteModifiers > 0) {
-                    if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
-                        this.lineState.singleQuoteModifiers--;
-                    }
-                    continue;
-                }
-
-                // If double quotes open, only check for closing quotes
-                if (this.lineState.doubleQuoteModifiers > 0) {
-                    if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
-                        this.lineState.doubleQuoteModifiers--;
-                    }
-                    continue;
-                }
-
-                // Else check for opening modifiers
+            // If single quotes open, only check for closing quotes
+            if (this.lineState.singleQuoteModifiers > 0) {
                 if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
-                    this.lineState.singleQuoteModifiers++;
-                    continue;
+                    this.lineState.singleQuoteModifiers--;
                 }
+                continue;
+            }
 
+            // If double quotes open, only check for closing quotes
+            if (this.lineState.doubleQuoteModifiers > 0) {
                 if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
-                    this.lineState.doubleQuoteModifiers++;
+                    this.lineState.doubleQuoteModifiers--;
+                }
+                continue;
+            }
+
+            // Else check for opening modifiers
+            if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                this.lineState.singleQuoteModifiers++;
+                continue;
+            }
+
+            if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                this.lineState.doubleQuoteModifiers++;
+                continue;
+            }
+
+            if (this.contents[i] === "/") {
+                if (this.contents[i + 1] === "/") {
+                    this.isComment = true;
                     continue;
                 }
 
-                if (this.contents[i] === "/") {
-                    if (this.contents[i + 1] === "/") {
-                        this.isComment = true;
-                        // Double line comments consume everything else
-                        break;
-                    }
-
-                    if (this.contents[i + 1] === "*") {
-                        this.lineState.multilineModifiers++;
-                        continue;
-                    }
+                if (this.contents[i + 1] === "*") {
+                    this.lineState.multilineModifiers++;
+                    continue;
                 }
             }
         }
