@@ -19,6 +19,8 @@ export default class TextLine {
         else {
             this.lineState = new LineState(settings);
         }
+
+        this.updateCommentState(this.contents.length, 0);
     }
 
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
@@ -28,15 +30,10 @@ export default class TextLine {
 
     public addBracket(bracket: string, range: vscode.Range) {
         if (!this.settings.colorizeComments) {
-            for (let i = range.start.character - 2; i >= this.lastBracketPos; i--) {
-                if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
-                    this.lineState.isComment = false;
-                    break;
-                }
-                if (this.contents[i] === "/" && (this.contents[i + 1] === "/" || this.contents[i + 1] === "*")) {
-                    this.lineState.isComment = true;
-                    return;
-                }
+            this.updateCommentState(range.start.character, this.lastBracketPos);
+
+            if (this.lineState.isComment) {
+                return;
             }
         }
 
@@ -70,4 +67,32 @@ export default class TextLine {
             }
         }
     }
+
+    private updateCommentState(startPos: number, endPos: number) {
+        const commentStatus = this.checkBackwardsForComment(startPos, endPos);
+
+        switch (commentStatus) {
+            case "start": this.lineState.isComment = true;
+                break;
+            case "none": break;
+            case "end": this.lineState.isComment = false;
+            break;
+            default: throw new Error("Not implemented enum");
+        }
+    }
+
+    private checkBackwardsForComment(startPos: number, endPos: number): "start" | "none" | "end" {
+        for (let i = startPos - 2; i >= endPos; i--) {
+            if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
+                return "end";
+            }
+            if (this.contents[i] === "/" && (this.contents[i + 1] === "/" || this.contents[i + 1] === "*")) {
+                this.lineState.isComment = true;
+                return "start";;
+            }
+        }
+
+        return "none";
+    }
+
 }
