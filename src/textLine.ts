@@ -32,17 +32,15 @@ export default class TextLine {
     public addBracket(bracket: string, range: vscode.Range) {
         if (!this.settings.colorizeComments) {
             this.checkBackwardsForStringModifiers(range.start.character);
+            this.lastBracketPos = range.start.character;
 
             if (this.isComment ||
                 this.lineState.multilineModifiers !== 0 ||
                 this.lineState.doubleQuoteModifiers !== 0 ||
                 this.lineState.singleQuoteModifiers !== 0) {
-                this.lastBracketPos = range.start.character;
                 return;
             }
         }
-
-        this.lastBracketPos = range.start.character;
 
         for (const bracketPair of this.settings.bracketPairs) {
             if (bracketPair.openCharacter === bracket) {
@@ -79,61 +77,53 @@ export default class TextLine {
             return;
         }
 
-        for (let i = startPos; i >= this.lastBracketPos; i--) {
+        for (let i = startPos - 1; i >= this.lastBracketPos; i--) {
 
             // If its multi-line commented, check for end of multiline
             if (this.lineState.multilineModifiers > 0) {
                 if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
                     this.lineState.multilineModifiers--;
-                    return;
                 }
-                else {
-                    continue;
-                }
+                continue;
             }
 
             // If single quotes open, only check for closing quotes
             if (this.lineState.singleQuoteModifiers > 0) {
                 if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
                     this.lineState.singleQuoteModifiers--;
-                    return;
                 }
-                else {
-                    continue;
-                }
+                continue;
             }
 
             // If double quotes open, only check for closing quotes
             if (this.lineState.doubleQuoteModifiers > 0) {
                 if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
                     this.lineState.doubleQuoteModifiers--;
-                    return;
                 }
-                else {
-                    continue;
-                }
+                continue;
             }
 
             // Else check for opening modifiers
             if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
                 this.lineState.singleQuoteModifiers++;
-                return;
+                continue;
             }
 
             if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
                 this.lineState.doubleQuoteModifiers++;
-                return;
+                continue;
             }
 
             if (this.contents[i] === "/") {
                 if (this.contents[i + 1] === "/") {
                     this.isComment = true;
+                    // Double line comments consume everything else
                     return;
                 }
 
                 if (this.contents[i + 1] === "*") {
                     this.lineState.multilineModifiers++;
-                    return;
+                    continue;
                 }
             }
         }
