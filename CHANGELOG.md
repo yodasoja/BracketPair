@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.6.2
+Performance improvements due to reduced string copying
+
 ### 0.6.1
 Second attempt at adding support for multiline comments
 
