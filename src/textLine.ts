@@ -4,7 +4,7 @@ import Settings from "./settings";
 
 export default class TextLine {
     public colorRanges = new Map<string, vscode.Range[]>();
-    private lastBracketPos = 0;
+    private lastModifierCheckPos = 0;
     private lineState: LineState;
     private isComment = false;
     private readonly settings: Settings;
@@ -32,7 +32,6 @@ export default class TextLine {
     public addBracket(bracket: string, range: vscode.Range) {
         if (!this.settings.colorizeComments) {
             this.checkBackwardsForStringModifiers(range.start.character);
-            this.lastBracketPos = range.start.character;
 
             if (this.isComment ||
                 this.lineState.multilineModifiers !== 0 ||
@@ -72,12 +71,14 @@ export default class TextLine {
     }
 
     private checkBackwardsForStringModifiers(startPos: number): void {
+        this.lastModifierCheckPos = startPos;
+
         // If it's already commented, nothing can change
         if (this.isComment) {
             return;
         }
 
-        for (let i = startPos - 1; i >= this.lastBracketPos; i--) {
+        for (let i = startPos - 1; i >= this.lastModifierCheckPos; i--) {
 
             // If its multi-line commented, check for end of multiline
             if (this.lineState.multilineModifiers > 0) {
