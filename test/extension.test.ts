@@ -18,12 +18,12 @@ import Settings from "../src/settings";
 suite("Settings Tests", () => {
 
     // Defines a Mocha unit test
-    test("bracketPairColorizer.timeOut", () => {
+    test("timeOut", () => {
         const settings = new Settings(0);
         assert.equal(settings.timeOutLength, 0);
     });
 
-    test("bracketPairColorizer.forceUniqueOpeningColor", () => {
+    test("forceUniqueOpeningColor", () => {
         let settings = new Settings(undefined, true);
         assert.equal(settings.forceUniqueOpeningColor, true);
 
@@ -31,7 +31,7 @@ suite("Settings Tests", () => {
         assert.equal(settings.forceUniqueOpeningColor, false);
     });
 
-    test("bracketPairColorizer.forceIterationColorCycle", () => {
+    test("forceIterationColorCycle", () => {
         let settings = new Settings(undefined, undefined, true);
         assert.equal(settings.forceIterationColorCycle, true);
 
@@ -39,7 +39,7 @@ suite("Settings Tests", () => {
         assert.equal(settings.forceIterationColorCycle, false);
     });
 
-    test("bracketPairColorizer.colorMode", () => {
+    test("colorMode", () => {
         let settings = new Settings(undefined, undefined, undefined, undefined, ColorMode.Independent);
         assert.equal(settings.colorMode, ColorMode.Independent);
 
@@ -47,7 +47,7 @@ suite("Settings Tests", () => {
         assert.equal(settings.colorMode, ColorMode.Consecutive);
     });
 
-    test("bracketPairColorizer.consecutivePairColors", () => {
+    test("consecutivePairColors", () => {
         const consecutiveSettings: [{}] = ["ab", "cd", ["color0", "color1"], "orphanColor"];
 
         const settings = new Settings(undefined, undefined, undefined, undefined,
@@ -69,7 +69,7 @@ suite("Settings Tests", () => {
         assert.equal(settings.bracketPairs[1].orphanColor, "orphanColor");
     });
 
-    test("bracketPairColorizer.independentPairColors", () => {
+    test("independentPairColors", () => {
         const independentSettings: [[{}]] =
             [
                 [
@@ -121,7 +121,7 @@ suite("Consecutive Coloring Test", () => {
             "Red",
         ]);
 
-    test("First Line Document Consecutive Coloring", () => {
+    test("Line 1", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -184,7 +184,7 @@ suite("Consecutive Coloring Test", () => {
         }
     });
 
-    test("Second Line Document Consecutive Coloring", () => {
+    test("Line 2", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -232,7 +232,7 @@ suite("Consecutive Coloring Test", () => {
         }
     });
 
-    test("Third Line Document Consecutive Coloring", () => {
+    test("Line 3", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -280,7 +280,7 @@ suite("Consecutive Coloring Test", () => {
         }
     });
 
-    test("Fourth Line Document Consecutive Coloring", () => {
+    test("Line 4", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -306,7 +306,7 @@ suite("Consecutive Coloring Test", () => {
         }
     });
 
-    test("Fifth Line Document Consecutive Coloring", () => {
+    test("Line 5", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -347,7 +347,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
             "Red",
         ]);
 
-    test("First Line Document Consecutive Coloring Unique Opening Color", () => {
+    test("Line 1", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -410,7 +410,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Second Line Document Consecutive Coloring Unique Opening Color", () => {
+    test("Line 2", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -458,7 +458,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Third Line Document Consecutive Coloring Unique Opening Color", () => {
+    test("Line 3", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -506,7 +506,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Fourth Line Document Consecutive Coloring Unique Opening Color", () => {
+    test("Line 5", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -532,7 +532,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Fifth Line Document Consecutive Coloring Unique Opening Color", () => {
+    test("Line 6", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -606,7 +606,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
             "Red",
         ]);
 
-    test("First Line Document Consecutive Force Iteration Color Cycle", () => {
+    test("Line 1", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -669,7 +669,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
         }
     });
 
-    test("Second Line Document Consecutive Force Iteration Color Cycle", () => {
+    test("Line 2", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -717,7 +717,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
         }
     });
 
-    test("Third Line Document Consecutive Force Iteration Color Cycle", () => {
+    test("Line 3", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -765,7 +765,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
         }
     });
 
-    test("Fourth Line Document Consecutive Force Iteration Color Cycle", () => {
+    test("Line 4", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -791,7 +791,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
         }
     });
 
-    test("Fifth Line Document Consecutive Coloring Force Iteration Color Cycle", () => {
+    test("Line 5", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -869,7 +869,7 @@ suite("Independent Coloring Test", () => {
             "Red",
         ]);
 
-    test("First Line Document Independent Coloring", () => {
+    test("Line 1", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -932,7 +932,7 @@ suite("Independent Coloring Test", () => {
         }
     });
 
-    test("Second Line Document Independent Coloring", () => {
+    test("Line 2", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -972,7 +972,7 @@ suite("Independent Coloring Test", () => {
         }
     });
 
-    test("Third Line Document Independent Coloring", () => {
+    test("Line 3", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1012,7 +1012,7 @@ suite("Independent Coloring Test", () => {
         }
     });
 
-    test("Fourth Line Document Independent Coloring", () => {
+    test("Line 4", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1038,7 +1038,7 @@ suite("Independent Coloring Test", () => {
         }
     });
 
-    test("Fifth Line Document Independent Coloring", () => {
+    test("Line 5", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1079,7 +1079,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
             "Red",
         ]);
 
-    test("First Line Document Independent Coloring Unique Opening Color", () => {
+    test("Line 1", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1142,7 +1142,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Second Line Document Independent Coloring Unique Opening Color", () => {
+    test("Line 2", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1186,7 +1186,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Third Line Document Independent Coloring Unique Opening Color", () => {
+    test("Line 3", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1230,7 +1230,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Fourth Line Document Independent Coloring Unique Opening Color", () => {
+    test("Line 4", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1256,7 +1256,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
         }
     });
 
-    test("Fifth Line Document Independent Coloring Unique Opening Color", () => {
+    test("Line 5", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1329,7 +1329,7 @@ suite("Bracket and quote test", () => {
             "Red",
         ]);
 
-    test("Fifth Line", () => {
+    test("Line 5", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1341,7 +1341,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Sixth Line", () => {
+    test("Line 6", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1358,7 +1358,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Seventh Line", () => {
+    test("Line 7", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1370,7 +1370,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Eighth Line", () => {
+    test("Line 8", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1382,7 +1382,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Ninth Line", () => {
+    test("Line 9", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1394,7 +1394,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Tenth Line", () => {
+    test("Line 10", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1420,7 +1420,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Eleventh Line", () => {
+    test("Line 11", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1432,7 +1432,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Twelth Line", () => {
+    test("Line 12", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1458,7 +1458,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Thirteenth Line", () => {
+    test("Line 13", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
@@ -1470,7 +1470,7 @@ suite("Bracket and quote test", () => {
         }
     });
 
-    test("Fourteenth Line", () => {
+    test("Line 14", () => {
         {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
