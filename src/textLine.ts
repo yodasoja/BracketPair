@@ -30,11 +30,17 @@ export default class TextLine {
         if (!this.settings.colorizeComments) {
             for (let i = range.start.character - 2; i >= this.lastBracketPos; i--) {
                 if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
+                    this.lineState.isComment = false;
                     break;
                 }
                 if (this.contents[i] === "/" && (this.contents[i + 1] === "/" || this.contents[i + 1] === "*")) {
+                    this.lineState.isComment = true;
                     return;
                 }
+            }
+
+            if (this.lineState.isComment) {
+                return;
             }
         }
 

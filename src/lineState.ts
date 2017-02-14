@@ -6,6 +6,7 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class LineState {
+    public isComment = false;
     protected readonly settings: Settings;
     protected previousBracketColor = "";
     protected colorIndexes: ColorIndexes;
@@ -15,12 +16,14 @@ export default class LineState {
         previousState?: {
             colorIndexes: ColorIndexes,
             bracketColor: string,
+            isComment: boolean,
         }) {
         this.settings = settings;
 
         if (previousState !== undefined) {
             this.previousBracketColor = previousState.bracketColor;
             this.colorIndexes = previousState.colorIndexes;
+            this.isComment = previousState.isComment;
         }
         else {
             switch (settings.colorMode) {
@@ -77,6 +80,7 @@ export default class LineState {
             {
                 bracketColor: this.previousBracketColor,
                 colorIndexes: this.colorIndexes.clone(),
+                isComment: this.isComment,
             });
     }
 }
