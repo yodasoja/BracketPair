@@ -25,12 +25,12 @@ export default class TextLine {
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
     public cloneState() {
         // Update state for whole line before returning
-        this.checkBackwardsForStringModifiers(this.contents.length);
+        this.checkForStringModifiers(this.contents.length);
         return this.lineState.clone();
     }
 
     public addBracket(bracket: string, range: vscode.Range) {
-        this.checkBackwardsForStringModifiers(range.start.character);
+        this.checkForStringModifiers(range.start.character);
 
         if (!this.settings.colorizeComments) {
             if (this.isComment ||
@@ -83,7 +83,7 @@ export default class TextLine {
         return counter % 2 === 1;
     }
 
-    private checkBackwardsForStringModifiers(startPos: number): void {
+    private checkForStringModifiers(startPos: number): void {
         for (let i = this.lastModifierCheckPos; i < startPos; i++) {
             // Double line comments consume everything else
             if (!this.settings.colorizeComments && this.isComment) {
