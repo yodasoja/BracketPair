@@ -79,12 +79,12 @@ export default class TextLine {
 
         for (let i = startPos - 1; i >= this.lastModifierCheckPos; i--) {
             // Double line comments consume everything else
-            if (this.isComment) {
+            if (!this.settings.colorizeComments && this.isComment) {
                 break;
             }
 
             // If its multi-line commented, check for end of multiline
-            if (this.lineState.multilineModifiers > 0) {
+            if (!this.settings.colorizeComments && this.lineState.multilineModifiers > 0) {
                 if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
                     this.lineState.multilineModifiers--;
                 }
@@ -92,7 +92,7 @@ export default class TextLine {
             }
 
             // If single quotes open, only check for closing quotes
-            if (this.lineState.singleQuoteModifiers > 0) {
+            if (!this.settings.colorizeQuotes && this.lineState.singleQuoteModifiers > 0) {
                 if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
                     this.lineState.singleQuoteModifiers--;
                 }
@@ -100,7 +100,7 @@ export default class TextLine {
             }
 
             // If double quotes open, only check for closing quotes
-            if (this.lineState.doubleQuoteModifiers > 0) {
+            if (!this.settings.colorizeQuotes && this.lineState.doubleQuoteModifiers > 0) {
                 if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
                     this.lineState.doubleQuoteModifiers--;
                 }
@@ -108,17 +108,19 @@ export default class TextLine {
             }
 
             // Else check for opening modifiers
-            if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
+            if (!this.settings.colorizeQuotes && this.contents[i] === "'" &&
+                (i === 0 || this.contents[i - 1] !== "\\")) {
                 this.lineState.singleQuoteModifiers++;
                 continue;
             }
 
-            if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
+            if (!this.settings.colorizeQuotes && this.contents[i] === "\"" &&
+                (i === 0 || this.contents[i - 1] !== "\\")) {
                 this.lineState.doubleQuoteModifiers++;
                 continue;
             }
 
-            if (this.contents[i] === "/") {
+            if (!this.settings.colorizeComments && this.contents[i] === "/") {
                 if (this.contents[i + 1] === "/") {
                     this.isComment = true;
                     continue;
