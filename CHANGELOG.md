@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.7.2
+Fix multiline comments breaking bracket coloring
+
 ### 0.7.1
 Added backticks `` ` `` as quote modifier
 
