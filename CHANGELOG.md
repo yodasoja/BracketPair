@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.7.4
+Fix multiple character escapes not being captured
+
 ### 0.7.3
 Fix quotes in comments and vice versa breaking bracket coloring
 
