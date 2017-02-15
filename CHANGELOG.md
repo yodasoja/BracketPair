@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 0.7.0
+Ignore brackets in quotes by default  
+Added `"bracketPairColorizer.colorizeQuotes"` setting to toggle
+
 ### 0.6.2
 Performance improvements due to reduced string copying
 

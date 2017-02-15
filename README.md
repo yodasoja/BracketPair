@@ -39,6 +39,9 @@ Set to 0 to disable.
 >`"bracketPairColorizer.colorizeComments"`  
 Determines if brackets in comments should be colorized
 
+>`"bracketPairColorizer.colorizeQuotes"`  
+Determines if brackets in quotes should be colorized
+
 >`"bracketPairColorizer.colorMode"`  
 Consecutive brackets share a color pool for all bracket types  
 Independent brackets allow each bracket type to use its own color pool  
