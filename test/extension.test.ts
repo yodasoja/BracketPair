@@ -1316,7 +1316,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 });
 
 suite("Bracket and quote test", () => {
-    const settings = new Settings(0, true, false, false, ColorMode.Independent,
+    const settings = new Settings(0, false, false, false, ColorMode.Consecutive,
         [
             "()",
             "[]",
