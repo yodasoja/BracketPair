@@ -7,40 +7,53 @@ export default class Settings {
     public readonly forceUniqueOpeningColor: boolean;
     public readonly forceIterationColorCycle: boolean;
     public readonly colorizeComments: boolean;
+    public readonly colorizeQuotes: boolean;
     public readonly bracketPairs: BracketPair[] = [];
     public readonly regexPattern: string;
     public readonly decorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly colorMode: ColorMode;
 
-    constructor(
+    constructor(settings: {
         timeOutLength?: number,
         forceUniqueOpeningColor?: boolean,
         forceIterationColorCycle?: boolean,
         colorizeComments?: boolean,
+        colorizeQuotes?: boolean,
         colorMode?: ColorMode,
         consecutiveSettings?: [{}],
         independentSettings?: [[{}]],
+    },
     ) {
         const configuration = vscode.workspace.getConfiguration();
 
-        this.forceUniqueOpeningColor = forceUniqueOpeningColor !== undefined ?
-            forceUniqueOpeningColor : configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
+        this.forceUniqueOpeningColor = settings.forceUniqueOpeningColor !== undefined ?
+            settings.forceUniqueOpeningColor :
+            configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
 
-        this.forceIterationColorCycle = forceIterationColorCycle !== undefined ?
-            forceIterationColorCycle : configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
+        this.forceIterationColorCycle = settings.forceIterationColorCycle !== undefined ?
+            settings.forceIterationColorCycle :
+            configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
 
-        this.colorizeComments = colorizeComments !== undefined ?
-            colorizeComments : configuration.get("bracketPairColorizer.colorizeComments") as boolean;
+        this.colorizeComments = settings.colorizeComments !== undefined ?
+            settings.colorizeComments :
+            configuration.get("bracketPairColorizer.colorizeComments") as boolean;
 
-        this.colorMode = colorMode !== undefined ?
-            colorMode : (ColorMode as any)[configuration.get("bracketPairColorizer.colorMode") as string];
+        this.colorizeQuotes = settings.colorizeQuotes !== undefined ?
+            settings.colorizeQuotes :
+            configuration.get("bracketPairColorizer.colorizeQuotes") as boolean;
 
-        this.timeOutLength = timeOutLength !== undefined ?
-            timeOutLength : configuration.get("bracketPairColorizer.timeOut") as number;
+        this.colorMode = settings.colorMode !== undefined ?
+            settings.colorMode :
+            (ColorMode as any)[configuration.get("bracketPairColorizer.colorMode") as string];
+
+        this.timeOutLength = settings.timeOutLength !== undefined ?
+            settings.timeOutLength :
+            configuration.get("bracketPairColorizer.timeOut") as number;
 
         if (this.colorMode === ColorMode.Consecutive) {
-            consecutiveSettings = consecutiveSettings !== undefined ?
-                consecutiveSettings : configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
+            const consecutiveSettings = settings.consecutiveSettings !== undefined ?
+                settings.consecutiveSettings :
+                configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
 
             const orphanColor = consecutiveSettings.pop() as string;
 
@@ -52,8 +65,9 @@ export default class Settings {
             });
         }
         else {
-            independentSettings = independentSettings !== undefined ?
-                independentSettings : configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
+            const independentSettings = settings.independentSettings !== undefined ?
+                settings.independentSettings :
+                configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
 
             independentSettings.forEach((setting, index) => {
 

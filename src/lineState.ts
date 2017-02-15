@@ -91,4 +91,13 @@ export default class LineState {
                 singleQuoteModifiers: this.singleQuoteModifiers,
             });
     }
+
+    public isQuoted(): boolean {
+        return this.doubleQuoteModifiers !== 0 ||
+            this.singleQuoteModifiers !== 0;
+    }
+
+    public isMultilineCommented(): boolean {
+        return this.multilineModifiers !== 0;
+    }
 }

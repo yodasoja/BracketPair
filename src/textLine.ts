@@ -30,13 +30,17 @@ export default class TextLine {
     }
 
     public addBracket(bracket: string, range: vscode.Range) {
-        if (!this.settings.colorizeComments) {
-            this.checkBackwardsForStringModifiers(range.start.character);
+        this.checkBackwardsForStringModifiers(range.start.character);
 
+        if (!this.settings.colorizeComments) {
             if (this.isComment ||
-                this.lineState.multilineModifiers !== 0 ||
-                this.lineState.doubleQuoteModifiers !== 0 ||
-                this.lineState.singleQuoteModifiers !== 0) {
+                this.lineState.isMultilineCommented()) {
+                return;
+            }
+        }
+
+        if (!this.settings.colorizeQuotes) {
+            if (this.lineState.isQuoted()) {
                 return;
             }
         }

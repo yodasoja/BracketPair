@@ -31,7 +31,12 @@
                 "bracketPairColorizer.colorizeComments": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Determines if brackets in comments also be colorized"
+                    "description": "Determines if brackets in comments should also be colorized"
+                },
+                "bracketPairColorizer.colorizeQuotes": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Determines if brackets in quotes should also be colorized"
                 },
                 "bracketPairColorizer.timeOut": {
                     "type": "number",

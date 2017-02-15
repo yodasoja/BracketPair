@@ -17,41 +17,39 @@ import Settings from "../src/settings";
 // Defines a Mocha test suite to group tests of similar kind together
 suite("Settings Tests", () => {
 
-    // Defines a Mocha unit test
     test("timeOut", () => {
-        const settings = new Settings(0);
+        const settings = new Settings({ timeOutLength: 0 });
         assert.equal(settings.timeOutLength, 0);
     });
 
     test("forceUniqueOpeningColor", () => {
-        let settings = new Settings(undefined, true);
+        let settings = new Settings({ forceUniqueOpeningColor: true });
         assert.equal(settings.forceUniqueOpeningColor, true);
 
-        settings = new Settings(undefined, false);
+        settings = new Settings({ forceUniqueOpeningColor: false });
         assert.equal(settings.forceUniqueOpeningColor, false);
     });
 
     test("forceIterationColorCycle", () => {
-        let settings = new Settings(undefined, undefined, true);
+        let settings = new Settings({ forceIterationColorCycle: true });
         assert.equal(settings.forceIterationColorCycle, true);
 
-        settings = new Settings(undefined, undefined, false);
+        settings = new Settings({ forceIterationColorCycle: false });
         assert.equal(settings.forceIterationColorCycle, false);
     });
 
     test("colorMode", () => {
-        let settings = new Settings(undefined, undefined, undefined, undefined, ColorMode.Independent);
+        let settings = new Settings({ colorMode: ColorMode.Independent });
         assert.equal(settings.colorMode, ColorMode.Independent);
 
-        settings = new Settings(undefined, undefined, undefined, undefined, ColorMode.Consecutive);
+        settings = new Settings({ colorMode: ColorMode.Consecutive });
         assert.equal(settings.colorMode, ColorMode.Consecutive);
     });
 
     test("consecutivePairColors", () => {
         const consecutiveSettings: [{}] = ["ab", "cd", ["color0", "color1"], "orphanColor"];
 
-        const settings = new Settings(undefined, undefined, undefined, undefined,
-            ColorMode.Consecutive, consecutiveSettings);
+        const settings = new Settings({ timeOutLength: 0, colorMode: ColorMode.Consecutive, consecutiveSettings });
 
         assert.equal(settings.colorMode, ColorMode.Consecutive);
 
@@ -90,7 +88,7 @@ suite("Settings Tests", () => {
                 ],
             ];
 
-        const settings = new Settings(0, false, false, false, ColorMode.Independent, undefined, independentSettings);
+        const settings = new Settings({ timeOutLength: 0, colorMode: ColorMode.Independent, independentSettings });
         assert.equal(settings.colorMode, ColorMode.Independent);
         assert.equal(settings.bracketPairs[0].openCharacter, "a");
         assert.equal(settings.bracketPairs[0].closeCharacter, "b");
@@ -108,18 +106,18 @@ suite("Settings Tests", () => {
 });
 
 suite("Consecutive Coloring Test", () => {
-    const settings = new Settings(0, false, false, false, ColorMode.Consecutive,
+    const consecutiveSettings: [{}] = [
+        "()",
+        "[]",
+        "{}",
         [
-            "()",
-            "[]",
-            "{}",
-            [
-                "Gold",
-                "Orchid",
-                "LightSkyBlue",
-            ],
-            "Red",
-        ]);
+            "Gold",
+            "Orchid",
+            "LightSkyBlue",
+        ],
+        "Red",
+    ];
+    const settings = new Settings({ timeOutLength: 0, colorMode: ColorMode.Consecutive, consecutiveSettings });
 
     test("Line 1", () => {
         {
@@ -334,18 +332,24 @@ suite("Consecutive Coloring Test", () => {
 });
 
 suite("Consecutive Coloring Test Unique Opening Color", () => {
-    const settings = new Settings(0, true, false, false, ColorMode.Consecutive,
+    const consecutiveSettings: [{}] = [
+        "()",
+        "[]",
+        "{}",
         [
-            "()",
-            "[]",
-            "{}",
-            [
-                "Gold",
-                "Orchid",
-                "LightSkyBlue",
-            ],
-            "Red",
-        ]);
+            "Gold",
+            "Orchid",
+            "LightSkyBlue",
+        ],
+        "Red",
+    ];
+
+    const settings = new Settings({
+        colorMode: ColorMode.Consecutive,
+        consecutiveSettings,
+        forceUniqueOpeningColor: true,
+        timeOutLength: 0,
+    });
 
     test("Line 1", () => {
         {
@@ -593,18 +597,24 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 });
 
 suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
-    const settings = new Settings(0, false, true, false, ColorMode.Consecutive,
+    const consecutiveSettings: [{}] = [
+        "()",
+        "[]",
+        "{}",
         [
-            "()",
-            "[]",
-            "{}",
-            [
-                "Gold",
-                "Orchid",
-                "LightSkyBlue",
-            ],
-            "Red",
-        ]);
+            "Gold",
+            "Orchid",
+            "LightSkyBlue",
+        ],
+        "Red",
+    ];
+
+    const settings = new Settings({
+        colorMode: ColorMode.Consecutive,
+        consecutiveSettings,
+        forceIterationColorCycle: true,
+        timeOutLength: 0,
+    });
 
     test("Line 1", () => {
         {
@@ -856,18 +866,42 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 });
 
 suite("Independent Coloring Test", () => {
-    const settings = new Settings(0, false, false, false, ColorMode.Independent,
+    const independentSettings: [[{}]] =
         [
-            "()",
-            "[]",
-            "{}",
             [
-                "Gold",
-                "Orchid",
-                "LightSkyBlue",
+                "()",
+                [
+                    "Gold",
+                    "Orchid",
+                    "LightSkyBlue",
+                ],
+                "Red",
             ],
-            "Red",
-        ]);
+            [
+                "[]",
+                [
+                    "Gold",
+                    "Orchid",
+                    "LightSkyBlue",
+                ],
+                "Red",
+            ],
+            [
+                "{}",
+                [
+                    "Gold",
+                    "Orchid",
+                    "LightSkyBlue",
+                ],
+                "Red",
+            ]
+        ];
+
+    const settings = new Settings({
+        colorMode: ColorMode.Independent,
+        independentSettings,
+        timeOutLength: 0,
+    });
 
     test("Line 1", () => {
         {
@@ -1066,18 +1100,43 @@ suite("Independent Coloring Test", () => {
 });
 
 suite("Independent Coloring Test Unique Opening Color", () => {
-    const settings = new Settings(0, true, false, false, ColorMode.Independent,
+    const independentSettings: [[{}]] =
         [
-            "()",
-            "[]",
-            "{}",
             [
-                "Gold",
-                "Orchid",
-                "LightSkyBlue",
+                "()",
+                [
+                    "Gold",
+                    "Orchid",
+                    "LightSkyBlue",
+                ],
+                "Red",
             ],
-            "Red",
-        ]);
+            [
+                "[]",
+                [
+                    "Gold",
+                    "Orchid",
+                    "LightSkyBlue",
+                ],
+                "Red",
+            ],
+            [
+                "{}",
+                [
+                    "Gold",
+                    "Orchid",
+                    "LightSkyBlue",
+                ],
+                "Red",
+            ]
+        ];
+
+    const settings = new Settings({
+        colorMode: ColorMode.Independent,
+        forceUniqueOpeningColor: true,
+        independentSettings,
+        timeOutLength: 0,
+    });
 
     test("Line 1", () => {
         {
@@ -1316,18 +1375,23 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 });
 
 suite("Bracket and quote test", () => {
-    const settings = new Settings(0, false, false, false, ColorMode.Consecutive,
+    const consecutiveSettings: [{}] = [
+        "()",
+        "[]",
+        "{}",
         [
-            "()",
-            "[]",
-            "{}",
-            [
-                "Gold",
-                "Orchid",
-                "LightSkyBlue",
-            ],
-            "Red",
-        ]);
+            "Gold",
+            "Orchid",
+            "LightSkyBlue",
+        ],
+        "Red",
+    ];
+
+    const settings = new Settings({
+        colorMode: ColorMode.Consecutive,
+        consecutiveSettings,
+        timeOutLength: 0,
+    });
 
     test("Line 5", () => {
         {

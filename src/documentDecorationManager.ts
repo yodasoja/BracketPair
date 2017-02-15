@@ -7,7 +7,7 @@ export default class DocumentDecorationManager {
     private readonly settings: Settings;
 
     constructor(settings?: Settings) {
-        this.settings = settings !== undefined ? settings : new Settings();
+        this.settings = settings !== undefined ? settings : new Settings({});
     }
 
     public updateDecorations(document: vscode.TextDocument) {
