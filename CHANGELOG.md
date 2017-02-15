@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.7.1
+Added backticks `` ` `` as quote modifier
+
 ### 0.7.0
 Ignore brackets in quotes by default  
 Added `"bracketPairColorizer.colorizeQuotes"` setting to toggle

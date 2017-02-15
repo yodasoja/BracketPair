@@ -75,8 +75,6 @@ export default class TextLine {
     }
 
     private checkBackwardsForStringModifiers(startPos: number): void {
-        // If it's already commented, nothing can change
-
         for (let i = startPos - 1; i >= this.lastModifierCheckPos; i--) {
             // Double line comments consume everything else
             if (!this.settings.colorizeComments && this.isComment) {
@@ -107,6 +105,14 @@ export default class TextLine {
                 continue;
             }
 
+            // If backtick quotes open, only check for closing quotes
+            if (!this.settings.colorizeQuotes && this.lineState.backTickModifiers > 0) {
+                if (this.contents[i] === "`" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                    this.lineState.backTickModifiers--;
+                }
+                continue;
+            }
+
             // Else check for opening modifiers
             if (!this.settings.colorizeQuotes && this.contents[i] === "'" &&
                 (i === 0 || this.contents[i - 1] !== "\\")) {
@@ -117,6 +123,12 @@ export default class TextLine {
             if (!this.settings.colorizeQuotes && this.contents[i] === "\"" &&
                 (i === 0 || this.contents[i - 1] !== "\\")) {
                 this.lineState.doubleQuoteModifiers++;
+                continue;
+            }
+
+            if (!this.settings.colorizeQuotes && this.contents[i] === "`" &&
+                (i === 0 || this.contents[i - 1] !== "\\")) {
+                this.lineState.backTickModifiers++;
                 continue;
             }
 

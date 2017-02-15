@@ -8,6 +8,7 @@ import SingularIndex from "./singularIndex";
 export default class LineState {
     public multilineModifiers = 0;
     public singleQuoteModifiers = 0;
+    public backTickModifiers = 0;
     public doubleQuoteModifiers = 0;
     protected readonly settings: Settings;
     protected previousBracketColor = "";
@@ -21,6 +22,7 @@ export default class LineState {
             multilineModifiers: number,
             singleQuoteModifiers: number,
             doubleQuoteModifiers: number,
+            backTickModifiers: number,
         }) {
         this.settings = settings;
 
@@ -30,6 +32,7 @@ export default class LineState {
             this.multilineModifiers = previousState.multilineModifiers;
             this.singleQuoteModifiers = previousState.singleQuoteModifiers;
             this.doubleQuoteModifiers = previousState.doubleQuoteModifiers;
+            this.backTickModifiers = previousState.backTickModifiers;
         }
         else {
             switch (settings.colorMode) {
@@ -84,6 +87,7 @@ export default class LineState {
         return new LineState(
             this.settings,
             {
+                backTickModifiers: this.backTickModifiers,
                 bracketColor: this.previousBracketColor,
                 colorIndexes: this.colorIndexes.clone(),
                 doubleQuoteModifiers: this.doubleQuoteModifiers,
@@ -94,7 +98,8 @@ export default class LineState {
 
     public isQuoted(): boolean {
         return this.doubleQuoteModifiers !== 0 ||
-            this.singleQuoteModifiers !== 0;
+            this.singleQuoteModifiers !== 0 ||
+            this.backTickModifiers !== 0;
     }
 
     public isMultilineCommented(): boolean {
