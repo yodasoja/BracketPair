@@ -894,7 +894,7 @@ suite("Independent Coloring Test", () => {
                     "LightSkyBlue",
                 ],
                 "Red",
-            ]
+            ],
         ];
 
     const settings = new Settings({
@@ -1128,7 +1128,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
                     "LightSkyBlue",
                 ],
                 "Red",
-            ]
+            ],
         ];
 
     const settings = new Settings({
