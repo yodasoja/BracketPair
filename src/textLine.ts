@@ -75,7 +75,7 @@ export default class TextLine {
     }
 
     private checkBackwardsForStringModifiers(startPos: number): void {
-        for (let i = startPos - 1; i >= this.lastModifierCheckPos; i--) {
+        for (let i = this.lastModifierCheckPos; i < startPos; i++) {
             // Double line comments consume everything else
             if (!this.settings.colorizeComments && this.isComment) {
                 break;
@@ -114,12 +114,6 @@ export default class TextLine {
             }
 
             // Else we are not in a scope
-
-            // Count closing multi-lines
-            if (!this.settings.colorizeComments && this.contents[i] === "*"
-                && this.contents[i + 1] === "/") {
-                this.lineState.multilineModifiers--;
-            }
 
             // Count opening single quotes
             if (!this.settings.colorizeQuotes && this.contents[i] === "'" &&
