@@ -74,6 +74,15 @@ export default class TextLine {
         }
     }
 
+    private isEscaped(index: number): boolean {
+        let counter = 0;
+        while (index > 0 && this.contents[--index] === "\\") {
+            counter++;
+        }
+
+        return counter % 2 === 1;
+    }
+
     private checkBackwardsForStringModifiers(startPos: number): void {
         for (let i = this.lastModifierCheckPos; i < startPos; i++) {
             // Double line comments consume everything else
@@ -91,7 +100,7 @@ export default class TextLine {
 
             // If single quotes open, only check for closing quotes
             if (!this.settings.colorizeQuotes && this.lineState.singleQuoteModifiers > 0) {
-                if (this.contents[i] === "'" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                if (this.contents[i] === "'" && !this.isEscaped(i)) {
                     this.lineState.singleQuoteModifiers--;
                 }
                 continue;
@@ -99,7 +108,7 @@ export default class TextLine {
 
             // If double quotes open, only check for closing quotes
             if (!this.settings.colorizeQuotes && this.lineState.doubleQuoteModifiers > 0) {
-                if (this.contents[i] === "\"" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                if (this.contents[i] === "\"" && !this.isEscaped(i)) {
                     this.lineState.doubleQuoteModifiers--;
                 }
                 continue;
@@ -107,7 +116,7 @@ export default class TextLine {
 
             // If backtick quotes open, only check for closing quotes
             if (!this.settings.colorizeQuotes && this.lineState.backTickModifiers > 0) {
-                if (this.contents[i] === "`" && (i === 0 || this.contents[i - 1] !== "\\")) {
+                if (this.contents[i] === "`" && !this.isEscaped(i)) {
                     this.lineState.backTickModifiers--;
                 }
                 continue;
@@ -117,21 +126,21 @@ export default class TextLine {
 
             // Count opening single quotes
             if (!this.settings.colorizeQuotes && this.contents[i] === "'" &&
-                (i === 0 || this.contents[i - 1] !== "\\")) {
+                !this.isEscaped(i)) {
                 this.lineState.singleQuoteModifiers++;
                 continue;
             }
 
             // Count opening double quotes
             if (!this.settings.colorizeQuotes && this.contents[i] === "\"" &&
-                (i === 0 || this.contents[i - 1] !== "\\")) {
+                !this.isEscaped(i)) {
                 this.lineState.doubleQuoteModifiers++;
                 continue;
             }
 
             // Count opening backticks
             if (!this.settings.colorizeQuotes && this.contents[i] === "`" &&
-                (i === 0 || this.contents[i - 1] !== "\\")) {
+                !this.isEscaped(i)) {
                 this.lineState.backTickModifiers++;
                 continue;
             }
