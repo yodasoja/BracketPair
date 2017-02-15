@@ -1912,36 +1912,26 @@ suite("Quotes only test", () => {
 
             const colorRangesGold = line10.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 6);
+                assert.equal(colorRangesGold.length, 4);
                 assert(colorRangesGold[0].start.line === 10 &&
-                    colorRangesGold[0].start.character === 2 &&
+                    colorRangesGold[0].start.character === 6 &&
                     colorRangesGold[0].end.line === 10 &&
-                    colorRangesGold[0].end.character === 3);
+                    colorRangesGold[0].end.character === 7);
 
                 assert(colorRangesGold[1].start.line === 10 &&
-                    colorRangesGold[1].start.character === 3 &&
+                    colorRangesGold[1].start.character === 7 &&
                     colorRangesGold[1].end.line === 10 &&
-                    colorRangesGold[1].end.character === 4);
+                    colorRangesGold[1].end.character === 8);
 
                 assert(colorRangesGold[2].start.line === 10 &&
-                    colorRangesGold[2].start.character === 6 &&
+                    colorRangesGold[2].start.character === 10 &&
                     colorRangesGold[2].end.line === 10 &&
-                    colorRangesGold[2].end.character === 7);
+                    colorRangesGold[2].end.character === 11);
 
                 assert(colorRangesGold[3].start.line === 10 &&
-                    colorRangesGold[3].start.character === 7 &&
+                    colorRangesGold[3].start.character === 11 &&
                     colorRangesGold[3].end.line === 10 &&
-                    colorRangesGold[3].end.character === 8);
-
-                assert(colorRangesGold[4].start.line === 10 &&
-                    colorRangesGold[4].start.character === 10 &&
-                    colorRangesGold[4].end.line === 10 &&
-                    colorRangesGold[4].end.character === 11);
-
-                assert(colorRangesGold[5].start.line === 10 &&
-                    colorRangesGold[5].start.character === 11 &&
-                    colorRangesGold[5].end.line === 10 &&
-                    colorRangesGold[5].end.character === 12);
+                    colorRangesGold[3].end.character === 12);
             }
             else {
                 assert(false);

@@ -113,31 +113,44 @@ export default class TextLine {
                 continue;
             }
 
-            // Else check for opening modifiers
+            // Else we are not in a scope
+
+            // Count closing multi-lines
+            if (!this.settings.colorizeComments && this.contents[i] === "*"
+                && this.contents[i + 1] === "/") {
+                this.lineState.multilineModifiers--;
+            }
+
+            // Count opening single quotes
             if (!this.settings.colorizeQuotes && this.contents[i] === "'" &&
                 (i === 0 || this.contents[i - 1] !== "\\")) {
                 this.lineState.singleQuoteModifiers++;
                 continue;
             }
 
+            // Count opening double quotes
             if (!this.settings.colorizeQuotes && this.contents[i] === "\"" &&
                 (i === 0 || this.contents[i - 1] !== "\\")) {
                 this.lineState.doubleQuoteModifiers++;
                 continue;
             }
 
+            // Count opening backticks
             if (!this.settings.colorizeQuotes && this.contents[i] === "`" &&
                 (i === 0 || this.contents[i - 1] !== "\\")) {
                 this.lineState.backTickModifiers++;
                 continue;
             }
 
+            // Count opening comments
             if (!this.settings.colorizeComments && this.contents[i] === "/") {
+                // Single
                 if (this.contents[i + 1] === "/") {
                     this.isComment = true;
                     continue;
                 }
 
+                // Multiline
                 if (this.contents[i + 1] === "*") {
                     this.lineState.multilineModifiers++;
                     continue;

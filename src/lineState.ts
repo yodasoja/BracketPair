@@ -97,12 +97,12 @@ export default class LineState {
     }
 
     public isQuoted(): boolean {
-        return this.doubleQuoteModifiers !== 0 ||
-            this.singleQuoteModifiers !== 0 ||
-            this.backTickModifiers !== 0;
+        return this.doubleQuoteModifiers > 0 ||
+            this.singleQuoteModifiers > 0 ||
+            this.backTickModifiers > 0;
     }
 
     public isMultilineCommented(): boolean {
-        return this.multilineModifiers !== 0;
+        return this.multilineModifiers > 0;
     }
 }
