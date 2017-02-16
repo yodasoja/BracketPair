@@ -31,16 +31,9 @@ export default class TextLine {
     }
 
     public addBracket(bracket: string, range: vscode.Range) {
-        this.checkForStringModifiers(range);
-
-        if (!this.settings.colorizeComments) {
-            if (this.lineState.isLineCommented || this.lineState.isMultiLineCommented()) {
-                return;
-            }
-        }
-
-        if (!this.settings.colorizeQuotes) {
-            if (this.lineState.isQuoted()) {
+        if (this.settings.contextualParsing) {
+            this.checkForStringModifiers(range);
+            if (this.lineState.isLineCommented || this.lineState.isMultiLineCommented() || this.lineState.isQuoted()) {
                 return;
             }
         }
@@ -80,13 +73,13 @@ export default class TextLine {
 
         for (let i = this.lastModifierCheckPos; i < bracketStartIndex; i++) {
             // Single line comments consume everything else
-            if (!this.settings.colorizeComments && this.lineState.isLineCommented) {
+            if (this.lineState.isLineCommented) {
                 break;
             }
 
             // We are in a scope, search for closing modifiers
             // These checks should not fallthrough
-            if (!this.settings.colorizeComments && this.lineState.isMultiLineCommented()) {
+            if (this.lineState.isMultiLineCommented()) {
                 const result = this.checkClosingPairModifier(i, this.lineState.multiLineState.blockCommentModifiers);
 
                 if (result !== undefined) {
@@ -95,7 +88,7 @@ export default class TextLine {
                 continue;
             }
 
-            if (!this.settings.colorizeQuotes && this.lineState.isQuoted()) {
+            if (this.lineState.isQuoted()) {
                 const result = this.checkClosingPairModifier(i, this.lineState.multiLineState.quoteModifiers);
 
                 if (result !== undefined) {
@@ -106,7 +99,7 @@ export default class TextLine {
 
             // Else we are not in a scope, search for opening modifiers
             // These checks fallthrough if unsuccessful
-            if (!this.settings.colorizeQuotes) {
+            {
                 const result = this.checkOpeningPairModifier(i, this.lineState.multiLineState.quoteModifiers);
 
                 if (result !== undefined) {
@@ -115,7 +108,7 @@ export default class TextLine {
                 }
             }
 
-            if (!this.settings.colorizeComments) {
+            {
                 const result = this.checkOpeningPairModifier(i, this.lineState.multiLineState.blockCommentModifiers);
 
                 if (result !== undefined) {
@@ -124,7 +117,7 @@ export default class TextLine {
                 }
             }
 
-            if (!this.settings.colorizeComments) {
+            {
                 const result = this.checkOpeningSingleModifier(i, this.settings.singleCommentModifiers);
 
                 if (result !== undefined) {

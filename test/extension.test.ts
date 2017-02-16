@@ -14,58 +14,57 @@ import DocumentDecoration from "../src/DocumentDecoration";
 import * as myExtension from "../src/extension";
 import Settings from "../src/settings";
 
+// tslint:disable:object-literal-sort-keys
+
 // Defines a Mocha test suite to group tests of similar kind together
 suite("Settings Tests", () => {
 
     test("timeOut", () => {
-        const settings = new Settings({ timeOutLength: 0 });
+        const settings = new Settings({ languageID: "typescript", timeOutLength: 0 });
         assert.equal(settings.timeOutLength, 0);
     });
 
     test("forceUniqueOpeningColor", () => {
-        let settings = new Settings({ forceUniqueOpeningColor: true });
+        let settings = new Settings({ languageID: "typescript", forceUniqueOpeningColor: true });
         assert.equal(settings.forceUniqueOpeningColor, true);
 
-        settings = new Settings({ forceUniqueOpeningColor: false });
+        settings = new Settings({ languageID: "typescript", forceUniqueOpeningColor: false });
         assert.equal(settings.forceUniqueOpeningColor, false);
     });
 
     test("forceIterationColorCycle", () => {
-        let settings = new Settings({ forceIterationColorCycle: true });
+        let settings = new Settings({ languageID: "typescript", forceIterationColorCycle: true });
         assert.equal(settings.forceIterationColorCycle, true);
 
-        settings = new Settings({ forceIterationColorCycle: false });
+        settings = new Settings({ languageID: "typescript", forceIterationColorCycle: false });
         assert.equal(settings.forceIterationColorCycle, false);
     });
 
-    test("colorizeComments", () => {
-        let settings = new Settings({ colorizeComments: true });
-        assert.equal(settings.colorizeComments, true);
+    test("contextualParsing", () => {
+        let settings = new Settings({ languageID: "typescript", contextualParsing: true });
+        assert.equal(settings.contextualParsing, true);
 
-        settings = new Settings({ colorizeComments: false });
-        assert.equal(settings.colorizeComments, false);
-    });
-
-    test("colorizeQuotes", () => {
-        let settings = new Settings({ colorizeQuotes: true });
-        assert.equal(settings.colorizeQuotes, true);
-
-        settings = new Settings({ colorizeQuotes: false });
-        assert.equal(settings.colorizeQuotes, false);
+        settings = new Settings({ languageID: "typescript", contextualParsing: false });
+        assert.equal(settings.contextualParsing, false);
     });
 
     test("colorMode", () => {
-        let settings = new Settings({ colorMode: ColorMode.Independent });
+        let settings = new Settings({ languageID: "typescript", colorMode: ColorMode.Independent });
         assert.equal(settings.colorMode, ColorMode.Independent);
 
-        settings = new Settings({ colorMode: ColorMode.Consecutive });
+        settings = new Settings({ languageID: "typescript", colorMode: ColorMode.Consecutive });
         assert.equal(settings.colorMode, ColorMode.Consecutive);
     });
 
     test("consecutivePairColors", () => {
         const consecutiveSettings: [{}] = ["ab", "cd", ["color0", "color1"], "orphanColor"];
 
-        const settings = new Settings({ timeOutLength: 0, colorMode: ColorMode.Consecutive, consecutiveSettings });
+        const settings = new Settings({
+            languageID: "typescript",
+            timeOutLength: 0,
+            colorMode: ColorMode.Consecutive,
+            consecutiveSettings,
+        });
 
         assert.equal(settings.colorMode, ColorMode.Consecutive);
 
@@ -104,7 +103,12 @@ suite("Settings Tests", () => {
                 ],
             ];
 
-        const settings = new Settings({ timeOutLength: 0, colorMode: ColorMode.Independent, independentSettings });
+        const settings = new Settings({
+            languageID: "typescript",
+            timeOutLength: 0,
+            colorMode: ColorMode.Independent,
+            independentSettings,
+        });
         assert.equal(settings.colorMode, ColorMode.Independent);
         assert.equal(settings.bracketPairs[0].openCharacter, "a");
         assert.equal(settings.bracketPairs[0].closeCharacter, "b");
@@ -133,7 +137,12 @@ suite("Consecutive Coloring Test", () => {
         ],
         "Red",
     ];
-    const settings = new Settings({ timeOutLength: 0, colorMode: ColorMode.Consecutive, consecutiveSettings });
+    const settings = new Settings({
+        languageID: "typescript",
+        timeOutLength: 0,
+        colorMode: ColorMode.Consecutive,
+        consecutiveSettings,
+    });
 
     test("Line 1", () => {
         {
@@ -361,6 +370,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
     ];
 
     const settings = new Settings({
+        languageID: "typescript",
         colorMode: ColorMode.Consecutive,
         consecutiveSettings,
         forceUniqueOpeningColor: true,
@@ -626,6 +636,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
     ];
 
     const settings = new Settings({
+        languageID: "typescript",
         colorMode: ColorMode.Consecutive,
         consecutiveSettings,
         forceIterationColorCycle: true,
@@ -914,6 +925,7 @@ suite("Independent Coloring Test", () => {
         ];
 
     const settings = new Settings({
+        languageID: "typescript",
         colorMode: ColorMode.Independent,
         independentSettings,
         timeOutLength: 0,
@@ -1148,6 +1160,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
         ];
 
     const settings = new Settings({
+        languageID: "typescript",
         colorMode: ColorMode.Independent,
         forceUniqueOpeningColor: true,
         independentSettings,
@@ -1404,6 +1417,7 @@ suite("Comment and quote", () => {
     ];
 
     const settings = new Settings({
+        languageID: "typescript",
         colorMode: ColorMode.Consecutive,
         consecutiveSettings,
         timeOutLength: 0,
@@ -1577,7 +1591,7 @@ suite("Comment and quote", () => {
     });
 });
 
-suite("Comments only", () => {
+suite("Typescript contextural parsing", () => {
     const consecutiveSettings: [{}] = [
         "()",
         "[]",
@@ -1591,445 +1605,8 @@ suite("Comments only", () => {
     ];
 
     const settings = new Settings({
-        colorMode: ColorMode.Consecutive,
-        colorizeQuotes: true,
-        consecutiveSettings,
-        timeOutLength: 0,
-    });
-
-    test("Line 5", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line5 = document.getLine(5, textDocument);
-
-            const colorRangesGold = line5.colorRanges.get("Gold");
-            assert.equal(colorRangesGold, undefined);
-        }
-    });
-
-    test("Line 6", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line6 = document.getLine(6, textDocument);
-
-            const colorRangesGold = line6.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 7", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line7 = document.getLine(7, textDocument);
-
-            const colorRangesGold = line7.colorRanges.get("Gold");
-            assert.equal(colorRangesGold, undefined);
-        }
-    });
-
-    test("Line 8", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line8 = document.getLine(8, textDocument);
-
-            const colorRangesGold = line8.colorRanges.get("Gold");
-            assert.equal(colorRangesGold, undefined);
-        }
-    });
-
-    test("Line 9", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line9 = document.getLine(9, textDocument);
-
-            const colorRangesGold = line9.colorRanges.get("Gold");
-            assert.equal(colorRangesGold, undefined);
-        }
-    });
-
-    test("Line 10", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line10 = document.getLine(10, textDocument);
-
-            const colorRangesGold = line10.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-                assert(colorRangesGold[0].start.line === 10 &&
-                    colorRangesGold[0].start.character === 6 &&
-                    colorRangesGold[0].end.line === 10 &&
-                    colorRangesGold[0].end.character === 7);
-
-                assert(colorRangesGold[1].start.line === 10 &&
-                    colorRangesGold[1].start.character === 7 &&
-                    colorRangesGold[1].end.line === 10 &&
-                    colorRangesGold[1].end.character === 8);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 11", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line11 = document.getLine(11, textDocument);
-
-            const colorRangesGold = line11.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-                assert(colorRangesGold[0].start.line === 11 &&
-                    colorRangesGold[0].start.character === 1 &&
-                    colorRangesGold[0].end.line === 11 &&
-                    colorRangesGold[0].end.character === 2);
-
-                assert(colorRangesGold[1].start.line === 11 &&
-                    colorRangesGold[1].start.character === 2 &&
-                    colorRangesGold[1].end.line === 11 &&
-                    colorRangesGold[1].end.character === 3);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 12", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line12 = document.getLine(12, textDocument);
-
-            const colorRangesGold = line12.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-                assert(colorRangesGold[0].start.line === 12 &&
-                    colorRangesGold[0].start.character === 2 &&
-                    colorRangesGold[0].end.line === 12 &&
-                    colorRangesGold[0].end.character === 3);
-
-                assert(colorRangesGold[1].start.line === 12 &&
-                    colorRangesGold[1].start.character === 3 &&
-                    colorRangesGold[1].end.line === 12 &&
-                    colorRangesGold[1].end.character === 4);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 13", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line13 = document.getLine(13, textDocument);
-
-            const colorRangesGold = line13.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-                assert(colorRangesGold[0].start.line === 13 &&
-                    colorRangesGold[0].start.character === 1 &&
-                    colorRangesGold[0].end.line === 13 &&
-                    colorRangesGold[0].end.character === 2);
-
-                assert(colorRangesGold[1].start.line === 13 &&
-                    colorRangesGold[1].start.character === 2 &&
-                    colorRangesGold[1].end.line === 13 &&
-                    colorRangesGold[1].end.character === 3);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 14", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line14 = document.getLine(14, textDocument);
-
-            const colorRangesGold = line14.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 4);
-                assert(colorRangesGold[0].start.line === 14 &&
-                    colorRangesGold[0].start.character === 0 &&
-                    colorRangesGold[0].end.line === 14 &&
-                    colorRangesGold[0].end.character === 1);
-
-                assert(colorRangesGold[1].start.line === 14 &&
-                    colorRangesGold[1].start.character === 1 &&
-                    colorRangesGold[1].end.line === 14 &&
-                    colorRangesGold[1].end.character === 2);
-
-                assert(colorRangesGold[2].start.line === 14 &&
-                    colorRangesGold[2].start.character === 3 &&
-                    colorRangesGold[2].end.line === 14 &&
-                    colorRangesGold[2].end.character === 4);
-
-                assert(colorRangesGold[3].start.line === 14 &&
-                    colorRangesGold[3].start.character === 4 &&
-                    colorRangesGold[3].end.line === 14 &&
-                    colorRangesGold[3].end.character === 5);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-});
-
-suite("Quotes only", () => {
-    const consecutiveSettings: [{}] = [
-        "()",
-        "[]",
-        "{}",
-        [
-            "Gold",
-            "Orchid",
-            "LightSkyBlue",
-        ],
-        "Red",
-    ];
-
-    const settings = new Settings({
-        colorMode: ColorMode.Consecutive,
-        colorizeComments: true,
-        consecutiveSettings,
-        timeOutLength: 0,
-    });
-
-    test("Line 5", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line5 = document.getLine(5, textDocument);
-
-            const colorRangesGold = line5.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 6", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line6 = document.getLine(6, textDocument);
-
-            const colorRangesGold = line6.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 7", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line7 = document.getLine(7, textDocument);
-
-            const colorRangesGold = line7.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 8", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line8 = document.getLine(8, textDocument);
-
-            const colorRangesGold = line8.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 9", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line9 = document.getLine(9, textDocument);
-
-            const colorRangesGold = line9.colorRanges.get("Gold");
-            assert.equal(colorRangesGold, undefined);
-        }
-    });
-
-    test("Line 10", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line10 = document.getLine(10, textDocument);
-
-            const colorRangesGold = line10.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 4);
-                assert(colorRangesGold[0].start.line === 10 &&
-                    colorRangesGold[0].start.character === 6 &&
-                    colorRangesGold[0].end.line === 10 &&
-                    colorRangesGold[0].end.character === 7);
-
-                assert(colorRangesGold[1].start.line === 10 &&
-                    colorRangesGold[1].start.character === 7 &&
-                    colorRangesGold[1].end.line === 10 &&
-                    colorRangesGold[1].end.character === 8);
-
-                assert(colorRangesGold[2].start.line === 10 &&
-                    colorRangesGold[2].start.character === 10 &&
-                    colorRangesGold[2].end.line === 10 &&
-                    colorRangesGold[2].end.character === 11);
-
-                assert(colorRangesGold[3].start.line === 10 &&
-                    colorRangesGold[3].start.character === 11 &&
-                    colorRangesGold[3].end.line === 10 &&
-                    colorRangesGold[3].end.character === 12);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 11", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line11 = document.getLine(11, textDocument);
-
-            const colorRangesGold = line11.colorRanges.get("Gold");
-            assert.equal(colorRangesGold, undefined);
-        }
-    });
-
-    test("Line 12", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line12 = document.getLine(12, textDocument);
-
-            const colorRangesGold = line12.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-                assert(colorRangesGold[0].start.line === 12 &&
-                    colorRangesGold[0].start.character === 2 &&
-                    colorRangesGold[0].end.line === 12 &&
-                    colorRangesGold[0].end.character === 3);
-
-                assert(colorRangesGold[1].start.line === 12 &&
-                    colorRangesGold[1].start.character === 3 &&
-                    colorRangesGold[1].end.line === 12 &&
-                    colorRangesGold[1].end.character === 4);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-
-    test("Line 13", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line13 = document.getLine(13, textDocument);
-
-            const colorRangesGold = line13.colorRanges.get("Gold");
-            assert.equal(colorRangesGold, undefined);
-        }
-    });
-
-    test("Line 14", () => {
-        {
-            const textDocument = vscode.window.activeTextEditor.document;
-            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
-            document.triggerUpdateDecorations();
-            const line14 = document.getLine(14, textDocument);
-
-            const colorRangesGold = line14.colorRanges.get("Gold");
-            if (colorRangesGold !== undefined) {
-                assert.equal(colorRangesGold.length, 2);
-                assert(colorRangesGold[0].start.line === 14 &&
-                    colorRangesGold[0].start.character === 3 &&
-                    colorRangesGold[0].end.line === 14 &&
-                    colorRangesGold[0].end.character === 4);
-
-                assert(colorRangesGold[1].start.line === 14 &&
-                    colorRangesGold[1].start.character === 4 &&
-                    colorRangesGold[1].end.line === 14 &&
-                    colorRangesGold[1].end.character === 5);
-            }
-            else {
-                assert(false);
-            }
-        }
-    });
-});
-
-suite("Comment quote mixing", () => {
-    const consecutiveSettings: [{}] = [
-        "()",
-        "[]",
-        "{}",
-        [
-            "Gold",
-            "Orchid",
-            "LightSkyBlue",
-        ],
-        "Red",
-    ];
-
-    const settings = new Settings({
+        languageID: "typescript",
+        contextualParsing: true,
         colorMode: ColorMode.Consecutive,
         consecutiveSettings,
         timeOutLength: 0,

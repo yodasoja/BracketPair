@@ -28,15 +28,10 @@
             "type": "object",
             "title": "BracketPair",
             "properties": {
-                "bracketPairColorizer.colorizeComments": {
+                "bracketPairColorizer.contextualParsing": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "Determines if brackets in comments should also be colorized"
-                },
-                "bracketPairColorizer.colorizeQuotes": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Determines if brackets in quotes should also be colorized"
+                    "default": true,
+                    "description": "Ignore brackets in comments or strings"
                 },
                 "bracketPairColorizer.timeOut": {
                     "type": "number",

@@ -7,8 +7,7 @@ export default class Settings {
     public readonly timeOutLength: number;
     public readonly forceUniqueOpeningColor: boolean;
     public readonly forceIterationColorCycle: boolean;
-    public readonly colorizeComments: boolean;
-    public readonly colorizeQuotes: boolean;
+    public readonly contextualParsing: boolean;
     public readonly bracketPairs: BracketPair[] = [];
     public readonly regexPattern: string;
     public readonly decorations: Map<string, vscode.TextEditorDecorationType>;
@@ -18,30 +17,83 @@ export default class Settings {
     public quoteModifiers: ModifierPair[] = [];
 
     constructor(settings: {
-        languageID?: string,
+        languageID: string,
         timeOutLength?: number,
         forceUniqueOpeningColor?: boolean,
         forceIterationColorCycle?: boolean,
-        colorizeComments?: boolean,
-        colorizeQuotes?: boolean,
+        contextualParsing?: boolean,
         colorMode?: ColorMode,
         consecutiveSettings?: [{}],
         independentSettings?: [[{}]],
     },
     ) {
-        // TODO Remember there is exceptional case here..
-        if (settings.languageID !== undefined && settings.languageID === "python") {
-            this.singleCommentModifiers.push("#");
+        const hashTag = "#";
+        const doubleQuote = "\"";
+        const singleQuote = "'";
+        const backtick = "`";
+        const doubleSlash = "//";
+        const slashBlockOpen = "/*";
+        const slashBlockClose = "*/";
+        const rubyBegin = "=begin";
+        const rubyEnd = "=end";
+
+        let supportedLanguageID = true;
+
+        if (settings.languageID === "python") {
+            this.singleCommentModifiers.push(hashTag);
+
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+            this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
+        }
+        else if (
+            settings.languageID === "typescript" ||
+            settings.languageID === "javascript") {
+            this.singleCommentModifiers.push(doubleSlash);
+
+            this.blockCommentModifiers.push(new ModifierPair(slashBlockOpen, slashBlockClose));
+
+            this.quoteModifiers.push(new ModifierPair(backtick, backtick));
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+            this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
+        }
+        else if (
+            settings.languageID === "c" ||
+            settings.languageID === "cpp" ||
+            settings.languageID === "csharp" ||
+            settings.languageID === "java") {
+            this.singleCommentModifiers.push(doubleSlash);
+
+            this.blockCommentModifiers.push(new ModifierPair(slashBlockOpen, slashBlockClose));
+
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+            this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
+        }
+        else if (settings.languageID === "php") {
+            this.singleCommentModifiers.push(doubleSlash);
+            this.singleCommentModifiers.push(hashTag);
+
+            this.blockCommentModifiers.push(new ModifierPair(slashBlockOpen, slashBlockClose));
+
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+            this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
+        }
+        else if (settings.languageID === "ruby") {
+            this.singleCommentModifiers.push(hashTag);
+
+            this.blockCommentModifiers.push(new ModifierPair(rubyBegin, rubyEnd));
+
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+            this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
+        }
+        else if (settings.languageID === "r") {
+            this.singleCommentModifiers.push(hashTag);
+
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+            this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
         }
         else {
-            this.singleCommentModifiers.push("//");
-            this.quoteModifiers.push(new ModifierPair("`", "`"));
-
-            this.blockCommentModifiers.push(new ModifierPair("/*", "*/"));
+            supportedLanguageID = false;
         }
-
-        this.quoteModifiers.push(new ModifierPair("\"", "\""));
-        this.quoteModifiers.push(new ModifierPair("'", "'"));
 
         const configuration = vscode.workspace.getConfiguration();
 
@@ -53,13 +105,13 @@ export default class Settings {
             settings.forceIterationColorCycle :
             configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
 
-        this.colorizeComments = settings.colorizeComments !== undefined ?
-            settings.colorizeComments :
-            configuration.get("bracketPairColorizer.colorizeComments") as boolean;
-
-        this.colorizeQuotes = settings.colorizeQuotes !== undefined ?
-            settings.colorizeQuotes :
-            configuration.get("bracketPairColorizer.colorizeQuotes") as boolean;
+        if (supportedLanguageID) {
+            this.contextualParsing = settings.contextualParsing !== undefined ?
+                settings.contextualParsing : configuration.get("bracketPairColorizer.contextualParsing") as boolean;
+        }
+        else {
+            this.contextualParsing = false;
+        }
 
         this.colorMode = settings.colorMode !== undefined ?
             settings.colorMode :

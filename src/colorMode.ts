@@ -1,8 +1,6 @@
-'use strict';
-
 enum ColorMode {
     Consecutive,
-    Independent
+    Independent,
 }
 
 export default ColorMode;
