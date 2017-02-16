@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import LineState from "./lineState";
+import ModifierPair from "./modifierPair";
 import MultiLineState from "./multiLineState";
 import Settings from "./settings";
 
@@ -73,6 +74,105 @@ export default class TextLine {
         }
     }
 
+    private checkForStringModifiers(range?: vscode.Range): void {
+        const bracketStartIndex = range !== undefined ? range.start.character : this.contents.length;
+        const bracketEndIndex = range !== undefined ? range.end.character : this.contents.length;
+
+        for (let i = this.lastModifierCheckPos; i < bracketStartIndex; i++) {
+            // Single line comments consume everything else
+            if (!this.settings.colorizeComments && this.lineState.isConsumedByCommentModifier) {
+                break;
+            }
+
+            // We are in a scope, search for closing modifiers
+            // These checks should not fallthrough
+            if (!this.settings.colorizeComments && this.lineState.isMultiLineCommented()) {
+                const result = this.checkClosingPairModifier(i, this.lineState.multiLineState.commentModifiers);
+
+                if (result !== undefined) {
+                    i += result;
+                }
+                continue;
+            }
+
+            if (!this.settings.colorizeQuotes && this.lineState.isQuoted()) {
+                const result = this.checkClosingPairModifier(i, this.lineState.multiLineState.quoteModifiers);
+
+                if (result !== undefined) {
+                    i += result;
+                }
+                continue;
+            }
+
+            // Else we are not in a scope, search for opening modifiers
+            // These checks fallthrough if unsuccessful
+            if (!this.settings.colorizeQuotes) {
+                const result = this.checkOpeningPairModifier(i, this.lineState.multiLineState.quoteModifiers);
+
+                if (result !== undefined) {
+                    i += result;
+                    continue;
+                }
+            }
+
+            if (!this.settings.colorizeComments) {
+                const result = this.checkOpeningPairModifier(i, this.lineState.multiLineState.commentModifiers);
+
+                if (result !== undefined) {
+                    i += result;
+                    continue;
+                }
+            }
+
+            if (!this.settings.colorizeComments) {
+                const result = this.checkOpeningSingleModifier(i, this.settings.singleCommentModifiers);
+
+                if (result !== undefined) {
+                    i += result;
+                    continue;
+                }
+            }
+        }
+
+        this.lastModifierCheckPos = bracketEndIndex;
+    }
+
+    private checkOpeningSingleModifier(index: number, modifiers: string[]): number | undefined {
+        for (const modifier of modifiers) {
+            const searchResult = this.contents.substr(index, modifier.length);
+            if (searchResult ===
+                modifier &&
+                (modifier.length !== 1 || !this.isEscaped(index))) {
+                this.lineState.isConsumedByCommentModifier = true;
+                return modifier.length - 1;
+            }
+        }
+    }
+
+    private checkOpeningPairModifier(index: number, modifierPairs: ModifierPair[]): number | undefined {
+        for (const modifier of modifierPairs) {
+            const searchResult = this.contents.substr(index, modifier.openingCharacter.length);
+            if (searchResult ===
+                modifier.openingCharacter &&
+                (modifier.openingCharacter.length !== 1 || !this.isEscaped(index))) {
+                modifier.counter++;
+                return modifier.openingCharacter.length - 1;
+            }
+        }
+    }
+
+    private checkClosingPairModifier(index: number, modifierPairs: ModifierPair[]): number | undefined {
+        for (const modifier of modifierPairs) {
+            const searchResult = this.contents.substr(index, modifier.closingCharacter.length);
+            if (searchResult ===
+                modifier.closingCharacter &&
+                (modifier.closingCharacter.length !== 1 || !this.isEscaped(index))) {
+                modifier.counter--;
+                return modifier.closingCharacter.length - 1;
+            }
+        }
+    }
+
     private isEscaped(index: number): boolean {
         let counter = 0;
         while (index > 0 && this.contents[--index] === "\\") {
@@ -80,104 +180,5 @@ export default class TextLine {
         }
 
         return counter % 2 === 1;
-    }
-
-    private checkForStringModifiers(range?: vscode.Range): void {
-        let incrementAmount = 1;
-        const bracketStartIndex = range !== undefined ? range.start.character : this.contents.length;
-        const bracketEndIndex = range !== undefined ? range.end.character : this.contents.length;
-
-        for (let i = this.lastModifierCheckPos; i < bracketStartIndex; i += incrementAmount) {
-            incrementAmount = 1;
-            // Single line comments consume everything else
-            if (!this.settings.colorizeComments && this.lineState.isConsumedByCommentModifier) {
-                break;
-            }
-
-            // We are in a scope, search for closing modifiers
-            if (!this.settings.colorizeComments && this.lineState.isMultiLineCommented()) {
-                let found = false;
-                for (const modifier of this.lineState.multiLineState.commentModifiers) {
-                    if (!found && modifier.counter > 0) {
-                        const searchResult = this.contents.substr(i, modifier.closingCharacter.length);
-                        if (searchResult === modifier.closingCharacter) {
-                            found = true;
-                            incrementAmount = searchResult.length;
-                            modifier.counter--;
-                        }
-                    }
-                }
-                continue;
-            }
-
-            if (!this.settings.colorizeQuotes && this.lineState.isQuoted()) {
-                let found = false;
-                for (const modifier of this.lineState.multiLineState.quoteModifiers) {
-                    if (!found && modifier.counter > 0) {
-                        const searchResult = this.contents.substr(i, modifier.closingCharacter.length);
-                        if (searchResult === modifier.closingCharacter) {
-                            found = true;
-                            incrementAmount = searchResult.length;
-                            modifier.counter--;
-                        }
-                    }
-                }
-                continue;
-            }
-
-            // Else we are not in a scope, search for opening modifiers
-            if (!this.settings.colorizeQuotes) {
-                let found = false;
-                for (const modifier of this.lineState.multiLineState.quoteModifiers) {
-                    if (!found) {
-                        const searchResult = this.contents.substr(i, modifier.openingCharacter.length);
-                        if (searchResult ===
-                            modifier.openingCharacter &&
-                            !this.isEscaped(i)) {
-                            found = true;
-                            incrementAmount = modifier.openingCharacter.length;
-                            modifier.counter++;
-                        }
-                    }
-                }
-
-                if (found) {
-                    continue;
-                }
-            }
-
-            if (!this.settings.colorizeComments) {
-                let found = false;
-                for (const modifier of this.lineState.multiLineState.commentModifiers) {
-                    if (!found) {
-                        const searchResult = this.contents.substr(i, modifier.openingCharacter.length);
-                        if (searchResult ===
-                            modifier.openingCharacter &&
-                            !this.isEscaped(i)) {
-                            found = true;
-                            incrementAmount = modifier.openingCharacter.length;
-                            modifier.counter++;
-                        }
-                    }
-                }
-
-                if (found) {
-                    continue;
-                }
-            }
-
-            if (!this.settings.colorizeComments) {
-                let found = false;
-                for (const modifier of this.settings.singleCommentModifiers) {
-                    const searchResult = this.contents.substring(i, modifier.length);
-                    if (!found && searchResult === modifier) {
-                        found = true;
-                        this.lineState.isConsumedByCommentModifier = true;
-                    }
-                }
-                continue;
-            }
-        }
-        this.lastModifierCheckPos = bracketEndIndex;
     }
 }
