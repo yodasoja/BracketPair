@@ -34,7 +34,7 @@ export default class TextLine {
         this.checkForStringModifiers(range);
 
         if (!this.settings.colorizeComments) {
-            if (this.lineState.isConsumedByCommentModifier || this.lineState.isMultiLineCommented()) {
+            if (this.lineState.isLineCommented || this.lineState.isMultiLineCommented()) {
                 return;
             }
         }
@@ -80,14 +80,14 @@ export default class TextLine {
 
         for (let i = this.lastModifierCheckPos; i < bracketStartIndex; i++) {
             // Single line comments consume everything else
-            if (!this.settings.colorizeComments && this.lineState.isConsumedByCommentModifier) {
+            if (!this.settings.colorizeComments && this.lineState.isLineCommented) {
                 break;
             }
 
             // We are in a scope, search for closing modifiers
             // These checks should not fallthrough
             if (!this.settings.colorizeComments && this.lineState.isMultiLineCommented()) {
-                const result = this.checkClosingPairModifier(i, this.lineState.multiLineState.commentModifiers);
+                const result = this.checkClosingPairModifier(i, this.lineState.multiLineState.blockCommentModifiers);
 
                 if (result !== undefined) {
                     i += result;
@@ -116,7 +116,7 @@ export default class TextLine {
             }
 
             if (!this.settings.colorizeComments) {
-                const result = this.checkOpeningPairModifier(i, this.lineState.multiLineState.commentModifiers);
+                const result = this.checkOpeningPairModifier(i, this.lineState.multiLineState.blockCommentModifiers);
 
                 if (result !== undefined) {
                     i += result;
@@ -140,10 +140,9 @@ export default class TextLine {
     private checkOpeningSingleModifier(index: number, modifiers: string[]): number | undefined {
         for (const modifier of modifiers) {
             const searchResult = this.contents.substr(index, modifier.length);
-            if (searchResult ===
-                modifier &&
+            if (searchResult === modifier &&
                 (modifier.length !== 1 || !this.isEscaped(index))) {
-                this.lineState.isConsumedByCommentModifier = true;
+                this.lineState.isLineCommented = true;
                 return modifier.length - 1;
             }
         }
@@ -152,8 +151,7 @@ export default class TextLine {
     private checkOpeningPairModifier(index: number, modifierPairs: ModifierPair[]): number | undefined {
         for (const modifier of modifierPairs) {
             const searchResult = this.contents.substr(index, modifier.openingCharacter.length);
-            if (searchResult ===
-                modifier.openingCharacter &&
+            if (searchResult === modifier.openingCharacter &&
                 (modifier.openingCharacter.length !== 1 || !this.isEscaped(index))) {
                 modifier.counter++;
                 return modifier.openingCharacter.length - 1;
@@ -164,8 +162,7 @@ export default class TextLine {
     private checkClosingPairModifier(index: number, modifierPairs: ModifierPair[]): number | undefined {
         for (const modifier of modifierPairs) {
             const searchResult = this.contents.substr(index, modifier.closingCharacter.length);
-            if (searchResult ===
-                modifier.closingCharacter &&
+            if (searchResult === modifier.closingCharacter &&
                 (modifier.closingCharacter.length !== 1 || !this.isEscaped(index))) {
                 modifier.counter--;
                 return modifier.closingCharacter.length - 1;

@@ -7,7 +7,7 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class MultiLineState {
-    public commentModifiers: ModifierPair[] = [];
+    public blockCommentModifiers: ModifierPair[] = [];
     public quoteModifiers: ModifierPair[] = [];
     private colorIndexes: ColorIndexes;
     private previousBracketColor: string;
@@ -17,7 +17,7 @@ export default class MultiLineState {
         {
             colorIndexes: ColorIndexes;
             previousBracketColor: string;
-            commentModifiers: ModifierPair[];
+            blockCommentModifiers: ModifierPair[];
             quoteModifiers: ModifierPair[];
         }) {
         this.settings = settings;
@@ -25,7 +25,7 @@ export default class MultiLineState {
         if (previousState !== undefined) {
             this.colorIndexes = previousState.colorIndexes;
             this.previousBracketColor = previousState.previousBracketColor;
-            this.commentModifiers = previousState.commentModifiers;
+            this.blockCommentModifiers = previousState.blockCommentModifiers;
             this.quoteModifiers = previousState.quoteModifiers;
         }
         else {
@@ -41,7 +41,7 @@ export default class MultiLineState {
             this.quoteModifiers.push(new ModifierPair("'", "'"));
             this.quoteModifiers.push(new ModifierPair("`", "`"));
 
-            this.commentModifiers.push(new ModifierPair("/*", "*/"));
+            this.blockCommentModifiers.push(new ModifierPair("/*", "*/"));
         }
     }
 
@@ -94,7 +94,7 @@ export default class MultiLineState {
     }
 
     public isCommented(): boolean {
-        for (const modifier of this.commentModifiers) {
+        for (const modifier of this.blockCommentModifiers) {
             if (modifier.counter > 0) {
                 return true;
             }
@@ -104,14 +104,14 @@ export default class MultiLineState {
     }
 
     public clone() {
-        const cloneState =
+        const clone =
             {
+                blockCommentModifiers: this.blockCommentModifiers.map((modifier) => modifier.Clone()),
                 colorIndexes: this.colorIndexes.clone(),
-                commentModifiers: this.commentModifiers.map((modifier) => modifier.Clone()),
                 previousBracketColor: this.previousBracketColor,
                 quoteModifiers: this.quoteModifiers.map((modifier) => modifier.Clone()),
             };
 
-        return new MultiLineState(this.settings, cloneState);
+        return new MultiLineState(this.settings, clone);
     }
 }

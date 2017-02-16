@@ -7,7 +7,7 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class LineState {
-    public isConsumedByCommentModifier = false;
+    public isLineCommented = false;
     public readonly multiLineState: MultiLineState;
     private readonly settings: Settings;
 
