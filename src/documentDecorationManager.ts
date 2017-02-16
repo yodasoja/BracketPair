@@ -4,11 +4,6 @@ import Settings from "./settings";
 
 export default class DocumentDecorationManager {
     private documents = new Map<string, DocumentDecoration>();
-    private readonly settings: Settings;
-
-    constructor(settings?: Settings) {
-        this.settings = settings !== undefined ? settings : new Settings({});
-    }
 
     public updateDecorations(document: vscode.TextDocument) {
         this.getDocumentDecorations(document).triggerUpdateDecorations();
@@ -29,7 +24,7 @@ export default class DocumentDecorationManager {
         let documentDecorations = this.documents.get(uri);
 
         if (documentDecorations === undefined) {
-            documentDecorations = new DocumentDecoration(uri, this.settings);
+            documentDecorations = new DocumentDecoration(uri, new Settings({languageID: document.languageId}));
             this.documents.set(uri, documentDecorations);
         }
 

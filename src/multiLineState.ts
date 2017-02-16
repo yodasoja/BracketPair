@@ -7,8 +7,8 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class MultiLineState {
-    public blockCommentModifiers: ModifierPair[] = [];
-    public quoteModifiers: ModifierPair[] = [];
+    public blockCommentModifiers: ModifierPair[];
+    public quoteModifiers: ModifierPair[];
     private colorIndexes: ColorIndexes;
     private previousBracketColor: string;
     private readonly settings: Settings;
@@ -37,11 +37,8 @@ export default class MultiLineState {
                 default: throw new RangeError("Not implemented enum value");
             }
 
-            this.quoteModifiers.push(new ModifierPair("\"", "\""));
-            this.quoteModifiers.push(new ModifierPair("'", "'"));
-            this.quoteModifiers.push(new ModifierPair("`", "`"));
-
-            this.blockCommentModifiers.push(new ModifierPair("/*", "*/"));
+            this.blockCommentModifiers = this.settings.blockCommentModifiers.slice();
+            this.quoteModifiers = this.settings.quoteModifiers.slice();
         }
     }
 

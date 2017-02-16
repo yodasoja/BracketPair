@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
+import ModifierPair from "./modifierPair";
 
 export default class Settings {
     public readonly timeOutLength: number;
@@ -12,9 +13,12 @@ export default class Settings {
     public readonly regexPattern: string;
     public readonly decorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly colorMode: ColorMode;
-    public readonly singleCommentModifiers = ["//"];
+    public readonly singleCommentModifiers: string[] = [];
+    public blockCommentModifiers: ModifierPair[] = [];
+    public quoteModifiers: ModifierPair[] = [];
 
     constructor(settings: {
+        languageID?: string,
         timeOutLength?: number,
         forceUniqueOpeningColor?: boolean,
         forceIterationColorCycle?: boolean,
@@ -25,6 +29,20 @@ export default class Settings {
         independentSettings?: [[{}]],
     },
     ) {
+        // TODO Remember there is exceptional case here..
+        if (settings.languageID !== undefined && settings.languageID === "python") {
+            this.singleCommentModifiers.push("#");
+        }
+        else {
+            this.singleCommentModifiers.push("//");
+            this.quoteModifiers.push(new ModifierPair("`", "`"));
+
+            this.blockCommentModifiers.push(new ModifierPair("/*", "*/"));
+        }
+
+        this.quoteModifiers.push(new ModifierPair("\"", "\""));
+        this.quoteModifiers.push(new ModifierPair("'", "'"));
+
         const configuration = vscode.workspace.getConfiguration();
 
         this.forceUniqueOpeningColor = settings.forceUniqueOpeningColor !== undefined ?
