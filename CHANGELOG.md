@@ -1,5 +1,23 @@
 ## Release Notes
 
+### 0.8
+The following settings were tightly coupled, so have been combined into one setting:
+Removed `"bracketPairColorizer.colorizeQuotes"` setting  
+Removed `"bracketPairColorizer.colorizeComments"` setting
+
+Added `bracketPairColorizer.contextualParsing` setting
+
+Contextual parsing will ignore brackets in comments or strings.
+
+Contextual parsing has experimental support for the following languages:  
+- c  
+- cpp  
+- csharp  
+- java  
+- php  
+- ruby  
+- r
+
 ### 0.7.5
 Added experimental support for python comments in python files
 
