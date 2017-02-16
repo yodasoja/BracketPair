@@ -1390,7 +1390,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
     });
 });
 
-suite("Comment and quote test", () => {
+suite("Comment and quote", () => {
     const consecutiveSettings: [{}] = [
         "()",
         "[]",
@@ -1577,7 +1577,7 @@ suite("Comment and quote test", () => {
     });
 });
 
-suite("Comments only test", () => {
+suite("Comments only", () => {
     const consecutiveSettings: [{}] = [
         "()",
         "[]",
@@ -1771,9 +1771,9 @@ suite("Comments only test", () => {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line12 = document.getLine(14, textDocument);
+            const line14 = document.getLine(14, textDocument);
 
-            const colorRangesGold = line12.colorRanges.get("Gold");
+            const colorRangesGold = line14.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 4);
                 assert(colorRangesGold[0].start.line === 14 &&
@@ -1803,7 +1803,7 @@ suite("Comments only test", () => {
     });
 });
 
-suite("Quotes only test", () => {
+suite("Quotes only", () => {
     const consecutiveSettings: [{}] = [
         "()",
         "[]",
@@ -1994,9 +1994,9 @@ suite("Quotes only test", () => {
             const textDocument = vscode.window.activeTextEditor.document;
             const document = new DocumentDecoration(textDocument.uri.toString(), settings);
             document.triggerUpdateDecorations();
-            const line12 = document.getLine(14, textDocument);
+            const line14 = document.getLine(14, textDocument);
 
-            const colorRangesGold = line12.colorRanges.get("Gold");
+            const colorRangesGold = line14.colorRanges.get("Gold");
             if (colorRangesGold !== undefined) {
                 assert.equal(colorRangesGold.length, 2);
                 assert(colorRangesGold[0].start.line === 14 &&
@@ -2008,6 +2008,78 @@ suite("Quotes only test", () => {
                     colorRangesGold[1].start.character === 4 &&
                     colorRangesGold[1].end.line === 14 &&
                     colorRangesGold[1].end.character === 5);
+            }
+            else {
+                assert(false);
+            }
+        }
+    });
+});
+
+suite("Comment quote mixing", () => {
+    const consecutiveSettings: [{}] = [
+        "()",
+        "[]",
+        "{}",
+        [
+            "Gold",
+            "Orchid",
+            "LightSkyBlue",
+        ],
+        "Red",
+    ];
+
+    const settings = new Settings({
+        colorMode: ColorMode.Consecutive,
+        consecutiveSettings,
+        timeOutLength: 0,
+    });
+
+    test("Line 15", () => {
+        {
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
+            document.triggerUpdateDecorations();
+            const line15 = document.getLine(15, textDocument);
+
+            const colorRangesGold = line15.colorRanges.get("Gold");
+            if (colorRangesGold !== undefined) {
+                assert.equal(colorRangesGold.length, 2);
+                assert(colorRangesGold[0].start.line === 15 &&
+                    colorRangesGold[0].start.character === 13 &&
+                    colorRangesGold[0].end.line === 15 &&
+                    colorRangesGold[0].end.character === 14);
+
+                assert(colorRangesGold[1].start.line === 15 &&
+                    colorRangesGold[1].start.character === 14 &&
+                    colorRangesGold[1].end.line === 15 &&
+                    colorRangesGold[1].end.character === 15);
+            }
+            else {
+                assert(false);
+            }
+        }
+    });
+
+    test("Line 16", () => {
+        {
+            const textDocument = vscode.window.activeTextEditor.document;
+            const document = new DocumentDecoration(textDocument.uri.toString(), settings);
+            document.triggerUpdateDecorations();
+            const line16 = document.getLine(16, textDocument);
+
+            const colorRangesGold = line16.colorRanges.get("Gold");
+            if (colorRangesGold !== undefined) {
+                assert.equal(colorRangesGold.length, 2);
+                assert(colorRangesGold[0].start.line === 16 &&
+                    colorRangesGold[0].start.character === 8 &&
+                    colorRangesGold[0].end.line === 16 &&
+                    colorRangesGold[0].end.character === 9);
+
+                assert(colorRangesGold[1].start.line === 16 &&
+                    colorRangesGold[1].start.character === 9 &&
+                    colorRangesGold[1].end.line === 16 &&
+                    colorRangesGold[1].end.character === 10);
             }
             else {
                 assert(false);
