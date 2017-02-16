@@ -9,7 +9,10 @@ Added `bracketPairColorizer.contextualParsing` setting
 
 Contextual parsing will ignore brackets in comments or strings.
 
-Contextual parsing has experimental support for the following languages:  
+Contextual parsing has experimental support for the following languages:
+- python
+- typescript
+- javascript  
 - c  
 - cpp  
 - csharp  
