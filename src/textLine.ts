@@ -1,21 +1,21 @@
 import * as vscode from "vscode";
 import LineState from "./lineState";
+import MultiLineState from "./multiLineState";
 import Settings from "./settings";
 
 export default class TextLine {
     public colorRanges = new Map<string, vscode.Range[]>();
     private lastModifierCheckPos = 0;
     private lineState: LineState;
-    private isComment = false;
     private readonly settings: Settings;
     private readonly contents: string;
 
-    constructor(settings: Settings, index: number, document: vscode.TextDocument, bracketState?: LineState) {
+    constructor(settings: Settings, index: number, document: vscode.TextDocument, multiLineState?: MultiLineState) {
         this.settings = settings;
         this.contents = document.lineAt(index).text;
 
-        if (bracketState !== undefined) {
-            this.lineState = bracketState;
+        if (multiLineState !== undefined) {
+            this.lineState = new LineState(settings, multiLineState);;
         }
         else {
             this.lineState = new LineState(settings);
@@ -26,15 +26,14 @@ export default class TextLine {
     public cloneState() {
         // Update state for whole line before returning
         this.checkForStringModifiers(this.contents.length);
-        return this.lineState.clone();
+        return this.lineState.CloneMultiLineState();
     }
 
     public addBracket(bracket: string, range: vscode.Range) {
         this.checkForStringModifiers(range.start.character);
 
         if (!this.settings.colorizeComments) {
-            if (this.isComment ||
-                this.lineState.isMultilineCommented()) {
+            if (this.lineState.isComment || this.lineState.isMultiLineCommented()) {
                 return;
             }
         }
@@ -83,83 +82,79 @@ export default class TextLine {
         return counter % 2 === 1;
     }
 
-    private checkForStringModifiers(startPos: number): void {
-        for (let i = this.lastModifierCheckPos; i < startPos; i++) {
+    private checkForStringModifiers(endPos: number): void {
+        for (let i = this.lastModifierCheckPos; i < endPos; i++) {
             // Double line comments consume everything else
-            if (!this.settings.colorizeComments && this.isComment) {
+            if (!this.settings.colorizeComments && this.lineState.isComment) {
                 break;
             }
 
-            // If its multi-line commented, check for end of multiline
-            if (!this.settings.colorizeComments && this.lineState.multilineModifiers > 0) {
-                if (this.contents[i] === "*" && this.contents[i + 1] === "/") {
-                    this.lineState.multilineModifiers--;
-                }
+            // We are in a scope, search for closing modifiers
+            if (!this.settings.colorizeComments && this.lineState.isMultiLineCommented()) {
+                let found = false;
+                this.lineState.multiLineState.commentModifiers.forEach((modifier) => {
+                    if (!found && modifier.counter > 0) {
+                        const searchValue = modifier.closingCharacter;
+                        const foundIndex = this.contents.substring(i, endPos).indexOf(searchValue);
+                        if (foundIndex !== -1) {
+                            found = true;
+                            i = foundIndex;
+                            modifier.counter--;
+                        }
+                    }
+                });
                 continue;
             }
 
-            // If single quotes open, only check for closing quotes
-            if (!this.settings.colorizeQuotes && this.lineState.singleQuoteModifiers > 0) {
-                if (this.contents[i] === "'" && !this.isEscaped(i)) {
-                    this.lineState.singleQuoteModifiers--;
-                }
+            if (!this.settings.colorizeQuotes && this.lineState.isQuoted()) {
+                let found = false;
+                this.lineState.multiLineState.quoteModifiers.forEach((modifier) => {
+                    if (!found && modifier.counter > 0) {
+                        const searchValue = modifier.closingCharacter;
+                        const foundIndex = this.contents.substring(i, endPos).indexOf(searchValue);
+                        if (foundIndex !== -1) {
+                            found = true;
+                            i = foundIndex;
+                            modifier.counter--;
+                        }
+                    }
+                });
                 continue;
             }
 
-            // If double quotes open, only check for closing quotes
-            if (!this.settings.colorizeQuotes && this.lineState.doubleQuoteModifiers > 0) {
-                if (this.contents[i] === "\"" && !this.isEscaped(i)) {
-                    this.lineState.doubleQuoteModifiers--;
-                }
-                continue;
-            }
+            // Else we are not in a scope, search for opening modifiers
+            if (!this.settings.colorizeQuotes) {
+                let found = false;
+                this.lineState.multiLineState.quoteModifiers.forEach((modifier) => {
+                    if (!found && this.contents.substring(i, endPos) ===
+                        modifier.openingCharacter &&
+                        !this.isEscaped(i)) {
+                        found = true;
+                        modifier.counter++;
+                    }
+                });
 
-            // If backtick quotes open, only check for closing quotes
-            if (!this.settings.colorizeQuotes && this.lineState.backTickModifiers > 0) {
-                if (this.contents[i] === "`" && !this.isEscaped(i)) {
-                    this.lineState.backTickModifiers--;
-                }
-                continue;
-            }
-
-            // Else we are not in a scope
-
-            // Count opening single quotes
-            if (!this.settings.colorizeQuotes && this.contents[i] === "'" &&
-                !this.isEscaped(i)) {
-                this.lineState.singleQuoteModifiers++;
-                continue;
-            }
-
-            // Count opening double quotes
-            if (!this.settings.colorizeQuotes && this.contents[i] === "\"" &&
-                !this.isEscaped(i)) {
-                this.lineState.doubleQuoteModifiers++;
-                continue;
-            }
-
-            // Count opening backticks
-            if (!this.settings.colorizeQuotes && this.contents[i] === "`" &&
-                !this.isEscaped(i)) {
-                this.lineState.backTickModifiers++;
-                continue;
-            }
-
-            // Count opening comments
-            if (!this.settings.colorizeComments && this.contents[i] === "/") {
-                // Single
-                if (this.contents[i + 1] === "/") {
-                    this.isComment = true;
+                if (found) {
                     continue;
                 }
+            }
 
-                // Multiline
-                if (this.contents[i + 1] === "*") {
-                    this.lineState.multilineModifiers++;
+            if (!this.settings.colorizeComments) {
+                let found = false;
+                this.lineState.multiLineState.commentModifiers.forEach((modifier) => {
+                    if (!found && this.contents.substring(i, endPos) ===
+                        modifier.openingCharacter &&
+                        !this.isEscaped(i)) {
+                        found = true;
+                        modifier.counter++;
+                    }
+                });
+
+                if (found) {
                     continue;
                 }
             }
         }
-        this.lastModifierCheckPos = startPos;
+        this.lastModifierCheckPos = endPos;
     }
 }
