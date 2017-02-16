@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.7.5
+Added experimental support for python comments in python files
+
 ### 0.7.4
 Fix multiple character escapes not being captured
 

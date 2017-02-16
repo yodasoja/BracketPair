@@ -38,11 +38,13 @@ Set to 0 to disable.
 
 >`"bracketPairColorizer.colorizeComments"`  
 Determines if brackets in comments should be colorized  
-Recognized comment types are [ `//`, `/*`, `*/` ]
+Recognized comment types are [ `//`, `/*`, `*/` ]  
+unless its a Python file, in which case it supports [ `#` ]
 
 >`"bracketPairColorizer.colorizeQuotes"`  
 Determines if brackets in quotes should be colorized  
-Recognized quote types are [ `"`, `'`, `` ` `` ]
+Recognized quote types are [ `"`, `'`, `` ` `` ]  
+unless its a Python file, in which case it supports [ `"`, `'` ]
 
 >`"bracketPairColorizer.colorMode"`  
 Consecutive brackets share a color pool for all bracket types  
