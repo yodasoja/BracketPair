@@ -12,6 +12,7 @@ export default class Settings {
     public readonly regexPattern: string;
     public readonly decorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly colorMode: ColorMode;
+    public readonly singleCommentModifiers = ["//"];
 
     constructor(settings: {
         timeOutLength?: number,

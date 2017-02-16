@@ -25,15 +25,15 @@ export default class TextLine {
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
     public cloneState() {
         // Update state for whole line before returning
-        this.checkForStringModifiers(this.contents.length);
+        this.checkForStringModifiers();
         return this.lineState.CloneMultiLineState();
     }
 
     public addBracket(bracket: string, range: vscode.Range) {
-        this.checkForStringModifiers(range.start.character);
+        this.checkForStringModifiers(range);
 
         if (!this.settings.colorizeComments) {
-            if (this.lineState.isComment || this.lineState.isMultiLineCommented()) {
+            if (this.lineState.isConsumedByCommentModifier || this.lineState.isMultiLineCommented()) {
                 return;
             }
         }
@@ -82,57 +82,64 @@ export default class TextLine {
         return counter % 2 === 1;
     }
 
-    private checkForStringModifiers(endPos: number): void {
-        for (let i = this.lastModifierCheckPos; i < endPos; i++) {
-            // Double line comments consume everything else
-            if (!this.settings.colorizeComments && this.lineState.isComment) {
+    private checkForStringModifiers(range?: vscode.Range): void {
+        let incrementAmount = 1;
+        const bracketStartIndex = range !== undefined ? range.start.character : this.contents.length;
+        const bracketEndIndex = range !== undefined ? range.end.character : this.contents.length;
+
+        for (let i = this.lastModifierCheckPos; i < bracketStartIndex; i += incrementAmount) {
+            incrementAmount = 1;
+            // Single line comments consume everything else
+            if (!this.settings.colorizeComments && this.lineState.isConsumedByCommentModifier) {
                 break;
             }
 
             // We are in a scope, search for closing modifiers
             if (!this.settings.colorizeComments && this.lineState.isMultiLineCommented()) {
                 let found = false;
-                this.lineState.multiLineState.commentModifiers.forEach((modifier) => {
+                for (const modifier of this.lineState.multiLineState.commentModifiers) {
                     if (!found && modifier.counter > 0) {
-                        const searchValue = modifier.closingCharacter;
-                        const foundIndex = this.contents.substring(i, endPos).indexOf(searchValue);
-                        if (foundIndex !== -1) {
+                        const searchResult = this.contents.substr(i, modifier.closingCharacter.length);
+                        if (searchResult === modifier.closingCharacter) {
                             found = true;
-                            i = foundIndex;
+                            incrementAmount = searchResult.length;
                             modifier.counter--;
                         }
                     }
-                });
+                }
                 continue;
             }
 
             if (!this.settings.colorizeQuotes && this.lineState.isQuoted()) {
                 let found = false;
-                this.lineState.multiLineState.quoteModifiers.forEach((modifier) => {
+                for (const modifier of this.lineState.multiLineState.quoteModifiers) {
                     if (!found && modifier.counter > 0) {
-                        const searchValue = modifier.closingCharacter;
-                        const foundIndex = this.contents.substring(i, endPos).indexOf(searchValue);
-                        if (foundIndex !== -1) {
+                        const searchResult = this.contents.substr(i, modifier.closingCharacter.length);
+                        if (searchResult === modifier.closingCharacter) {
                             found = true;
-                            i = foundIndex;
+                            incrementAmount = searchResult.length;
                             modifier.counter--;
                         }
                     }
-                });
+                }
                 continue;
             }
 
             // Else we are not in a scope, search for opening modifiers
             if (!this.settings.colorizeQuotes) {
                 let found = false;
-                this.lineState.multiLineState.quoteModifiers.forEach((modifier) => {
-                    if (!found && this.contents.substring(i, endPos) ===
-                        modifier.openingCharacter &&
-                        !this.isEscaped(i)) {
-                        found = true;
-                        modifier.counter++;
+                for (const modifier of this.lineState.multiLineState.quoteModifiers) {
+                    if (!found) {
+                        const searchResult = this.contents.substr(i, modifier.openingCharacter.length);
+                        if (searchResult ===
+                            modifier.openingCharacter &&
+                            !this.isEscaped(i)) {
+                            found = true;
+                            incrementAmount = modifier.openingCharacter.length;
+                            modifier.counter++;
+                        }
                     }
-                });
+                }
 
                 if (found) {
                     continue;
@@ -141,20 +148,36 @@ export default class TextLine {
 
             if (!this.settings.colorizeComments) {
                 let found = false;
-                this.lineState.multiLineState.commentModifiers.forEach((modifier) => {
-                    if (!found && this.contents.substring(i, endPos) ===
-                        modifier.openingCharacter &&
-                        !this.isEscaped(i)) {
-                        found = true;
-                        modifier.counter++;
+                for (const modifier of this.lineState.multiLineState.commentModifiers) {
+                    if (!found) {
+                        const searchResult = this.contents.substr(i, modifier.openingCharacter.length);
+                        if (searchResult ===
+                            modifier.openingCharacter &&
+                            !this.isEscaped(i)) {
+                            found = true;
+                            incrementAmount = modifier.openingCharacter.length;
+                            modifier.counter++;
+                        }
                     }
-                });
+                }
 
                 if (found) {
                     continue;
                 }
             }
+
+            if (!this.settings.colorizeComments) {
+                let found = false;
+                for (const modifier of this.settings.singleCommentModifiers) {
+                    const searchResult = this.contents.substring(i, modifier.length);
+                    if (!found && searchResult === modifier) {
+                        found = true;
+                        this.lineState.isConsumedByCommentModifier = true;
+                    }
+                }
+                continue;
+            }
         }
-        this.lastModifierCheckPos = endPos;
+        this.lastModifierCheckPos = bracketEndIndex;
     }
 }

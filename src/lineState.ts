@@ -7,7 +7,7 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class LineState {
-    public isComment = false;
+    public isConsumedByCommentModifier = false;
     public readonly multiLineState: MultiLineState;
     private readonly settings: Settings;
 
@@ -37,7 +37,7 @@ export default class LineState {
     }
 
     public isQuoted(): boolean {
-        return this.multiLineState.isCommented();
+        return this.multiLineState.isQuoted();
     }
 
     public isMultiLineCommented(): boolean {

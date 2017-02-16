@@ -84,21 +84,21 @@ export default class MultiLineState {
     }
 
     public isQuoted(): boolean {
-        Object.keys(this.quoteModifiers).forEach((key) => {
-            if (this.quoteModifiers[key] > 0) {
+        for (const modifier of this.quoteModifiers) {
+            if (modifier.counter > 0) {
                 return true;
             }
-        });
+        }
 
         return false;
     }
 
     public isCommented(): boolean {
-        Object.keys(this.commentModifiers).forEach((key) => {
-            if (this.commentModifiers[key] > 0) {
+        for (const modifier of this.commentModifiers) {
+            if (modifier.counter > 0) {
                 return true;
             }
-        });
+        }
 
         return false;
     }
