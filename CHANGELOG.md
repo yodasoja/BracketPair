@@ -1,6 +1,6 @@
 ## Release Notes
 
-### 0.8
+### 0.8.0
 The following settings were tightly coupled, so have been combined into one setting:
 Removed `"bracketPairColorizer.colorizeQuotes"` setting  
 Removed `"bracketPairColorizer.colorizeComments"` setting
