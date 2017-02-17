@@ -40,16 +40,17 @@ Set to 0 to disable.
 Contextual parsing will ignore brackets in comments or strings.  
 Contextual parsing has experimental support for the following languages:  
 ```
+- c
+- cpp
+- csharp
+- java
+- javascript
+- php
 - python
-- typescript
-- javascript  
-- c  
-- cpp  
-- csharp  
-- java  
-- php  
-- ruby  
 - r
+- ruby
+- swift
+- typescript
 ```
 
 >`"bracketPairColorizer.colorMode"`  

@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.8.1
+Added swift support for contextual parsing
+
 ### 0.8.0
 The following settings were tightly coupled, so have been combined into one setting:
 Removed `"bracketPairColorizer.colorizeQuotes"` setting  

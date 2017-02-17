@@ -68,6 +68,13 @@ export default class Settings {
             this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
             this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
         }
+        else if (settings.languageID === "swift") {
+            this.singleCommentModifiers.push(doubleSlash);
+
+            this.blockCommentModifiers.push(new ModifierPair(slashBlockOpen, slashBlockClose));
+
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+        }
         else if (settings.languageID === "php") {
             this.singleCommentModifiers.push(doubleSlash);
             this.singleCommentModifiers.push(hashTag);
