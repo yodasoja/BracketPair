@@ -26,7 +26,7 @@ export default class DocumentDecorationManager {
         contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         const documentDecoration = this.getDocumentDecorations(document);
         if (documentDecoration) {
-            documentDecoration.triggerUpdateDecorations();
+            documentDecoration.onDidChangeTextDocument(contentChanges);
         }
     }
 
@@ -81,11 +81,6 @@ export default class DocumentDecorationManager {
 
     private isValidDocument(document?: vscode.TextDocument): boolean {
         if (document === undefined) {
-            return false;
-        }
-
-        if (document.lineCount === 0)
-        {
             return false;
         }
 
