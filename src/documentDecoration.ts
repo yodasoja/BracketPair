@@ -5,7 +5,6 @@ import TextLine from "./textLine";
 export default class DocumentDecoration {
     private updateDecorationTimeout: NodeJS.Timer | null;
     // This program caches lines, and will only analyze linenumbers including or above a modified line
-    private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
     private readonly uri: string;
     private readonly settings: Settings;
@@ -17,11 +16,6 @@ export default class DocumentDecoration {
 
     public dispose() {
         this.settings.dispose();
-    }
-
-    public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        this.updateLowestLineNumber(contentChanges);
-        this.triggerUpdateDecorations();
     }
 
     // Lines are stored in an array, if line is requested outside of array bounds
@@ -67,16 +61,6 @@ export default class DocumentDecoration {
         }
     }
 
-    private updateLowestLineNumber(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        let lowestLineNumberChanged = Infinity;
-
-        for (const contentChange of contentChanges) {
-            lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
-        }
-
-        this.lineToUpdateWhenTimeoutEnds = lowestLineNumberChanged;
-    }
-
     private updateDecorations() {
         const editors: vscode.TextEditor[] = [];
 
@@ -94,7 +78,7 @@ export default class DocumentDecoration {
         // Only have to analyze the first document, since it is shared between the editors
         const document = editors[0].document;
 
-        const lineNumber = this.lineToUpdateWhenTimeoutEnds;
+        const lineNumber = 0;
 
         const amountToRemove = this.lines.length - lineNumber;
 
@@ -155,7 +139,5 @@ export default class DocumentDecoration {
                 }
             });
         }
-
-        this.lineToUpdateWhenTimeoutEnds = Infinity;
     }
 }
