@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.8.5
+Remove line caching, due to VSCode dropping some on-change events.
+
 ### 0.8.4
 Hot-reload setings  
 Show error on invalid settings
