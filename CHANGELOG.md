@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.8.2
+Fix error causing only first document to be parsed
+
 ### 0.8.1
 Added swift support for contextual parsing
 
