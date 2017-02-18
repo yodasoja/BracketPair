@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 0.8.4
+Hot-reload setings  
+Show error on invalid settings
+
 ### 0.8.3
 Improved colorizing documents after closing or changing active document
 
