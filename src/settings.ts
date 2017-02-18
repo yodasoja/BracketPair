@@ -129,9 +129,9 @@ export default class Settings {
             configuration.get("bracketPairColorizer.timeOut") as number;
 
         if (this.colorMode === ColorMode.Consecutive) {
-            const consecutiveSettings = settings.consecutiveSettings !== undefined ?
+            const consecutiveSettings = (settings.consecutiveSettings !== undefined ?
                 settings.consecutiveSettings :
-                configuration.get("bracketPairColorizer.consecutivePairColors") as [{}];
+                (configuration.get("bracketPairColorizer.consecutivePairColors") as [{}])).slice();
 
             const orphanColor = consecutiveSettings.pop() as string;
 
