@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.8.6
+Fix line caching
+
 ### 0.8.5
 Remove line caching temporarily
 
