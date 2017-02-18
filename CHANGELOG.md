@@ -1,7 +1,10 @@
 ## Release Notes
 
+### 0.8.3
+Improved colorizing documents after closing or changing active document
+
 ### 0.8.2
-Fix error causing only first document to be parsed
+Fixed an error causing only first document to be parsed
 
 ### 0.8.1
 Added swift support for contextual parsing

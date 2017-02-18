@@ -6,17 +6,18 @@ export function activate(context: vscode.ExtensionContext) {
 
     let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 
-    vscode.window.visibleTextEditors.forEach((editor) => {
-        if (editor && isValidDocument(editor.document)) {
-            documentDecorationManager.updateDecorations(editor.document);
-        }
-    });
+    function updatAllDocuments() {
+        vscode.window.visibleTextEditors.forEach((editor) => {
+            if (editor && isValidDocument(editor.document)) {
+                documentDecorationManager.updateDecorations(editor.document);
+            }
+        });
+    }
 
     vscode.window.onDidChangeActiveTextEditor((editor) => {
         activeEditor = editor;
-        if (activeEditor && isValidDocument(activeEditor.document)) {
-            documentDecorationManager.updateDecorations(activeEditor.document);
-        }
+
+        updatAllDocuments();
     }, null, context.subscriptions);
 
     vscode.workspace.onDidChangeTextDocument((event) => {
@@ -29,6 +30,8 @@ export function activate(context: vscode.ExtensionContext) {
         if (activeEditor) {
             documentDecorationManager.onDidCloseTextDocument(event);
         }
+
+        updatAllDocuments();
     }, null, context.subscriptions);
 }
 
