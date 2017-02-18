@@ -68,13 +68,10 @@ export default class DocumentDecoration {
     }
 
     private updateLowestLineNumber(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        let lowestLineNumberChanged = Infinity;
-
         for (const contentChange of contentChanges) {
-            lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
+            this.lineToUpdateWhenTimeoutEnds =
+                Math.min(this.lineToUpdateWhenTimeoutEnds, contentChange.range.start.line);
         }
-
-        this.lineToUpdateWhenTimeoutEnds = lowestLineNumberChanged;
     }
 
     private updateDecorations() {

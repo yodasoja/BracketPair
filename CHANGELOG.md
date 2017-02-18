@@ -1,7 +1,7 @@
 ## Release Notes
 
 ### 0.8.5
-Remove line caching, due to VSCode dropping some on-change events.
+Remove line caching temporarily
 
 ### 0.8.4
 Hot-reload setings  
