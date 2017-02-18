@@ -3,6 +3,7 @@ import DocumentDecoration from "./documentDecoration";
 import Settings from "./settings";
 
 export default class DocumentDecorationManager {
+    private showError = true;
     private documents = new Map<string, DocumentDecoration>();
 
     public reset() {
@@ -10,16 +11,23 @@ export default class DocumentDecorationManager {
             document.dispose();
         });
         this.documents.clear();
+        this.updateAllDocuments();
     }
 
-    public updateDecorations(document: vscode.TextDocument) {
-        this.getDocumentDecorations(document).triggerUpdateDecorations();
+    public updateDocument(document: vscode.TextDocument) {
+        const documentDecoration = this.getDocumentDecorations(document);
+        if (documentDecoration) {
+            documentDecoration.triggerUpdateDecorations();
+        }
     }
 
     public onDidChangeTextDocument(
         document: vscode.TextDocument,
         contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        this.getDocumentDecorations(document).onDidChangeTextDocument(contentChanges);
+        const documentDecoration = this.getDocumentDecorations(document);
+        if (documentDecoration) {
+            documentDecoration.onDidChangeTextDocument(contentChanges);
+        }
     }
 
     public onDidCloseTextDocument(closedDocument: vscode.TextDocument) {
@@ -30,17 +38,52 @@ export default class DocumentDecorationManager {
         }
 
         this.documents.delete(closedDocument.uri.toString());
+        this.updateAllDocuments();
     }
 
-    private getDocumentDecorations(document: vscode.TextDocument): DocumentDecoration {
+    public updateAllDocuments() {
+        vscode.window.visibleTextEditors.forEach((editor) => {
+            this.updateDocument(editor.document);
+        });
+    }
+
+    private getDocumentDecorations(document: vscode.TextDocument): DocumentDecoration | undefined {
+        if (!this.isValidDocument(document)) {
+            return;
+        }
+
         const uri = document.uri.toString();
         let documentDecorations = this.documents.get(uri);
 
         if (documentDecorations === undefined) {
-            documentDecorations = new DocumentDecoration(uri, new Settings({ languageID: document.languageId }));
-            this.documents.set(uri, documentDecorations);
+            try {
+                const settings = new Settings({ languageID: document.languageId });
+                documentDecorations = new DocumentDecoration(uri, settings);
+                this.documents.set(uri, documentDecorations);
+            } catch (error) {
+                if (error instanceof Error) {
+                    if (this.showError) {
+                        vscode.window.showErrorMessage("BracketPair Settings: " + error.message);
+
+                        // Don't spam errors
+                        this.showError = false;
+                        setTimeout(() => {
+                            this.showError = true;
+                        }, 3000);
+                    }
+                }
+                return;
+            }
         }
 
         return documentDecorations;
+    }
+
+    private isValidDocument(document?: vscode.TextDocument): boolean {
+        if (document === undefined) {
+            return false;
+        }
+
+        return document.uri.scheme === "file" || document.uri.scheme === "untitled";
     }
 }

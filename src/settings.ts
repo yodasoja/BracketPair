@@ -109,9 +109,17 @@ export default class Settings {
             settings.forceUniqueOpeningColor :
             configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
 
+        if (typeof this.forceUniqueOpeningColor !== "boolean") {
+            throw new Error("forceUniqueOpeningColor is not a boolean");
+        }
+
         this.forceIterationColorCycle = settings.forceIterationColorCycle !== undefined ?
             settings.forceIterationColorCycle :
             configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
+
+        if (typeof this.forceIterationColorCycle !== "boolean") {
+            throw new Error("forceIterationColorCycle is not a boolean");
+        }
 
         if (supportedLanguageID) {
             this.contextualParsing = settings.contextualParsing !== undefined ?
@@ -121,40 +129,93 @@ export default class Settings {
             this.contextualParsing = false;
         }
 
+        if (typeof this.contextualParsing !== "boolean") {
+            throw new Error("contextualParsing is not a boolean");
+        }
+
         this.colorMode = settings.colorMode !== undefined ?
             settings.colorMode :
             (ColorMode as any)[configuration.get("bracketPairColorizer.colorMode") as string];
+
+        if (typeof this.colorMode !== "number") {
+            throw new Error("colorMode enum could not be parsed");
+        }
 
         this.timeOutLength = settings.timeOutLength !== undefined ?
             settings.timeOutLength :
             configuration.get("bracketPairColorizer.timeOut") as number;
 
+        if (typeof this.timeOutLength !== "number") {
+            throw new Error("timeOutLength was is a number");
+        }
+
         if (this.colorMode === ColorMode.Consecutive) {
-            const consecutiveSettings = (settings.consecutiveSettings !== undefined ?
+            const consecutiveSettings: [{}] = (settings.consecutiveSettings !== undefined ?
                 settings.consecutiveSettings :
-                (configuration.get("bracketPairColorizer.consecutivePairColors") as [{}])).slice();
+                configuration.get("bracketPairColorizer.consecutivePairColors") as [{}]);
 
-            const orphanColor = consecutiveSettings.pop() as string;
+            if (!Array.isArray(consecutiveSettings)) {
+                throw new Error("consecutivePairColors is not an array");
+            }
 
-            const colors = consecutiveSettings.pop() as [string];
+            if (consecutiveSettings.length < 3) {
+                throw new Error("consecutivePairColors expected at least 3 parameters, actual: "
+                    + consecutiveSettings.length);
+            }
 
-            consecutiveSettings.forEach((value) => {
-                const brackets = value as string;
+            const orphanColor = consecutiveSettings[consecutiveSettings.length - 1] as string;
+            if (typeof orphanColor !== "string") {
+                throw new Error("consecutivePairColors[" + (consecutiveSettings.length - 1) + "] is not a string");
+            }
+
+            const colors = consecutiveSettings[consecutiveSettings.length - 2] as string[];
+            if (!Array.isArray(colors)) {
+                throw new Error("consecutivePairColors[" + (consecutiveSettings.length - 2) + "] is not a string[]");
+            }
+
+            consecutiveSettings.slice(0, consecutiveSettings.length - 2).forEach((value, index) => {
+                if (typeof value !== "string") {
+                    throw new Error("consecutivePairColors[ " + index + "] is not a string");
+                }
+                const brackets = value;
+                if (brackets.length < 2) {
+                    throw new Error("consecutivePairColors[" + index + "] needs at least 2 characters");
+                }
                 this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
             });
         }
         else {
-            const independentSettings = settings.independentSettings !== undefined ?
+            const independentSettings: [[{}]] = settings.independentSettings !== undefined ?
                 settings.independentSettings :
                 configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
 
-            independentSettings.forEach((setting, index) => {
+            if (!Array.isArray(independentSettings)) {
+                throw new Error("independentPairColors is not an array");
+            }
 
-                const brackets = setting[0] as string;
+            independentSettings.forEach((innerArray, index) => {
+                if (!Array.isArray(innerArray)) {
+                    throw new Error("independentPairColors[" + index + "] is not an array");
+                }
 
-                const colors = setting[1] as string[];
+                const brackets = innerArray[0] as string;
+                if (typeof brackets !== "string") {
+                    throw new Error("independentSettings[" + index + "][0] is not a string");
+                }
 
-                const orphanColor = setting[2] as string;
+                if (brackets.length < 2) {
+                    throw new Error("independentSettings[" + index + "][0] needs at least 2 characters");
+                }
+
+                const colors = innerArray[1] as string[];
+                if (!Array.isArray(colors)) {
+                    throw new Error("independentSettings[" + index + "][1] is not string[]");
+                }
+
+                const orphanColor = innerArray[2] as string;
+                if (typeof orphanColor !== "string") {
+                    throw new Error("independentSettings[" + index + "][2] is not a string");
+                }
 
                 this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
             });

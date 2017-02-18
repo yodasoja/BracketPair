@@ -5,7 +5,7 @@ import TextLine from "./textLine";
 export default class DocumentDecoration {
     private updateDecorationTimeout: NodeJS.Timer | null;
     // This program caches lines, and will only analyze linenumbers including or above a modified line
-    private lineToUpdateWhenTimeoutEnds = Infinity;
+    private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
     private readonly uri: string;
     private readonly settings: Settings;
@@ -20,7 +20,8 @@ export default class DocumentDecoration {
     }
 
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        this.triggerUpdateDecorations(this.getLowestLineNumberChanged(contentChanges));
+        this.updateLowestLineNumber(contentChanges);
+        this.triggerUpdateDecorations();
     }
 
     // Lines are stored in an array, if line is requested outside of array bounds
@@ -46,7 +47,7 @@ export default class DocumentDecoration {
         }
     }
 
-    public triggerUpdateDecorations(lineNumber: number = 0) {
+    public triggerUpdateDecorations() {
         if (this.settings.isDisposed) {
             return;
         }
@@ -57,28 +58,26 @@ export default class DocumentDecoration {
                 clearTimeout(this.updateDecorationTimeout);
             }
 
-            this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, lineNumber);
             this.updateDecorationTimeout = setTimeout(() => {
                 this.updateDecorations();
-                this.lineToUpdateWhenTimeoutEnds = Infinity;
             }, this.settings.timeOutLength);
         }
         else {
-            this.updateDecorations(lineNumber);
+            this.updateDecorations();
         }
     }
 
-    private getLowestLineNumberChanged(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
+    private updateLowestLineNumber(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         let lowestLineNumberChanged = Infinity;
 
         for (const contentChange of contentChanges) {
             lowestLineNumberChanged = Math.min(lowestLineNumberChanged, contentChange.range.start.line);
         }
 
-        return lowestLineNumberChanged;
+        this.lineToUpdateWhenTimeoutEnds = lowestLineNumberChanged;
     }
 
-    private updateDecorations(lineNumber?: number) {
+    private updateDecorations() {
         const editors: vscode.TextEditor[] = [];
 
         // One document may be shared by multiple editors (side by side view)
@@ -95,9 +94,7 @@ export default class DocumentDecoration {
         // Only have to analyze the first document, since it is shared between the editors
         const document = editors[0].document;
 
-        if (lineNumber === undefined) {
-            lineNumber = this.lineToUpdateWhenTimeoutEnds;
-        }
+        const lineNumber = this.lineToUpdateWhenTimeoutEnds;
 
         const amountToRemove = this.lines.length - lineNumber;
 
@@ -158,5 +155,7 @@ export default class DocumentDecoration {
                 }
             });
         }
+
+        this.lineToUpdateWhenTimeoutEnds = Infinity;
     }
 }

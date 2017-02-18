@@ -6,27 +6,27 @@ export function activate(context: vscode.ExtensionContext) {
 
     let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 
-    function updateAllDocuments() {
-        vscode.window.visibleTextEditors.forEach((editor) => {
-            if (editor && isValidDocument(editor.document)) {
-                documentDecorationManager.updateDecorations(editor.document);
-            }
-        });
-    }
-
     vscode.workspace.onDidChangeConfiguration((event) => {
         documentDecorationManager.reset();
-        updateAllDocuments();
     });
 
     vscode.window.onDidChangeActiveTextEditor((editor) => {
         activeEditor = editor;
 
-        updateAllDocuments();
+        if (activeEditor) {
+            documentDecorationManager.updateDocument(editor.document);
+        }
+    }, null, context.subscriptions);
+
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
+        activeEditor = editor;
+
+        documentDecorationManager.updateAllDocuments();
+
     }, null, context.subscriptions);
 
     vscode.workspace.onDidChangeTextDocument((event) => {
-        if (activeEditor && event.document === activeEditor.document && isValidDocument(activeEditor.document)) {
+        if (activeEditor && event.document === activeEditor.document) {
             documentDecorationManager.onDidChangeTextDocument(activeEditor.document, event.contentChanges);
         }
     }, null, context.subscriptions);
@@ -35,17 +35,9 @@ export function activate(context: vscode.ExtensionContext) {
         if (activeEditor) {
             documentDecorationManager.onDidCloseTextDocument(event);
         }
-
-        updateAllDocuments();
     }, null, context.subscriptions);
-}
 
-function isValidDocument(document?: vscode.TextDocument): boolean {
-    if (document === undefined) {
-        return false;
-    }
-
-    return document.uri.scheme === "file" || document.uri.scheme === "untitled";
+    documentDecorationManager.reset();
 }
 
 // tslint:disable-next-line:no-empty
