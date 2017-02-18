@@ -15,6 +15,7 @@ export default class Settings {
     public readonly singleCommentModifiers: string[] = [];
     public blockCommentModifiers: ModifierPair[] = [];
     public quoteModifiers: ModifierPair[] = [];
+    public isDisposed = false;
 
     constructor(settings: {
         languageID: string,
@@ -161,6 +162,14 @@ export default class Settings {
 
         this.regexPattern = this.createRegex(this.bracketPairs);
         this.decorations = this.createDecorations(this.bracketPairs);
+    }
+
+    public dispose() {
+        this.decorations.forEach((decoration, key) => {
+            decoration.dispose();
+        });
+        this.decorations.clear();
+        this.isDisposed = true;
     }
 
     // Create a regex to match open and close brackets

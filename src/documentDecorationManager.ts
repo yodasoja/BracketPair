@@ -5,6 +5,13 @@ import Settings from "./settings";
 export default class DocumentDecorationManager {
     private documents = new Map<string, DocumentDecoration>();
 
+    public reset() {
+        this.documents.forEach((document, key) => {
+            document.dispose();
+        });
+        this.documents.clear();
+    }
+
     public updateDecorations(document: vscode.TextDocument) {
         this.getDocumentDecorations(document).triggerUpdateDecorations();
     }
@@ -16,6 +23,12 @@ export default class DocumentDecorationManager {
     }
 
     public onDidCloseTextDocument(closedDocument: vscode.TextDocument) {
+        const uri = closedDocument.uri.toString();
+        const document = this.documents.get(uri);
+        if (document !== undefined) {
+            document.dispose();
+        }
+
         this.documents.delete(closedDocument.uri.toString());
     }
 
@@ -24,7 +37,7 @@ export default class DocumentDecorationManager {
         let documentDecorations = this.documents.get(uri);
 
         if (documentDecorations === undefined) {
-            documentDecorations = new DocumentDecoration(uri, new Settings({languageID: document.languageId}));
+            documentDecorations = new DocumentDecoration(uri, new Settings({ languageID: document.languageId }));
             this.documents.set(uri, documentDecorations);
         }
 

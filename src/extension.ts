@@ -6,7 +6,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 
-    function updatAllDocuments() {
+    function updateAllDocuments() {
         vscode.window.visibleTextEditors.forEach((editor) => {
             if (editor && isValidDocument(editor.document)) {
                 documentDecorationManager.updateDecorations(editor.document);
@@ -14,10 +14,15 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }
 
+    vscode.workspace.onDidChangeConfiguration((event) => {
+        documentDecorationManager.reset();
+        updateAllDocuments();
+    });
+
     vscode.window.onDidChangeActiveTextEditor((editor) => {
         activeEditor = editor;
 
-        updatAllDocuments();
+        updateAllDocuments();
     }, null, context.subscriptions);
 
     vscode.workspace.onDidChangeTextDocument((event) => {
@@ -31,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
             documentDecorationManager.onDidCloseTextDocument(event);
         }
 
-        updatAllDocuments();
+        updateAllDocuments();
     }, null, context.subscriptions);
 }
 
@@ -43,5 +48,6 @@ function isValidDocument(document?: vscode.TextDocument): boolean {
     return document.uri.scheme === "file" || document.uri.scheme === "untitled";
 }
 
+// tslint:disable-next-line:no-empty
 export function deactivate() {
 }

@@ -15,6 +15,10 @@ export default class DocumentDecoration {
         this.uri = uri;
     }
 
+    public dispose() {
+        this.settings.dispose();
+    }
+
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         this.triggerUpdateDecorations(this.getLowestLineNumberChanged(contentChanges));
     }
@@ -43,6 +47,10 @@ export default class DocumentDecoration {
     }
 
     public triggerUpdateDecorations(lineNumber: number = 0) {
+        if (this.settings.isDisposed) {
+            return;
+        }
+
         if (this.settings.timeOutLength > 0) {
 
             if (this.updateDecorationTimeout) {
@@ -129,7 +137,7 @@ export default class DocumentDecoration {
                         existingRanges.push(...ranges);
                     }
                     else {
-                        // Slice because we will be adding values to this array in the future, 
+                        // Slice because we will be adding values to this array in the future,
                         // but don't want to modify the original array which is stored per line
                         colorMap.set(color, ranges.slice());
                     }
