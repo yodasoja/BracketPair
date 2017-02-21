@@ -35,10 +35,8 @@ export default class DocumentDecorationManager {
         const document = this.documents.get(uri);
         if (document !== undefined) {
             document.dispose();
+            this.documents.delete(closedDocument.uri.toString());
         }
-
-        this.documents.delete(closedDocument.uri.toString());
-        this.updateAllDocuments();
     }
 
     public updateAllDocuments() {
@@ -84,6 +82,12 @@ export default class DocumentDecorationManager {
             return false;
         }
 
+        if (document.lineCount === 0) {
+            // console.warn("Invalid: " + document.fileName);
+            return false;
+        }
+
+        // console.log("Valid: " + document.fileName);
         return document.uri.scheme === "file" || document.uri.scheme === "untitled";
     }
 }
