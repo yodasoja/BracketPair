@@ -99,6 +99,11 @@ export default class Settings {
             this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
             this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
         }
+        else if (settings.languageID === "json") {
+            this.singleCommentModifiers.push(doubleSlash);
+            this.blockCommentModifiers.push(new ModifierPair(slashBlockOpen, slashBlockClose));
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+        }
         else {
             supportedLanguageID = false;
         }
