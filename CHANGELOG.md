@@ -1,13 +1,16 @@
 ## Release Notes
 
+### 0.8.7
+Added JSON (with comments) contextual parsing
+
 ### 0.8.6
-Fix line caching
+Fixed line caching
 
 ### 0.8.5
-Remove line caching temporarily
+Removed line caching temporarily
 
 ### 0.8.4
-Hot-reload setings  
+Settings will now hot-reload 
 Show error on invalid settings
 
 ### 0.8.3
