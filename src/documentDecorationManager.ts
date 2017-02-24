@@ -83,11 +83,9 @@ export default class DocumentDecorationManager {
         }
 
         if (document.lineCount === 0) {
-            // console.warn("Invalid: " + document.fileName);
             return false;
         }
 
-        // console.log("Valid: " + document.fileName);
         return document.uri.scheme === "file" || document.uri.scheme === "untitled";
     }
 }

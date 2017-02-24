@@ -35,6 +35,8 @@ export default class Settings {
         const doubleSlash = "//";
         const slashBlockOpen = "/*";
         const slashBlockClose = "*/";
+        const htmlBlockOpen = "<!--";
+        const htmlBlockClose = "-->";
         const rubyBegin = "=begin";
         const rubyEnd = "=end";
 
@@ -69,7 +71,8 @@ export default class Settings {
             this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
             this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
         }
-        else if (settings.languageID === "swift") {
+        else if (settings.languageID === "swift" ||
+            settings.languageID === "json") {
             this.singleCommentModifiers.push(doubleSlash);
 
             this.blockCommentModifiers.push(new ModifierPair(slashBlockOpen, slashBlockClose));
@@ -99,10 +102,15 @@ export default class Settings {
             this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
             this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
         }
-        else if (settings.languageID === "json") {
-            this.singleCommentModifiers.push(doubleSlash);
+        else if (settings.languageID === "html") {
+            this.blockCommentModifiers.push(new ModifierPair(htmlBlockOpen, htmlBlockClose));
+            this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+            this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
+        }
+        else if (settings.languageID === "css") {
             this.blockCommentModifiers.push(new ModifierPair(slashBlockOpen, slashBlockClose));
             this.quoteModifiers.push(new ModifierPair(doubleQuote, doubleQuote));
+            this.quoteModifiers.push(new ModifierPair(singleQuote, singleQuote));
         }
         else {
             supportedLanguageID = false;
