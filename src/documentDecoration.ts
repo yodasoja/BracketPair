@@ -15,7 +15,7 @@ export default class DocumentDecoration {
     constructor(document: vscode.TextDocument, settings: Settings) {
         this.settings = settings;
         this.document = document;
-        this.scopeDecoration = vscode.window.createTextEditorDecorationType({ color: "red" });
+        this.scopeDecoration = vscode.window.createTextEditorDecorationType({ color: "green" });
     }
 
     public dispose() {
@@ -61,28 +61,34 @@ export default class DocumentDecoration {
 
         const selection = event.selections[0].active;
 
-        let startPos: vscode.Position | undefined;
+        let startPositionAndColor: { color: string, position: vscode.Position } | undefined;
 
-        for (let i = selection.line; i >= 0 && !startPos; i--) {
+        for (let i = selection.line; i >= 0 && !startPositionAndColor; i--) {
             const line = this.getLine(i, event.textEditor.document);
-            startPos = line.getFirstPositionBefore(selection);
+            startPositionAndColor = line.getFirstBracketColorAndPositionBefore(selection);
         }
 
-        let endPos: vscode.Position | undefined;
+        if (startPositionAndColor) {
+            let endPos: vscode.Position | undefined;
 
-        for (let i = selection.line; i < this.lines.length && !endPos; i++) {
-            const line = this.getLine(i, event.textEditor.document);
-            endPos = line.getFirstPositionAfter(selection);
-        }
+            for (let i = selection.line; i < this.lines.length && !endPos; i++) {
+                const line = this.getLine(i, event.textEditor.document);
+                endPos = line.getFirstPositionAfter(selection, startPositionAndColor.color);
+            }
 
-        if (startPos && endPos) {
+            endPos = endPos || new vscode.Position(Infinity, Infinity);
+
+            console.log("Start -> Line: " + startPositionAndColor.position.line +
+                " | Char: " + startPositionAndColor.position.character +
+                " | Color: " + startPositionAndColor.color);
+            console.log("End -> Line: " + endPos.line + " | Char: " + endPos.character);
+
             event.textEditor.setDecorations(
                 this.scopeDecoration,
                 [new vscode.Range(
-                    startPos,
+                    startPositionAndColor.position,
                     endPos,
-                )],
-            );
+                )]);
         }
         else {
             event.textEditor.setDecorations(

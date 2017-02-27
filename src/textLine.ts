@@ -24,50 +24,53 @@ export default class TextLine {
         }
     }
 
-    public getFirstPositionBefore(position: vscode.Position): vscode.Position | undefined {
+    public getFirstBracketColorAndPositionBefore(position: vscode.Position):
+        { color: string, position: vscode.Position } | undefined {
         let limit = position.character;
         let foundPos = -1;
-
+        let foundColor: string | undefined;
         if (this.index < position.line) {
             limit = Infinity;
         }
 
-        let found = false;
-
-        this.colorRanges.forEach((ranges) => {
+        this.colorRanges.forEach((ranges, color) => {
             ranges.forEach((range) => {
                 if (range.end.character < limit) {
-                    foundPos = Math.max(foundPos, range.end.character);
-                    found = true;
+                    if (range.end.character > foundPos) {
+                        foundPos = range.end.character;
+                        foundColor = color;
+                    }
                 }
             });
         });
 
-        if (!found) {
+        if (!foundColor) {
             return undefined;
         }
 
-        return new vscode.Position(this.index, foundPos);
+        return { color: foundColor, position: new vscode.Position(this.index, foundPos) };
     }
 
-    public getFirstPositionAfter(position: vscode.Position): vscode.Position | undefined {
+    public getFirstPositionAfter(position: vscode.Position, color: string): vscode.Position | undefined {
         let limit = position.character;
         let foundPos = Infinity;
-
+        let found = false;
         if (this.index > position.line) {
             limit = -1;
         }
 
-        let found = false;
+        const ranges = this.colorRanges.get(color);
 
-        this.colorRanges.forEach((ranges) => {
+        if (ranges) {
             ranges.forEach((range) => {
                 if (range.start.character > limit) {
-                    foundPos = Math.min(range.start.character, foundPos);
-                    found = true;
+                    if (range.start.character < foundPos) {
+                        foundPos = range.start.character;
+                        found = true;
+                    }
                 }
             });
-        });
+        }
 
         if (!found) {
             return undefined;
