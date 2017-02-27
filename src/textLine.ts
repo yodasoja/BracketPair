@@ -6,6 +6,7 @@ import Settings from "./settings";
 
 export default class TextLine {
     public colorRanges = new Map<string, vscode.Range[]>();
+    public readonly index: number;
     private lastModifierCheckPos = 0;
     private lineState: LineState;
     private readonly settings: Settings;
@@ -14,13 +15,65 @@ export default class TextLine {
     constructor(settings: Settings, index: number, document: vscode.TextDocument, multiLineState?: MultiLineState) {
         this.settings = settings;
         this.contents = document.lineAt(index).text;
-
+        this.index = index;
         if (multiLineState !== undefined) {
             this.lineState = new LineState(settings, multiLineState);;
         }
         else {
             this.lineState = new LineState(settings);
         }
+    }
+
+    public getFirstPositionBefore(position: vscode.Position): vscode.Position | undefined {
+        let limit = position.character;
+        let foundPos = -1;
+
+        if (this.index < position.line) {
+            limit = Infinity;
+        }
+
+        let found = false;
+
+        this.colorRanges.forEach((ranges) => {
+            ranges.forEach((range) => {
+                if (range.end.character < limit) {
+                    foundPos = Math.max(foundPos, range.end.character);
+                    found = true;
+                }
+            });
+        });
+
+        if (!found) {
+            return undefined;
+        }
+
+        return new vscode.Position(this.index, foundPos);
+    }
+
+    public getFirstPositionAfter(position: vscode.Position): vscode.Position | undefined {
+        let limit = position.character;
+        let foundPos = Infinity;
+
+        if (this.index > position.line) {
+            limit = -1;
+        }
+
+        let found = false;
+
+        this.colorRanges.forEach((ranges) => {
+            ranges.forEach((range) => {
+                if (range.start.character > limit) {
+                    foundPos = Math.min(range.start.character, foundPos);
+                    found = true;
+                }
+            });
+        });
+
+        if (!found) {
+            return undefined;
+        }
+
+        return new vscode.Position(this.index, foundPos);
     }
 
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.

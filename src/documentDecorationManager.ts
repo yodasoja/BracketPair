@@ -30,6 +30,13 @@ export default class DocumentDecorationManager {
         }
     }
 
+    public onDidChangeSelection(event: vscode.TextEditorSelectionChangeEvent) {
+        const documentDecoration = this.getDocumentDecorations(event.textEditor.document);
+        if (documentDecoration) {
+            documentDecoration.updateScopeDecorations(event);
+        }
+    }
+
     public onDidCloseTextDocument(closedDocument: vscode.TextDocument) {
         const uri = closedDocument.uri.toString();
         const document = this.documents.get(uri);
@@ -56,7 +63,7 @@ export default class DocumentDecorationManager {
         if (documentDecorations === undefined) {
             try {
                 const settings = new Settings({ languageID: document.languageId });
-                documentDecorations = new DocumentDecoration(uri, settings);
+                documentDecorations = new DocumentDecoration(document, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
                 if (error instanceof Error) {

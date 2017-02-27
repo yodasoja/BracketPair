@@ -4,15 +4,18 @@ import TextLine from "./textLine";
 
 export default class DocumentDecoration {
     private updateDecorationTimeout: NodeJS.Timer | null;
+
     // This program caches lines, and will only analyze linenumbers including or above a modified line
     private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
-    private readonly uri: string;
+    private readonly document: vscode.TextDocument;
     private readonly settings: Settings;
+    private readonly scopeDecoration: vscode.TextEditorDecorationType;
 
-    constructor(uri: string, settings: Settings) {
+    constructor(document: vscode.TextDocument, settings: Settings) {
         this.settings = settings;
-        this.uri = uri;
+        this.document = document;
+        this.scopeDecoration = vscode.window.createTextEditorDecorationType({ color: "red" });
     }
 
     public dispose() {
@@ -44,6 +47,48 @@ export default class DocumentDecoration {
 
             const lineToReturn = this.lines[this.lines.length - 1];
             return lineToReturn;
+        }
+    }
+
+    public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
+        if (this.settings.isDisposed) {
+            return;
+        }
+
+        if (event.selections.length === 0 || this.lines.length === 0) {
+            return;
+        }
+
+        const selection = event.selections[0].active;
+
+        let startPos: vscode.Position | undefined;
+
+        for (let i = selection.line; i >= 0 && !startPos; i--) {
+            const line = this.getLine(i, event.textEditor.document);
+            startPos = line.getFirstPositionBefore(selection);
+        }
+
+        let endPos: vscode.Position | undefined;
+
+        for (let i = selection.line; i < this.lines.length && !endPos; i++) {
+            const line = this.getLine(i, event.textEditor.document);
+            endPos = line.getFirstPositionAfter(selection);
+        }
+
+        if (startPos && endPos) {
+            event.textEditor.setDecorations(
+                this.scopeDecoration,
+                [new vscode.Range(
+                    startPos,
+                    endPos,
+                )],
+            );
+        }
+        else {
+            event.textEditor.setDecorations(
+                this.scopeDecoration,
+                [],
+            );
         }
     }
 
@@ -79,7 +124,7 @@ export default class DocumentDecoration {
 
         // One document may be shared by multiple editors (side by side view)
         vscode.window.visibleTextEditors.forEach((editor) => {
-            if (editor.document && editor.document.lineCount !== 0 && this.uri === editor.document.uri.toString()) {
+            if (editor.document && editor.document.lineCount !== 0 && this.document === editor.document) {
                 editors.push(editor);
             }
         });

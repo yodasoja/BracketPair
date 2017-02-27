@@ -17,6 +17,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     }, null, context.subscriptions);
 
+    vscode.window.onDidChangeTextEditorSelection((event) => {
+        documentDecorationManager.onDidChangeSelection(event);
+    }, null, context.subscriptions);
+
     vscode.workspace.onDidCloseTextDocument((event) => {
         documentDecorationManager.onDidCloseTextDocument(event);
 
