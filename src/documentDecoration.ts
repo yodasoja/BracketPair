@@ -4,15 +4,16 @@ import TextLine from "./textLine";
 
 export default class DocumentDecoration {
     private updateDecorationTimeout: NodeJS.Timer | null;
+
     // This program caches lines, and will only analyze linenumbers including or above a modified line
     private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
-    private readonly uri: string;
+    private readonly document: vscode.TextDocument;
     private readonly settings: Settings;
 
-    constructor(uri: string, settings: Settings) {
+    constructor(document: vscode.TextDocument, settings: Settings) {
         this.settings = settings;
-        this.uri = uri;
+        this.document = document;
     }
 
     public dispose() {
@@ -79,7 +80,7 @@ export default class DocumentDecoration {
 
         // One document may be shared by multiple editors (side by side view)
         vscode.window.visibleTextEditors.forEach((editor) => {
-            if (editor.document && editor.document.lineCount !== 0 && this.uri === editor.document.uri.toString()) {
+            if (editor.document && editor.document.lineCount !== 0 && this.document === editor.document) {
                 editors.push(editor);
             }
         });
@@ -109,10 +110,9 @@ export default class DocumentDecoration {
             const startPos = document.positionAt(match.index);
 
             const endPos = startPos.translate(0, match[0].length);
-            const range = new vscode.Range(startPos, endPos);
 
             const currentLine = this.getLine(startPos.line, document);
-            currentLine.addBracket(match[0], range);
+            currentLine.addBracket(match[0], startPos.character);
         }
 
         this.colorDecorations(editors);
