@@ -15,7 +15,7 @@ export default class ScopeCharacter {
         if (options) {
             this.escapeCharacter = options.escapeCharacter || "";
             this.mustNotStartWith = options.mustNotStartWith || [];
-            this.mustNotStartWith = options.mustNotEndWith || [];
+            this.mustNotEndWith = options.mustNotEndWith || [];
         }
         else {
             this.escapeCharacter = "";

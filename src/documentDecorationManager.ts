@@ -33,7 +33,7 @@ export default class DocumentDecorationManager {
     public onDidChangeSelection(event: vscode.TextEditorSelectionChangeEvent) {
         const documentDecoration = this.getDocumentDecorations(event.textEditor.document);
         if (documentDecoration) {
-            documentDecoration.updateScopeDecorations(event);
+            // documentDecoration.updateScopeDecorations(event);
         }
     }
 

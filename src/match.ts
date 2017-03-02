@@ -15,7 +15,7 @@ export default class Match {
     }
 
     private checkMatch(position: number, character: ScopeCharacter): boolean {
-        return this.content.substr(position, character.escapeCharacter.length) === character.escapeCharacter
+        return this.content.substr(position, character.match.length) === character.match
             && this.isNotEscaped(position, character);
     }
 
