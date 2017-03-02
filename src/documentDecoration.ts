@@ -14,7 +14,6 @@ export default class DocumentDecoration {
     constructor(document: vscode.TextDocument, settings: Settings) {
         this.settings = settings;
         this.document = document;
-        // this.scopeDecoration = vscode.window.createTextEditorDecorationType({ color: "green" });
     }
 
     public dispose() {

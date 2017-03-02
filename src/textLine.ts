@@ -77,10 +77,17 @@ export default class TextLine {
         if (this.lineState.activeScope) {
             if (!this.lineState.activeScope.isSingleLineComment()) {
                 if (this.lineState.activeScope.closer) {
-                    if (this.match.isMatched(position, this.lineState.activeScope.closer)) {
-                        this.lastModifierCheckPos = position + bracket.length;
-                        this.lineState.activeScope = undefined;
+                    for (let i = this.lastModifierCheckPos; i < position; i++) {
+                        if (this.match.isMatched(i, this.lineState.activeScope.closer)) {
+                            this.lastModifierCheckPos = position + bracket.length;
+                            this.lineState.activeScope = undefined;
+                            return;
+                        }
                     }
+                }
+                else
+                {
+                    throw new Error("Closing character is undefined in multiline block");
                 }
             }
             return;
@@ -88,7 +95,7 @@ export default class TextLine {
 
         for (let i = this.lastModifierCheckPos; i < position; i++) {
             for (const scope of this.settings.scopes) {
-                if (this.match.isMatched(position, scope.opener)) {
+                if (this.match.isMatched(i, scope.opener)) {
                     this.lastModifierCheckPos = position + bracket.length;
                     this.lineState.activeScope = scope;
                     return;
