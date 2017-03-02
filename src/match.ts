@@ -7,7 +7,7 @@ export default class Match {
         this.content = content;
     }
 
-    public isMatched(position: number, character: ScopeCharacter): boolean {
+    public contains(position: number, character: ScopeCharacter): boolean {
         return (
             this.checkMatch(position, character) &&
             this.checkPreCondition(position, character) &&
