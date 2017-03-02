@@ -1,33 +1,42 @@
 import * as vscode from "vscode";
+import Bracket from "./bracket";
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
+import Scope from "./scope";
 import Settings from "./settings";
 
-type RangeAndIndex = { range: vscode.Range, index: number };
 export default class MultipleIndexes implements ColorIndexes {
-    private currentOpenBracketColorIndexes: { [character: string]: RangeAndIndex[]; } = {};
+    private openBrackets: { [character: string]: Bracket[]; } = {};
     private previousOpenBracketColorIndexes: { [character: string]: number; } = {};
-    private pairedPositions: Array<{ open: vscode.Range, close: vscode.Range }> = [];
+    private bracketScopes: Scope[] = [];
     private readonly settings: Settings;
 
     constructor(
         settings: Settings,
         previousState?: {
-            currentOpenBracketColorIndexes: { [character: string]: RangeAndIndex[]; },
+            currentOpenBracketColorIndexes: { [character: string]: Bracket[]; },
             previousOpenBracketColorIndexes: { [character: string]: number; },
         }) {
         this.settings = settings;
 
         if (previousState !== undefined) {
-            this.currentOpenBracketColorIndexes = previousState.currentOpenBracketColorIndexes;
+            this.openBrackets = previousState.currentOpenBracketColorIndexes;
             this.previousOpenBracketColorIndexes = previousState.previousOpenBracketColorIndexes;
 
         }
         else {
             settings.bracketPairs.forEach((bracketPair) => {
-                this.currentOpenBracketColorIndexes[bracketPair.openCharacter] = [];
+                this.openBrackets[bracketPair.openCharacter] = [];
                 this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = -1;
             });
+        }
+    }
+
+    public getScope(position: vscode.Position): Scope | undefined {
+        for (const scope of this.bracketScopes) {
+            if (scope.range.contains(position)) {
+                return scope;
+            }
         }
     }
 
@@ -36,27 +45,28 @@ export default class MultipleIndexes implements ColorIndexes {
     }
 
     public setCurrent(bracketPair: BracketPair, range: vscode.Range, colorIndex: number) {
-        this.currentOpenBracketColorIndexes[bracketPair.openCharacter].push({ range, index: colorIndex });
+        this.openBrackets[bracketPair.openCharacter].push(new Bracket(range, colorIndex));
         this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = colorIndex;
     }
 
     public getCurrentLength(bracketPair: BracketPair): number {
-        return this.currentOpenBracketColorIndexes[bracketPair.openCharacter].length;
+        return this.openBrackets[bracketPair.openCharacter].length;
     }
 
-    public popCurrent(bracketPair: BracketPair, range: vscode.Range): number | undefined {
-        const positionAndIndex = this.currentOpenBracketColorIndexes[bracketPair.openCharacter].pop();
-        if (positionAndIndex) {
-            this.pairedPositions.push({ open: positionAndIndex.range, close: range });
-            return positionAndIndex.index;
+    public getCurrentColorIndex(bracketPair: BracketPair, range: vscode.Range): number | undefined {
+        const openBracket = this.openBrackets[bracketPair.openCharacter].pop();
+        if (openBracket) {
+            const scopeRange = new vscode.Range(openBracket.range.end, range.start);
+            this.bracketScopes.push(new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex]));
+            return openBracket.colorIndex;
         }
     }
 
     public clone(): ColorIndexes {
-        const bracketColorIndexesCopy: { [character: string]: RangeAndIndex[]; } = {};
+        const bracketColorIndexesCopy: { [character: string]: Bracket[]; } = {};
 
-        Object.keys(this.currentOpenBracketColorIndexes).forEach((key) => {
-            bracketColorIndexesCopy[key] = this.currentOpenBracketColorIndexes[key].slice();
+        Object.keys(this.openBrackets).forEach((key) => {
+            bracketColorIndexesCopy[key] = this.openBrackets[key].slice();
         });
 
         const previousOpenBracketIndexesCopy: { [character: string]: number; } = {};

@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
 
@@ -65,6 +66,56 @@ export default class DocumentDecoration {
         }
         else {
             this.updateDecorations();
+        }
+    }
+
+    public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
+        const scopes: Set<Scope> = new Set<Scope>();
+
+        event.selections.forEach((selection) => {
+            const scope = this.getScope(selection.active);
+
+            if (scope) {
+                scopes.add(scope);
+            }
+        });
+
+        const colorMap = new Map<string, vscode.Range[]>();
+
+        // Reduce all the colors/ranges of the lines into a singular map
+        for (const scope of scopes) {
+            {
+                const existingRanges = colorMap.get(scope.color);
+
+                if (existingRanges !== undefined) {
+                    existingRanges.push(scope.range);
+                }
+                else {
+                    colorMap.set(scope.color, [scope.range]);
+                }
+            }
+        }
+
+        for (const [color, decoration] of this.settings.scopeDecorations) {
+            const ranges = colorMap.get(color);
+            if (ranges !== undefined) {
+                event.textEditor.setDecorations(decoration, ranges);
+            }
+            else {
+                // We must set non-used colors to an empty array
+                // or previous decorations will not be invalidated
+                event.textEditor.setDecorations(decoration, []);
+            }
+        }
+    }
+
+    private getScope(position: vscode.Position): Scope | undefined {
+        for (let i = position.line; i < this.lines.length; i++) {
+            const scope = this.lines[i].getScope(position);
+
+            if (scope) {
+                return scope;
+            }
         }
     }
 
@@ -139,7 +190,7 @@ export default class DocumentDecoration {
             }
         }
 
-        for (const [color, decoration] of this.settings.decorations) {
+        for (const [color, decoration] of this.settings.bracketDecorations) {
             const ranges = colorMap.get(color);
             editors.forEach((editor) => {
                 if (ranges !== undefined) {

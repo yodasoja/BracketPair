@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
-import Scope from "./scope";
 import ScopeCharacter from "./scopeCharacter";
+import ScopePattern from "./scopePattern";
 
 export default class Settings {
     public readonly timeOutLength: number;
@@ -11,9 +11,10 @@ export default class Settings {
     public readonly contextualParsing: boolean;
     public readonly bracketPairs: BracketPair[] = [];
     public readonly regexPattern: string;
-    public readonly decorations: Map<string, vscode.TextEditorDecorationType>;
+    public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
+    public readonly scopeDecorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly colorMode: ColorMode;
-    public readonly scopes: Scope[] = [];
+    public readonly scopes: ScopePattern[] = [];
     public isDisposed = false;
 
     constructor(settings: {
@@ -30,23 +31,23 @@ export default class Settings {
         const backslash = "\\";
 
         const hash = new ScopeCharacter("#");
-        const hashComment = new Scope(hash);
+        const hashComment = new ScopePattern(hash);
 
         const doubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
-        const doubleQuoteBlock = new Scope(doubleQuote, doubleQuote);
+        const doubleQuoteBlock = new ScopePattern(doubleQuote, doubleQuote);
 
         const singleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
-        const singleQuoteBlock = new Scope(singleQuote, singleQuote);
+        const singleQuoteBlock = new ScopePattern(singleQuote, singleQuote);
 
         const backtick = new ScopeCharacter("`");
-        const backtickQuoteBlock = new Scope(backtick, backtick);
+        const backtickQuoteBlock = new ScopePattern(backtick, backtick);
 
         const doubleForwardslash = new ScopeCharacter("//");
-        const doubleForwardslashComment = new Scope(doubleForwardslash);
+        const doubleForwardslashComment = new ScopePattern(doubleForwardslash);
 
         const slashCommentOpen = new ScopeCharacter("/*");
         const slashCommentClose = new ScopeCharacter("*/");
-        const slashCommentBlock = new Scope(slashCommentOpen, slashCommentClose);
+        const slashCommentBlock = new ScopePattern(slashCommentOpen, slashCommentClose);
 
         // VSCode does not follow html comment spec
         // The following invalid examples still are highlighted as comments
@@ -56,11 +57,11 @@ export default class Settings {
         // <!-- inva--lid -->
         const htmlCommentOpen = new ScopeCharacter("<!--");
         const htmlCommentClose = new ScopeCharacter("-->", { mustNotStartWith: ["-"] });
-        const htmlCommentBlock = new Scope(htmlCommentOpen, htmlCommentClose);
+        const htmlCommentBlock = new ScopePattern(htmlCommentOpen, htmlCommentClose);
 
         const rubyCommentOpen = new ScopeCharacter("=begin");
         const rubyCommentClose = new ScopeCharacter("=end");
-        const rubyCommentBlock = new Scope(rubyCommentOpen, rubyCommentClose);
+        const rubyCommentBlock = new ScopePattern(rubyCommentOpen, rubyCommentClose);
 
         if (settings.languageID === "python") {
             this.scopes.push(hashComment);
@@ -242,14 +243,20 @@ export default class Settings {
         }
 
         this.regexPattern = this.createRegex(this.bracketPairs);
-        this.decorations = this.createDecorations(this.bracketPairs);
+        this.bracketDecorations = this.createBracketDecorations(this.bracketPairs);
+        this.scopeDecorations = this.createScopeDecorations(this.bracketPairs);
     }
 
     public dispose() {
-        this.decorations.forEach((decoration, key) => {
+        this.scopeDecorations.forEach((decoration, key) => {
             decoration.dispose();
         });
-        this.decorations.clear();
+        this.scopeDecorations.clear();
+
+        this.bracketDecorations.forEach((decoration, key) => {
+            decoration.dispose();
+        });
+        this.bracketDecorations.clear();
         this.isDisposed = true;
     }
 
@@ -267,7 +274,7 @@ export default class Settings {
         return regex;
     }
 
-    private createDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
+    private createBracketDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
         const decorations = new Map<string, vscode.TextEditorDecorationType>();
 
         for (const bracketPair of bracketPairs) {
@@ -278,6 +285,21 @@ export default class Settings {
 
             const errorDecoration = vscode.window.createTextEditorDecorationType({ color: bracketPair.orphanColor });
             decorations.set(bracketPair.orphanColor, errorDecoration);
+        }
+
+        return decorations;
+    }
+
+    private createScopeDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
+        const decorations = new Map<string, vscode.TextEditorDecorationType>();
+
+        for (const bracketPair of bracketPairs) {
+            for (const color of bracketPair.colors) {
+                const decoration = vscode.window.createTextEditorDecorationType(
+                    { backgroundColor: color + "; opacity:0.1;" },
+                );
+                decorations.set(color, decoration);
+            }
         }
 
         return decorations;

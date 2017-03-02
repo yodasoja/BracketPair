@@ -1,31 +1,32 @@
 import * as vscode from "vscode";
+import Bracket from "./bracket";
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
+import Scope from "./scope";
 
-type RangeAndIndex = { range: vscode.Range, index: number };
 export default class SingularIndex implements ColorIndexes {
-    private currentOpenBracketColorIndexes: RangeAndIndex[] = [];
+    private openBrackets: Bracket[] = [];
     private previousOpenBracketColorIndex: number = -1;
-    private pairedPositions: Array<{ open: vscode.Range, close: vscode.Range }> = [];
+    private bracketScopes: Scope[] = [];
 
     constructor(
         previousState?: {
-            currentOpenBracketColorIndexes: RangeAndIndex[],
+            currentOpenBracketColorIndexes: Bracket[],
             previousOpenBracketColorIndex: number,
         }) {
 
         if (previousState !== undefined) {
-            this.currentOpenBracketColorIndexes = previousState.currentOpenBracketColorIndexes;
+            this.openBrackets = previousState.currentOpenBracketColorIndexes;
             this.previousOpenBracketColorIndex = previousState.previousOpenBracketColorIndex;
         }
     }
 
-    public clone() {
-        return new SingularIndex(
-            {
-                currentOpenBracketColorIndexes: this.currentOpenBracketColorIndexes.slice(),
-                previousOpenBracketColorIndex: this.previousOpenBracketColorIndex,
-            });
+    public getScope(position: vscode.Position): Scope | undefined {
+        for (const scope of this.bracketScopes) {
+            if (scope.range.contains(position)) {
+                return scope;
+            }
+        }
     }
 
     public getPreviousIndex(bracketPair: BracketPair): number {
@@ -33,19 +34,28 @@ export default class SingularIndex implements ColorIndexes {
     }
 
     public setCurrent(bracketPair: BracketPair, range: vscode.Range, colorIndex: number) {
-        this.currentOpenBracketColorIndexes.push({ range, index: colorIndex });
+        this.openBrackets.push(new Bracket(range, colorIndex));
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
     public getCurrentLength(bracketPair: BracketPair): number {
-        return this.currentOpenBracketColorIndexes.length;
+        return this.openBrackets.length;
     }
 
-    public popCurrent(bracketPair: BracketPair, range: vscode.Range): number | undefined {
-        const rangeAndIndex = this.currentOpenBracketColorIndexes.pop();
-        if (rangeAndIndex) {
-            this.pairedPositions.push({ open: rangeAndIndex.range, close: range });
-            return rangeAndIndex.index;
+    public getCurrentColorIndex(bracketPair: BracketPair, range: vscode.Range): number | undefined {
+        const openBracket = this.openBrackets.pop();
+        if (openBracket) {
+            const scopeRange = new vscode.Range(openBracket.range.end, range.start);
+            this.bracketScopes.push(new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex]));
+            return openBracket.colorIndex;
         }
+    }
+
+    public clone() {
+        return new SingularIndex(
+            {
+                currentOpenBracketColorIndexes: this.openBrackets.slice(),
+                previousOpenBracketColorIndex: this.previousOpenBracketColorIndex,
+            });
     }
 }

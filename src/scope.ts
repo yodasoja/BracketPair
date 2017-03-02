@@ -1,16 +1,10 @@
-import Match from "./match";
-import ScopeCharacter from "./scopeCharacter";
+import * as vscode from "vscode";
 
 export default class Scope {
-    public readonly opener: ScopeCharacter;
-    public readonly closer: ScopeCharacter | undefined;
-
-    constructor(opener: ScopeCharacter, closer?: ScopeCharacter) {
-        this.opener = opener;
-        this.closer = closer;
-    }
-
-    public isSingleLineComment() {
-        return this.closer === undefined;
+    public readonly range: vscode.Range;
+    public readonly color: string;
+    constructor(range: vscode.Range, color: string) {
+        this.range = range;
+        this.color = color;
     }
 }

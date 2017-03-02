@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import LineState from "./lineState";
 import Match from "./match";
 import ModifierPair from "./modifierPair";
+import Scope from "./scope";
 import Settings from "./settings";
 
 export default class TextLine {
@@ -29,6 +30,10 @@ export default class TextLine {
         // Update state for whole line before returning
         this.checkForStringModifiers(this.scopeChecker.content.length);
         return this.lineState.clone();
+    }
+
+    public getScope(position: vscode.Position): Scope | undefined {
+        return this.lineState.getScope(position);
     }
 
     public addBracket(bracket: string, position: number) {

@@ -5,11 +5,12 @@ import ColorIndexes from "./IColorIndexes";
 import ModifierPair from "./modifierPair";
 import MultipleIndexes from "./multipleIndexes";
 import Scope from "./scope";
+import ScopePattern from "./scopePattern";
 import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class LineState {
-    public activeScope: Scope | undefined;
+    public activeScope: ScopePattern | undefined;
     private colorIndexes: ColorIndexes;
     private previousBracketColor: string;
     private readonly settings: Settings;
@@ -18,7 +19,7 @@ export default class LineState {
         {
             colorIndexes: ColorIndexes;
             previousBracketColor: string;
-            activeScope?: Scope;
+            activeScope?: ScopePattern;
         }) {
         this.settings = settings;
 
@@ -40,6 +41,10 @@ export default class LineState {
                 default: throw new RangeError("Not implemented enum value");
             }
         }
+    }
+
+    public getScope(position: vscode.Position): Scope | undefined {
+        return this.colorIndexes.getScope(position);
     }
 
     public getOpenBracketColor(bracketPair: BracketPair, range: vscode.Range): string {
@@ -66,7 +71,7 @@ export default class LineState {
     };
 
     public getCloseBracketColor(bracketPair: BracketPair, range: vscode.Range): string {
-        const colorIndex = this.colorIndexes.popCurrent(bracketPair, range);
+        const colorIndex = this.colorIndexes.getCurrentColorIndex(bracketPair, range);
         let color: string;
         if (colorIndex !== undefined) {
             color = bracketPair.colors[colorIndex];
