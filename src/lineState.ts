@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
 import ColorIndexes from "./IColorIndexes";
@@ -41,11 +42,11 @@ export default class LineState {
         }
     }
 
-    public getOpenBracketColor(bracketPair: BracketPair): string {
+    public getOpenBracketColor(bracketPair: BracketPair, range: vscode.Range): string {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
-            colorIndex = (this.colorIndexes.getPrevious(bracketPair) + 1) % bracketPair.colors.length;
+            colorIndex = (this.colorIndexes.getPreviousIndex(bracketPair) + 1) % bracketPair.colors.length;
         }
         else {
             colorIndex = this.colorIndexes.getCurrentLength(bracketPair) % bracketPair.colors.length;
@@ -59,13 +60,13 @@ export default class LineState {
         }
 
         this.previousBracketColor = color;
-        this.colorIndexes.setCurrent(bracketPair, colorIndex);
+        this.colorIndexes.setCurrent(bracketPair, range, colorIndex);
 
         return color;
     };
 
-    public getCloseBracketColor(bracketPair: BracketPair): string {
-        const colorIndex = this.colorIndexes.popCurrent(bracketPair);
+    public getCloseBracketColor(bracketPair: BracketPair, range: vscode.Range): string {
+        const colorIndex = this.colorIndexes.popCurrent(bracketPair, range);
         let color: string;
         if (colorIndex !== undefined) {
             color = bracketPair.colors[colorIndex];

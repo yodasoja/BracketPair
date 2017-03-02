@@ -39,14 +39,16 @@ export default class TextLine {
             }
         }
 
+        const bracketOpenPosition = new vscode.Position(this.index, position);
+        const bracketClosePosition = new vscode.Position(this.index, position + bracket.length);
         const range = new vscode.Range(
-            new vscode.Position(this.index, position),
-            new vscode.Position(this.index, position + bracket.length),
+            bracketOpenPosition,
+            bracketClosePosition,
         );
 
         for (const bracketPair of this.settings.bracketPairs) {
             if (bracketPair.openCharacter === bracket) {
-                const color = this.lineState.getOpenBracketColor(bracketPair);
+                const color = this.lineState.getOpenBracketColor(bracketPair, range);
 
                 const colorRanges = this.colorRanges.get(color);
 
@@ -59,7 +61,7 @@ export default class TextLine {
                 return;
             }
             else if (bracketPair.closeCharacter === bracket) {
-                const color = this.lineState.getCloseBracketColor(bracketPair);
+                const color = this.lineState.getCloseBracketColor(bracketPair, range);
 
                 const colorRanges = this.colorRanges.get(color);
                 if (colorRanges !== undefined) {

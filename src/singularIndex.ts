@@ -1,13 +1,16 @@
+import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
 
+type RangeAndIndex = { range: vscode.Range, index: number };
 export default class SingularIndex implements ColorIndexes {
-    private currentOpenBracketColorIndexes: number[] = [];
+    private currentOpenBracketColorIndexes: RangeAndIndex[] = [];
     private previousOpenBracketColorIndex: number = -1;
+    private pairedPositions: Array<{ open: vscode.Range, close: vscode.Range }> = [];
 
     constructor(
         previousState?: {
-            currentOpenBracketColorIndexes: number[],
+            currentOpenBracketColorIndexes: RangeAndIndex[],
             previousOpenBracketColorIndex: number,
         }) {
 
@@ -25,12 +28,12 @@ export default class SingularIndex implements ColorIndexes {
             });
     }
 
-    public getPrevious(bracketPair: BracketPair): number {
+    public getPreviousIndex(bracketPair: BracketPair): number {
         return this.previousOpenBracketColorIndex;
     }
 
-    public setCurrent(bracketPair: BracketPair, colorIndex: number) {
-        this.currentOpenBracketColorIndexes.push(colorIndex);
+    public setCurrent(bracketPair: BracketPair, range: vscode.Range, colorIndex: number) {
+        this.currentOpenBracketColorIndexes.push({ range, index: colorIndex });
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
@@ -38,7 +41,11 @@ export default class SingularIndex implements ColorIndexes {
         return this.currentOpenBracketColorIndexes.length;
     }
 
-    public popCurrent(bracketPair: BracketPair): number | undefined {
-        return this.currentOpenBracketColorIndexes.pop();
+    public popCurrent(bracketPair: BracketPair, range: vscode.Range): number | undefined {
+        const rangeAndIndex = this.currentOpenBracketColorIndexes.pop();
+        if (rangeAndIndex) {
+            this.pairedPositions.push({ open: rangeAndIndex.range, close: range });
+            return rangeAndIndex.index;
+        }
     }
 }

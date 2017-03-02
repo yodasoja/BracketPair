@@ -1,16 +1,19 @@
+import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
 
+type RangeAndIndex = { range: vscode.Range, index: number };
 export default class MultipleIndexes implements ColorIndexes {
-    private currentOpenBracketColorIndexes: { [character: string]: number[]; } = {};
+    private currentOpenBracketColorIndexes: { [character: string]: RangeAndIndex[]; } = {};
     private previousOpenBracketColorIndexes: { [character: string]: number; } = {};
+    private pairedPositions: Array<{ open: vscode.Range, close: vscode.Range }> = [];
     private readonly settings: Settings;
 
     constructor(
         settings: Settings,
         previousState?: {
-            currentOpenBracketColorIndexes: { [character: string]: number[]; },
+            currentOpenBracketColorIndexes: { [character: string]: RangeAndIndex[]; },
             previousOpenBracketColorIndexes: { [character: string]: number; },
         }) {
         this.settings = settings;
@@ -28,12 +31,12 @@ export default class MultipleIndexes implements ColorIndexes {
         }
     }
 
-    public getPrevious(bracketPair: BracketPair): number {
+    public getPreviousIndex(bracketPair: BracketPair): number {
         return this.previousOpenBracketColorIndexes[bracketPair.openCharacter];
     }
 
-    public setCurrent(bracketPair: BracketPair, colorIndex: number) {
-        this.currentOpenBracketColorIndexes[bracketPair.openCharacter].push(colorIndex);
+    public setCurrent(bracketPair: BracketPair, range: vscode.Range, colorIndex: number) {
+        this.currentOpenBracketColorIndexes[bracketPair.openCharacter].push({ range, index: colorIndex });
         this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = colorIndex;
     }
 
@@ -41,12 +44,16 @@ export default class MultipleIndexes implements ColorIndexes {
         return this.currentOpenBracketColorIndexes[bracketPair.openCharacter].length;
     }
 
-    public popCurrent(bracketPair: BracketPair): number | undefined {
-        return this.currentOpenBracketColorIndexes[bracketPair.openCharacter].pop();
+    public popCurrent(bracketPair: BracketPair, range: vscode.Range): number | undefined {
+        const positionAndIndex = this.currentOpenBracketColorIndexes[bracketPair.openCharacter].pop();
+        if (positionAndIndex) {
+            this.pairedPositions.push({ open: positionAndIndex.range, close: range });
+            return positionAndIndex.index;
+        }
     }
 
     public clone(): ColorIndexes {
-        const bracketColorIndexesCopy: { [character: string]: number[]; } = {};
+        const bracketColorIndexesCopy: { [character: string]: RangeAndIndex[]; } = {};
 
         Object.keys(this.currentOpenBracketColorIndexes).forEach((key) => {
             bracketColorIndexesCopy[key] = this.currentOpenBracketColorIndexes[key].slice();
