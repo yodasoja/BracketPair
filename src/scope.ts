@@ -1,8 +1,16 @@
 import Match from "./match";
-import MatchLogic from "./matchLogic";
+import ScopeCharacter from "./scopeCharacter";
 
 export default class Scope {
-    private opener: Match;
-    private intermediate: Match | undefined;
-    private closer: Match | undefined;
+    public readonly opener: ScopeCharacter;
+    public readonly closer: ScopeCharacter | undefined;
+
+    constructor(opener: ScopeCharacter, closer?: ScopeCharacter) {
+        this.opener = opener;
+        this.closer = closer;
+    }
+
+    public isSingleLineComment() {
+        return this.closer === undefined;
+    }
 }

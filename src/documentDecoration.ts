@@ -160,10 +160,9 @@ export default class DocumentDecoration {
             const startPos = document.positionAt(match.index);
 
             const endPos = startPos.translate(0, match[0].length);
-            const range = new vscode.Range(startPos, endPos);
 
             const currentLine = this.getLine(startPos.line, document);
-            currentLine.addBracket(match[0], range);
+            currentLine.addBracket(match[0], startPos.character);
         }
 
         this.colorDecorations(editors);

@@ -1,52 +1,35 @@
+import ScopeCharacter from "./scopeCharacter";
+
 export default class Match {
     public readonly content: string;
-    public readonly match: string;
-    public readonly escapeCharacter: string;
-    public readonly mustNotStartWith: string[];
-    public readonly mustNotEndWith: string[];
 
-    constructor(
-        content: string,
-        match: string,
-        options: {
-            escapeCharacter?: string,
-            mustNotStartWith?: string[],
-            mustNotEndWith?: string[],
-        }) {
-
+    constructor(content: string) {
         this.content = content;
-        this.match = match;
-
-        if (options) {
-            this.escapeCharacter = options.escapeCharacter || "";
-            this.mustNotStartWith = options.mustNotStartWith || [];
-            this.mustNotStartWith = options.mustNotEndWith || [];
-        }
     }
 
-    public isMatched(position: number): boolean {
+    public isMatched(position: number, character: ScopeCharacter): boolean {
         return (
-            this.checkMatch(position) &&
-            this.checkPreCondition(position) &&
-            this.checkPostCondition(position + this.match.length));
+            this.checkMatch(position, character) &&
+            this.checkPreCondition(position, character) &&
+            this.checkPostCondition(position + character.match.length, character));
     }
 
-    private checkMatch(position: number): boolean {
-        return this.content.substr(position, this.escapeCharacter.length) === this.escapeCharacter
-            && this.isNotEscaped(position);
+    private checkMatch(position: number, character: ScopeCharacter): boolean {
+        return this.content.substr(position, character.escapeCharacter.length) === character.escapeCharacter
+            && this.isNotEscaped(position, character);
     }
 
-    private checkPreCondition(position: number): boolean {
+    private checkPreCondition(position: number, character: ScopeCharacter): boolean {
         if (position === 0) {
             return true;
         }
 
-        this.mustNotStartWith.forEach((element) => {
+        character.mustNotStartWith.forEach((element) => {
             const offsetPosition = position - element.length;
             if (
                 offsetPosition >= 0 &&
                 this.content.substr(offsetPosition, element.length) === element &&
-                this.isNotEscaped(position)) {
+                this.isNotEscaped(position, character)) {
                 return false;
             }
         });
@@ -54,15 +37,15 @@ export default class Match {
         return true;
     }
 
-    private checkPostCondition(position: number): boolean {
+    private checkPostCondition(position: number, character: ScopeCharacter): boolean {
         if (position === this.content.length - 1) {
             return true;
         }
 
-        this.mustNotEndWith.forEach((element) => {
+        character.mustNotEndWith.forEach((element) => {
             if (
                 this.content.substr(position, element.length) === element &&
-                this.isNotEscaped(position)) {
+                this.isNotEscaped(position, character)) {
                 return false;
             }
         });
@@ -70,11 +53,14 @@ export default class Match {
         return true;
     }
 
-    private isNotEscaped(position: number): boolean {
+    private isNotEscaped(position: number, character: ScopeCharacter): boolean {
         let counter = 0;
-        position -= this.escapeCharacter.length;
-        while (position > 0 && this.content.substr(position, this.escapeCharacter.length) === this.escapeCharacter) {
-            position -= this.escapeCharacter.length;
+        position -= character.escapeCharacter.length;
+        while (
+            position > 0 &&
+            this.content.substr(position, character.escapeCharacter.length) === character.escapeCharacter
+        ) {
+            position -= character.escapeCharacter.length;
             counter++;
         }
 
