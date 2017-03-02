@@ -80,7 +80,9 @@ export default class Settings {
             settings.languageID === "c" ||
             settings.languageID === "cpp" ||
             settings.languageID === "csharp" ||
-            settings.languageID === "java") {
+            settings.languageID === "java" ||
+            settings.languageID === "less" ||
+            settings.languageID === "scss") {
             this.scopes.push(doubleForwardslashComment);
             this.scopes.push(slashCommentBlock);
             this.scopes.push(doubleQuoteBlock);

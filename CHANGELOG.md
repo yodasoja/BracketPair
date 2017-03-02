@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.8.9
+Added SCSS and LESS contextual parsing
+
 ### 0.8.8
 Added HTML and CSS contextual parsing
 

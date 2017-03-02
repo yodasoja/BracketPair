@@ -47,10 +47,12 @@ Contextual parsing has experimental support for the following languages:
 - html
 - java
 - javascript
+- less
 - php
 - python
 - r
 - ruby
+- scss
 - swift
 - typescript
 ```
