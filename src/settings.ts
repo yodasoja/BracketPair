@@ -49,6 +49,13 @@ export default class Settings {
         const slashCommentClose = new ScopeCharacter("*/");
         const slashCommentBlock = new ScopePattern(slashCommentOpen, slashCommentClose);
 
+        const roundBracketCommentOpen = new ScopeCharacter("(*");
+        const roundBracketCommentClose = new ScopeCharacter("*)");
+        const roundBracketCommentBlock = new ScopePattern(roundBracketCommentOpen, roundBracketCommentClose);
+
+        const tripleQuote = new ScopeCharacter("\"\"\"");
+        const tripleQuoteBlock = new ScopePattern(tripleQuote, tripleQuote);
+
         // VSCode does not follow html comment spec
         // The following invalid examples still are highlighted as comments
         // So we will also follow this pattern and not parse these cases
@@ -122,6 +129,13 @@ export default class Settings {
             this.scopes.push(slashCommentBlock);
             this.scopes.push(doubleQuoteBlock);
             this.scopes.push(singleQuoteBlock);
+        }
+        else if (settings.languageID === "fsharp")
+        {
+            this.scopes.push(tripleQuoteBlock); // Must go first else single quotes take precedence
+            this.scopes.push(roundBracketCommentBlock);
+            this.scopes.push(singleQuoteBlock);
+            this.scopes.push(doubleForwardslashComment);
         }
 
         const configuration = vscode.workspace.getConfiguration();
