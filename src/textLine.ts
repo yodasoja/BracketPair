@@ -91,7 +91,7 @@ export default class TextLine {
 
                 if (this.lineState.activeScope.closer) {
                     if (this.scopeChecker.contains(i, this.lineState.activeScope.closer)) {
-                        i += this.lineState.activeScope.closer.match.length;
+                        i += this.lineState.activeScope.closer.match.length - 1;
                         this.lineState.activeScope = undefined;
                     }
                 }
@@ -106,11 +106,11 @@ export default class TextLine {
         this.lastModifierCheckPos = bracketPosition + bracket.length;
     }
 
-    private checkForOpeningScope(position: number) : number {
+    private checkForOpeningScope(position: number): number {
         for (const scope of this.settings.scopes) {
             if (this.scopeChecker.contains(position, scope.opener)) {
                 this.lineState.activeScope = scope;
-                return scope.opener.match.length;
+                return scope.opener.match.length - 1;
             }
         }
 
