@@ -145,7 +145,7 @@ export default class Settings {
             }
             case "fsharp": {
                 this.scopes.push(tripleQuoteBlock);
-                this.scopes.push(doubleQuoteBlock)
+                this.scopes.push(doubleQuoteBlock);
                 this.scopes.push(singleQuoteBlock);
                 this.scopes.push(roundBracketCommentBlock);
                 this.scopes.push(doubleForwardslashComment);

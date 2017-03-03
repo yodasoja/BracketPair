@@ -54,7 +54,7 @@ export default class Match {
     }
 
     private isNotEscaped(position: number, character: ScopeCharacter): boolean {
-        if (character.escapeCharacter.length === 0) {
+        if (!character.escapeCharacter) {
             return true;
         }
 
