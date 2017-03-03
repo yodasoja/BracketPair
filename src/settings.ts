@@ -74,72 +74,86 @@ export default class Settings {
         const rubyCommentClose = new ScopeCharacter("=end");
         const rubyCommentBlock = new ScopePattern(rubyCommentOpen, rubyCommentClose);
 
-        if (settings.languageID === "python") {
-            this.scopes.push(hashComment);
-            this.scopes.push(doubleQuoteBlock);
-            this.scopes.push(singleQuoteBlock);
-        }
-        else if (
-            settings.languageID === "typescript" ||
-            settings.languageID === "javascript") {
-            this.scopes.push(doubleForwardslashComment);
-            this.scopes.push(slashCommentBlock);
-            this.scopes.push(backtickQuoteBlock);
-            this.scopes.push(doubleQuoteBlock);
-            this.scopes.push(singleQuoteBlock);
-        }
-        else if (
-            settings.languageID === "c" ||
-            settings.languageID === "cpp" ||
-            settings.languageID === "csharp" ||
-            settings.languageID === "java" ||
-            settings.languageID === "less" ||
-            settings.languageID === "scss") {
-            this.scopes.push(doubleForwardslashComment);
-            this.scopes.push(slashCommentBlock);
-            this.scopes.push(doubleQuoteBlock);
-            this.scopes.push(singleQuoteBlock);
-        }
-        else if (settings.languageID === "swift" ||
-            settings.languageID === "json") {
-            this.scopes.push(doubleForwardslashComment);
-            this.scopes.push(slashCommentBlock);
-            this.scopes.push(doubleQuoteBlock);
-        }
-        else if (settings.languageID === "php") {
-            this.scopes.push(doubleForwardslashComment);
-            this.scopes.push(hashComment);
-            this.scopes.push(slashCommentBlock);
-            this.scopes.push(doubleQuoteBlock);
-            this.scopes.push(singleQuoteBlock);
-        }
-        else if (settings.languageID === "ruby") {
-            this.scopes.push(hashComment);
-            this.scopes.push(rubyCommentBlock);
-            this.scopes.push(doubleQuoteBlock);
-            this.scopes.push(singleQuoteBlock);
-        }
-        else if (settings.languageID === "r") {
-            this.scopes.push(hashComment);
-            this.scopes.push(doubleQuoteBlock);
-            this.scopes.push(singleQuoteBlock);
-        }
-        else if (settings.languageID === "html") {
-            this.scopes.push(htmlCommentBlock);
-            this.scopes.push(doubleQuoteBlock);
-            this.scopes.push(singleQuoteBlock);
-        }
-        else if (settings.languageID === "css") {
-            this.scopes.push(slashCommentBlock);
-            this.scopes.push(doubleQuoteBlock);
-            this.scopes.push(singleQuoteBlock);
-        }
-        else if (settings.languageID === "fsharp") {
-            this.scopes.push(tripleQuoteBlock);
-            this.scopes.push(roundBracketCommentBlock);
-            this.scopes.push(singleQuoteBlock);
-            this.scopes.push(doubleForwardslashComment);
-            this.scopes.push(verbatimQuoteBlock);
+        switch (settings.languageID) {
+            case "python": {
+                this.scopes.push(hashComment);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
+                break;
+            }
+            case "typescript":
+            case "javascript": {
+                this.scopes.push(doubleForwardslashComment);
+                this.scopes.push(slashCommentBlock);
+                this.scopes.push(backtickQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
+                break;
+            }
+            case "c":
+            case "cpp":
+            case "csharp":
+            case "java":
+            case "less":
+            case "scss":
+                {
+                    this.scopes.push(doubleForwardslashComment);
+                    this.scopes.push(slashCommentBlock);
+                    this.scopes.push(doubleQuoteBlock);
+                    this.scopes.push(singleQuoteBlock);
+                    break;
+                }
+            case "swift":
+            case "json": {
+                this.scopes.push(doubleForwardslashComment);
+                this.scopes.push(slashCommentBlock);
+                this.scopes.push(doubleQuoteBlock);
+                break;
+            }
+            case "php": {
+                this.scopes.push(doubleForwardslashComment);
+                this.scopes.push(hashComment);
+                this.scopes.push(slashCommentBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
+                break;
+            }
+            case "ruby": {
+                this.scopes.push(hashComment);
+                this.scopes.push(rubyCommentBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
+                break;
+            }
+            case "r": {
+                this.scopes.push(hashComment);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
+                break;
+            }
+            case "html": {
+                this.scopes.push(htmlCommentBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
+                break;
+            }
+            case "css": {
+                this.scopes.push(slashCommentBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
+                break;
+            }
+            case "fsharp": {
+                this.scopes.push(tripleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock)
+                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(roundBracketCommentBlock);
+                this.scopes.push(doubleForwardslashComment);
+                this.scopes.push(verbatimQuoteBlock);
+                break;
+            }
+            // tslint:disable-next-line:no-empty
+            default: { }
         }
 
         // Longest openers get checked first
@@ -317,7 +331,7 @@ export default class Settings {
         for (const bracketPair of bracketPairs) {
             for (const color of bracketPair.colors) {
                 const decoration = vscode.window.createTextEditorDecorationType(
-                    { backgroundColor: color + "; opacity:0.1;" },
+                    { border: "1px solid " + color + "; opacity: 0.5", backgroundColor: color },
                 );
                 decorations.set(color, decoration);
             }

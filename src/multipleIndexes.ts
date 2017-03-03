@@ -56,8 +56,11 @@ export default class MultipleIndexes implements ColorIndexes {
     public getCurrentColorIndex(bracketPair: BracketPair, range: vscode.Range): number | undefined {
         const openBracket = this.openBrackets[bracketPair.openCharacter].pop();
         if (openBracket) {
-            const scopeRange = new vscode.Range(openBracket.range.end, range.start);
-            this.bracketScopes.push(new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex]));
+            const closeBracket = new Bracket(range, openBracket.colorIndex);
+            const scopeRange = new vscode.Range(openBracket.range.start, range.end);
+            this.bracketScopes.push(
+                new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex], openBracket, closeBracket)
+            );
             return openBracket.colorIndex;
         }
     }

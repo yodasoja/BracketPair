@@ -88,10 +88,11 @@ export default class DocumentDecoration {
                 const existingRanges = colorMap.get(scope.color);
 
                 if (existingRanges !== undefined) {
-                    existingRanges.push(scope.range);
+                    existingRanges.push(scope.open.range);
+                    existingRanges.push(scope.close.range);
                 }
                 else {
-                    colorMap.set(scope.color, [scope.range]);
+                    colorMap.set(scope.color, [scope.open.range, scope.close.range]);
                 }
             }
         }
