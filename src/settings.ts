@@ -33,11 +33,11 @@ export default class Settings {
         const hash = new ScopeCharacter("#");
         const hashComment = new ScopePattern(hash);
 
-        const doubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
-        const doubleQuoteBlock = new ScopePattern(doubleQuote, doubleQuote);
+        const nonEscapedDoubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
+        const doubleQuoteBlock = new ScopePattern(nonEscapedDoubleQuote, nonEscapedDoubleQuote);
 
-        const singleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
-        const singleQuoteBlock = new ScopePattern(singleQuote, singleQuote);
+        const nonEscapedSingleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
+        const singleQuoteBlock = new ScopePattern(nonEscapedSingleQuote, nonEscapedSingleQuote);
 
         const backtick = new ScopeCharacter("`");
         const backtickQuoteBlock = new ScopePattern(backtick, backtick);
@@ -55,6 +55,10 @@ export default class Settings {
 
         const tripleQuote = new ScopeCharacter("\"\"\"");
         const tripleQuoteBlock = new ScopePattern(tripleQuote, tripleQuote);
+
+        const verbatimQuote = new ScopeCharacter("@\"");
+        const verbatimEndQuote = new ScopeCharacter("\"", { mustNotStartWith: ["\""] });
+        const verbatimQuoteBlock = new ScopePattern(verbatimQuote, verbatimEndQuote);
 
         // VSCode does not follow html comment spec
         // The following invalid examples still are highlighted as comments
@@ -130,13 +134,16 @@ export default class Settings {
             this.scopes.push(doubleQuoteBlock);
             this.scopes.push(singleQuoteBlock);
         }
-        else if (settings.languageID === "fsharp")
-        {
-            this.scopes.push(tripleQuoteBlock); // Must go first else single quotes take precedence
+        else if (settings.languageID === "fsharp") {
+            this.scopes.push(tripleQuoteBlock);
             this.scopes.push(roundBracketCommentBlock);
             this.scopes.push(singleQuoteBlock);
             this.scopes.push(doubleForwardslashComment);
+            this.scopes.push(verbatimQuoteBlock);
         }
+
+        // Longest openers get checked first
+        this.scopes.sort((a, b) => b.opener.match.length - a.opener.match.length);
 
         const configuration = vscode.workspace.getConfiguration();
 
