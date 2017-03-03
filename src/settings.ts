@@ -33,6 +33,8 @@ export default class Settings {
         const hash = new ScopeCharacter("#");
         const hashComment = new ScopePattern(hash);
 
+        const doubleQuote = new ScopeCharacter("\"");
+
         const nonEscapedDoubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
         const doubleQuoteBlock = new ScopePattern(nonEscapedDoubleQuote, nonEscapedDoubleQuote);
 
@@ -57,7 +59,8 @@ export default class Settings {
         const tripleQuoteBlock = new ScopePattern(tripleQuote, tripleQuote);
 
         const verbatimQuote = new ScopeCharacter("@\"");
-        const verbatimEndQuote = new ScopeCharacter("\"", { mustNotStartWith: ["\""] });
+        const verbatimEndQuote = new ScopeCharacter("\"",
+            { mustNotMatchAtOffset: [{ offset: -1, character: doubleQuote }] });
         const verbatimQuoteBlock = new ScopePattern(verbatimQuote, verbatimEndQuote);
 
         // VSCode does not follow html comment spec
@@ -66,8 +69,10 @@ export default class Settings {
         // <!--> invalid -->
         // <!---> invalid -->
         // <!-- inva--lid -->
+        const hypen = new ScopeCharacter("-");
         const htmlCommentOpen = new ScopeCharacter("<!--");
-        const htmlCommentClose = new ScopeCharacter("-->", { mustNotStartWith: ["-"] });
+        const htmlCommentClose = new ScopeCharacter("-->",
+            { mustMatchAtOffset: [{ offset: -1, character: hypen }] });
         const htmlCommentBlock = new ScopePattern(htmlCommentOpen, htmlCommentClose);
 
         const rubyCommentOpen = new ScopeCharacter("=begin");

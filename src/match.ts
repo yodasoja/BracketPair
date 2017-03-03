@@ -10,47 +10,12 @@ export default class Match {
     public contains(position: number, character: ScopeCharacter): boolean {
         return (
             this.checkMatch(position, character) &&
-            this.checkPreCondition(position, character) &&
-            this.checkPostCondition(position + character.match.length, character));
+            this.checkOffsetCondition(position, character));
     }
 
     private checkMatch(position: number, character: ScopeCharacter): boolean {
         return this.content.substr(position, character.match.length) === character.match
             && this.isNotEscaped(position, character);
-    }
-
-    private checkPreCondition(position: number, character: ScopeCharacter): boolean {
-        if (position === 0) {
-            return true;
-        }
-
-        character.mustNotStartWith.forEach((element) => {
-            const offsetPosition = position - element.length;
-            if (
-                offsetPosition >= 0 &&
-                this.content.substr(offsetPosition, element.length) === element &&
-                this.isNotEscaped(position, character)) {
-                return false;
-            }
-        });
-
-        return true;
-    }
-
-    private checkPostCondition(position: number, character: ScopeCharacter): boolean {
-        if (position === this.content.length - 1) {
-            return true;
-        }
-
-        character.mustNotEndWith.forEach((element) => {
-            if (
-                this.content.substr(position, element.length) === element &&
-                this.isNotEscaped(position, character)) {
-                return false;
-            }
-        });
-
-        return true;
     }
 
     private isNotEscaped(position: number, character: ScopeCharacter): boolean {
@@ -69,5 +34,33 @@ export default class Match {
         }
 
         return counter % 2 === 0;
+    }
+
+    private checkOffsetCondition(postion: number, character: ScopeCharacter): boolean {
+        if (character.mustMatchAtOffset) {
+            character.mustMatchAtOffset.forEach((matchCondition) => {
+                const checkPosition = postion + matchCondition.offset;
+
+                if (checkPosition < 0) {
+                    return false;
+                }
+
+                if (!this.checkMatch(checkPosition, character)) {
+                    return false;
+                }
+            });
+        }
+
+        if (character.mustNotMatchAtOffset) {
+            character.mustNotMatchAtOffset.forEach((matchCondition) => {
+                const checkPosition = postion + matchCondition.offset;
+
+                if (checkPosition >= 0 && this.checkMatch(checkPosition, character)) {
+                    return false;
+                }
+            });
+        }
+
+        return true;
     }
 }
