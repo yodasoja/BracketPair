@@ -44,6 +44,7 @@ Contextual parsing has experimental support for the following languages:
 - cpp
 - csharp
 - css
+- fsharp
 - html
 - java
 - javascript
