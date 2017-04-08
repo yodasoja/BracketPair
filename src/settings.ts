@@ -48,6 +48,10 @@ export default class Settings {
         const slashCommentClose = new ScopeCharacter("*/");
         const slashCommentBlock = new Scope(slashCommentOpen, slashCommentClose);
 
+        const parensCommentOpen = new ScopeCharacter("(*");
+        const parensCommentClose = new ScopeCharacter("*)");
+        const parensCommentBlock = new Scope(parensCommentOpen, parensCommentClose);
+
         // VSCode does not follow html comment spec
         // The following invalid examples still are highlighted as comments
         // So we will also follow this pattern and not parse these cases
@@ -119,6 +123,12 @@ export default class Settings {
         }
         else if (settings.languageID === "css") {
             this.scopes.push(slashCommentBlock);
+            this.scopes.push(doubleQuoteBlock);
+            this.scopes.push(singleQuoteBlock);
+        }
+        else if (settings.languageID === "fsharp") {
+            this.scopes.push(doubleForwardslashComment);
+            this.scopes.push(parensCommentBlock);
             this.scopes.push(doubleQuoteBlock);
             this.scopes.push(singleQuoteBlock);
         }
