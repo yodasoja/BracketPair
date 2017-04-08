@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.9
+Basic support for F# contextual parsing
+
 ### 0.8.9
 Added SCSS and LESS contextual parsing
 
