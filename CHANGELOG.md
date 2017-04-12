@@ -1,5 +1,12 @@
 ## Release Notes
 
+### 0.9.1
+Fix support for F# multiline comments (* *)
+Internal refactoring, preparation for big code cleanup
+
+### 0.9.0
+Basic support for F# contextual parsing
+
 ### 0.8.9
 Added SCSS and LESS contextual parsing
 
