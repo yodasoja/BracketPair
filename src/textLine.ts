@@ -10,6 +10,7 @@ export default class TextLine {
     public readonly index: number;
     private lastModifierCheckPos = 0;
     private lineState: LineState;
+    private scopeEndPosition = -1;
     private readonly settings: Settings;
     private readonly scopeChecker: Match;
 
@@ -39,7 +40,7 @@ export default class TextLine {
     public addBracket(bracket: string, position: number) {
         if (this.settings.contextualParsing) {
             this.checkForStringModifiers(position, bracket);
-            if (this.lineState.activeScope) {
+            if (this.lineState.activeScope || position <= this.scopeEndPosition) {
                 return;
             }
         }
@@ -81,7 +82,7 @@ export default class TextLine {
     }
 
     private checkForStringModifiers(bracketPosition: number, bracket: string = ""): void {
-        for (let i = this.lastModifierCheckPos; i < bracketPosition; i++) {
+        for (let i = this.lastModifierCheckPos; i <= bracketPosition; i++) {
             // If in a scope, check for closing characters
             if (this.lineState.activeScope) {
                 // Unless in a scope that continues until end of line
@@ -92,6 +93,7 @@ export default class TextLine {
                 if (this.lineState.activeScope.closer) {
                     if (this.scopeChecker.contains(i, this.lineState.activeScope.closer)) {
                         i += this.lineState.activeScope.closer.match.length - 1;
+                        this.scopeEndPosition = i;
                         this.lineState.activeScope = undefined;
                     }
                 }

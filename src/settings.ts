@@ -56,10 +56,10 @@ export default class Settings {
         const tripleDoubleQuote = new ScopeCharacter("\"\"\"");
         const tripleDoubleQuoteBlock = new ScopePattern(tripleDoubleQuote, tripleDoubleQuote);
 
-        const verbatimQuote = new ScopeCharacter("@\"");
-        const verbatimEndQuote = new ScopeCharacter("\"",
-            { mustNotMatchAtOffset: [{ offset: -1, character: notEscapedDoubleQuote }] });
-        const verbatimQuoteBlock = new ScopePattern(verbatimQuote, verbatimEndQuote);
+        // const verbatimQuote = new ScopeCharacter("@\"");
+        // const verbatimEndQuote = new ScopeCharacter("\"",
+        //     { mustNotMatchAtOffset: [{ offset: -1, character: notEscapedDoubleQuote }] });
+        // const verbatimQuoteBlock = new ScopePattern(verbatimQuote, verbatimEndQuote);
 
         // VSCode does not follow html comment spec
         // The following invalid examples still are highlighted as comments
@@ -152,7 +152,7 @@ export default class Settings {
                 this.scopes.push(notEscapedSingleQuoteBlock);
                 this.scopes.push(roundBracketCommentBlock);
                 this.scopes.push(doubleForwardslashComment);
-                this.scopes.push(verbatimQuoteBlock);
+                // this.scopes.push(verbatimQuoteBlock);
                 break;
             }
             // tslint:disable-next-line:no-empty
