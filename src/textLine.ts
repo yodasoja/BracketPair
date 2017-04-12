@@ -29,7 +29,7 @@ export default class TextLine {
     }
 
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
-    public cloneState() {
+    public copyMultilineContext() {
         // Update state for whole line before returning
         this.updateScopes(this.content.length);
         return this.lineState.copyMultilineContext();

@@ -39,7 +39,8 @@ export default class DocumentDecoration {
 
             for (let i = this.lines.length; i <= index; i++) {
                 const previousLine = this.lines[this.lines.length - 1];
-                const newLine = new TextLine(document.lineAt(index).text, this.settings, i, previousLine.cloneState());
+                const newLine =
+                    new TextLine(document.lineAt(i).text, this.settings, i, previousLine.copyMultilineContext());
 
                 this.lines.push(newLine);
             }
