@@ -1,1 +1,3 @@
-let xmlFragment1 = @"<book author=""Milton, John"" title=""Paradise Lost"">"
+let xmlFragment1 = @"()""()";
+val foo : x:'a -> 'a
+(*()*)

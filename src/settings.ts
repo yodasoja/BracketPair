@@ -33,13 +33,11 @@ export default class Settings {
         const hash = new ScopeCharacter("#");
         const hashComment = new ScopePattern(hash);
 
-        const doubleQuote = new ScopeCharacter("\"");
+        const notEscapedDoubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
+        const notEscapedDoubleQuoteBlock = new ScopePattern(notEscapedDoubleQuote, notEscapedDoubleQuote);
 
-        const nonEscapedDoubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
-        const doubleQuoteBlock = new ScopePattern(nonEscapedDoubleQuote, nonEscapedDoubleQuote);
-
-        const nonEscapedSingleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
-        const singleQuoteBlock = new ScopePattern(nonEscapedSingleQuote, nonEscapedSingleQuote);
+        const notEscapedSingleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
+        const notEscapedSingleQuoteBlock = new ScopePattern(notEscapedSingleQuote, notEscapedSingleQuote);
 
         const backtick = new ScopeCharacter("`");
         const backtickQuoteBlock = new ScopePattern(backtick, backtick);
@@ -55,12 +53,12 @@ export default class Settings {
         const roundBracketCommentClose = new ScopeCharacter("*)");
         const roundBracketCommentBlock = new ScopePattern(roundBracketCommentOpen, roundBracketCommentClose);
 
-        const tripleQuote = new ScopeCharacter("\"\"\"");
-        const tripleQuoteBlock = new ScopePattern(tripleQuote, tripleQuote);
+        const tripleDoubleQuote = new ScopeCharacter("\"\"\"");
+        const tripleDoubleQuoteBlock = new ScopePattern(tripleDoubleQuote, tripleDoubleQuote);
 
         const verbatimQuote = new ScopeCharacter("@\"");
         const verbatimEndQuote = new ScopeCharacter("\"",
-            { mustNotMatchAtOffset: [{ offset: -1, character: doubleQuote }] });
+            { mustNotMatchAtOffset: [{ offset: -1, character: notEscapedDoubleQuote }] });
         const verbatimQuoteBlock = new ScopePattern(verbatimQuote, verbatimEndQuote);
 
         // VSCode does not follow html comment spec
@@ -82,8 +80,8 @@ export default class Settings {
         switch (settings.languageID) {
             case "python": {
                 this.scopes.push(hashComment);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(notEscapedSingleQuoteBlock);
                 break;
             }
             case "typescript":
@@ -91,8 +89,8 @@ export default class Settings {
                 this.scopes.push(doubleForwardslashComment);
                 this.scopes.push(slashCommentBlock);
                 this.scopes.push(backtickQuoteBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(notEscapedSingleQuoteBlock);
                 break;
             }
             case "c":
@@ -104,54 +102,54 @@ export default class Settings {
                 {
                     this.scopes.push(doubleForwardslashComment);
                     this.scopes.push(slashCommentBlock);
-                    this.scopes.push(doubleQuoteBlock);
-                    this.scopes.push(singleQuoteBlock);
+                    this.scopes.push(notEscapedDoubleQuoteBlock);
+                    this.scopes.push(notEscapedSingleQuoteBlock);
                     break;
                 }
             case "swift":
             case "json": {
                 this.scopes.push(doubleForwardslashComment);
                 this.scopes.push(slashCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
                 break;
             }
             case "php": {
                 this.scopes.push(doubleForwardslashComment);
                 this.scopes.push(hashComment);
                 this.scopes.push(slashCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(notEscapedSingleQuoteBlock);
                 break;
             }
             case "ruby": {
                 this.scopes.push(hashComment);
                 this.scopes.push(rubyCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(notEscapedSingleQuoteBlock);
                 break;
             }
             case "r": {
                 this.scopes.push(hashComment);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(notEscapedSingleQuoteBlock);
                 break;
             }
             case "html": {
                 this.scopes.push(htmlCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(notEscapedSingleQuoteBlock);
                 break;
             }
             case "css": {
                 this.scopes.push(slashCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(notEscapedSingleQuoteBlock);
                 break;
             }
             case "fsharp": {
-                this.scopes.push(tripleQuoteBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
+                this.scopes.push(tripleDoubleQuoteBlock);
+                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(notEscapedSingleQuoteBlock);
                 this.scopes.push(roundBracketCommentBlock);
                 this.scopes.push(doubleForwardslashComment);
                 this.scopes.push(verbatimQuoteBlock);
