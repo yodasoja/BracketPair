@@ -29,7 +29,7 @@ export default class TextLine {
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
     public cloneState() {
         // Update state for whole line before returning
-        this.checkForStringModifiers(this.scopeChecker.content.length);
+        this.updateScopes(this.scopeChecker.content.length);
         return this.lineState.clone();
     }
 
@@ -39,8 +39,8 @@ export default class TextLine {
 
     public addBracket(bracket: string, position: number) {
         if (this.settings.contextualParsing) {
-            this.checkForStringModifiers(position, bracket);
-            if (this.lineState.activeScope || position <= this.scopeEndPosition) {
+            this.updateScopes(position, bracket);
+            if (position <= this.scopeEndPosition) {
                 return;
             }
         }
@@ -81,7 +81,7 @@ export default class TextLine {
         }
     }
 
-    private checkForStringModifiers(bracketPosition: number, bracket: string = ""): void {
+    private updateScopes(bracketPosition: number, bracket: string = ""): void {
         for (let i = this.lastModifierCheckPos; i <= bracketPosition; i++) {
             // If in a scope, check for closing characters
             if (this.lineState.activeScope) {
@@ -105,13 +105,19 @@ export default class TextLine {
                 i += this.checkForOpeningScope(i);
             }
         }
-        this.lastModifierCheckPos = bracketPosition + bracket.length;
+        this.lastModifierCheckPos = bracketPosition + bracket.length +1;
     }
 
     private checkForOpeningScope(position: number): number {
         for (const scope of this.settings.scopes) {
             if (this.scopeChecker.contains(position, scope.opener)) {
                 this.lineState.activeScope = scope;
+                if (scope.isSingleLineComment()) {
+                    this.scopeEndPosition = Infinity;
+                }
+                else {
+                    this.scopeEndPosition = -1;
+                }
                 return scope.opener.match.length - 1;
             }
         }
