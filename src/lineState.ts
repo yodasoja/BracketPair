@@ -10,27 +10,24 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class LineState {
-    public activeScope: ScopePattern | undefined;
+    public activeScope: ScopePattern | null;
     private colorIndexes: ColorIndexes;
     private previousBracketColor: string;
     private readonly settings: Settings;
 
-    constructor(settings: Settings, previousState?:
-        {
-            colorIndexes: ColorIndexes;
-            previousBracketColor: string;
-            activeScope?: ScopePattern;
-        }) {
+    constructor(settings: Settings,
+        previousState?:
+            {
+                colorIndexes: ColorIndexes;
+                previousBracketColor: string;
+                activeScope: ScopePattern | null;
+            }) {
         this.settings = settings;
 
         if (previousState !== undefined) {
             this.colorIndexes = previousState.colorIndexes;
             this.previousBracketColor = previousState.previousBracketColor;
-
-            // When assuming previous lines state, don't mantain single line comment state
-            if (previousState.activeScope && !previousState.activeScope.isSingleLineComment()) {
-                this.activeScope = previousState.activeScope;
-            }
+            this.activeScope = previousState.activeScope;
         }
         else {
             switch (settings.colorMode) {
@@ -85,10 +82,16 @@ export default class LineState {
         return color;
     }
 
-    public clone(): LineState {
+    public copyMultilineContext(): LineState {
+        let scope = null;
+
+        if (this.activeScope && this.activeScope.closer) {
+            scope = this.activeScope;
+        }
+
         const clone =
             {
-                activeScope: this.activeScope,
+                activeScope: scope,
                 colorIndexes: this.colorIndexes.clone(),
                 previousBracketColor: this.previousBracketColor,
             };

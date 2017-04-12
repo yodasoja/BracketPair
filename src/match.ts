@@ -1,24 +1,18 @@
 import ScopeCharacter from "./scopeCharacter";
 
 export default class Match {
-    public readonly content: string;
-
-    constructor(content: string) {
-        this.content = content;
-    }
-
-    public contains(position: number, character: ScopeCharacter): boolean {
+    public static contains(content: string, position: number, character: ScopeCharacter): boolean {
         return (
-            this.checkMatch(position, character) &&
-            this.checkOffsetCondition(position, character));
+            this.checkMatch(content, position, character) &&
+            this.checkOffsetCondition(content, position, character));
     }
 
-    private checkMatch(position: number, character: ScopeCharacter): boolean {
-        return this.content.substr(position, character.match.length) === character.match
-            && this.isNotEscaped(position, character);
+    private static checkMatch(content: string, position: number, character: ScopeCharacter): boolean {
+        return content.substr(position, character.match.length) === character.match
+            && this.isNotEscaped(content, position, character);
     }
 
-    private isNotEscaped(position: number, character: ScopeCharacter): boolean {
+    private static isNotEscaped(content: string, position: number, character: ScopeCharacter): boolean {
         if (!character.escapeCharacter) {
             return true;
         }
@@ -27,7 +21,7 @@ export default class Match {
         position -= character.escapeCharacter.length;
         while (
             position > 0 &&
-            this.content.substr(position, character.escapeCharacter.length) === character.escapeCharacter
+            content.substr(position, character.escapeCharacter.length) === character.escapeCharacter
         ) {
             position -= character.escapeCharacter.length;
             counter++;
@@ -36,7 +30,7 @@ export default class Match {
         return counter % 2 === 0;
     }
 
-    private checkOffsetCondition(postion: number, character: ScopeCharacter): boolean {
+    private static checkOffsetCondition(content: string, postion: number, character: ScopeCharacter): boolean {
         if (character.mustMatchAtOffset) {
             character.mustMatchAtOffset.forEach((matchCondition) => {
                 const checkPosition = postion + matchCondition.offset;
@@ -45,7 +39,7 @@ export default class Match {
                     return false;
                 }
 
-                if (!this.checkMatch(checkPosition, character)) {
+                if (!this.checkMatch(content, checkPosition, character)) {
                     return false;
                 }
             });
@@ -55,7 +49,7 @@ export default class Match {
             character.mustNotMatchAtOffset.forEach((matchCondition) => {
                 const checkPosition = postion + matchCondition.offset;
 
-                if (checkPosition >= 0 && this.checkMatch(checkPosition, character)) {
+                if (checkPosition >= 0 && this.checkMatch(content, checkPosition, character)) {
                     return false;
                 }
             });

@@ -3,20 +3,22 @@ import LineState from "./lineState";
 import Match from "./match";
 import ModifierPair from "./modifierPair";
 import Scope from "./scope";
+import ScopeCharacter from "./scopeCharacter";
+import ScopePattern from "./scopePattern";
 import Settings from "./settings";
 
 export default class TextLine {
     public colorRanges = new Map<string, vscode.Range[]>();
     public readonly index: number;
-    private lastModifierCheckPos = 0;
+    private resumeLineCheckPosition = 0;
     private lineState: LineState;
     private scopeEndPosition = -1;
     private readonly settings: Settings;
-    private readonly scopeChecker: Match;
+    private readonly content: string;
 
-    constructor(settings: Settings, index: number, document: vscode.TextDocument, lineState?: LineState) {
+    constructor(content: string, settings: Settings, index: number, lineState?: LineState) {
         this.settings = settings;
-        this.scopeChecker = new Match(document.lineAt(index).text);
+        this.content = content;
         this.index = index;
         if (lineState !== undefined) {
             this.lineState = lineState;
@@ -29,8 +31,8 @@ export default class TextLine {
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
     public cloneState() {
         // Update state for whole line before returning
-        this.updateScopes(this.scopeChecker.content.length);
-        return this.lineState.clone();
+        this.updateScopes(this.content.length);
+        return this.lineState.copyMultilineContext();
     }
 
     public getScope(position: vscode.Position): Scope | undefined {
@@ -39,7 +41,13 @@ export default class TextLine {
 
     public addBracket(bracket: string, position: number) {
         if (this.settings.contextualParsing) {
+            if (position <= this.scopeEndPosition) {
+                return;
+            }
+
             this.updateScopes(position, bracket);
+
+            // Check again now scope is updated
             if (position <= this.scopeEndPosition) {
                 return;
             }
@@ -82,46 +90,51 @@ export default class TextLine {
     }
 
     private updateScopes(bracketPosition: number, bracket: string = ""): void {
-        for (let i = this.lastModifierCheckPos; i <= bracketPosition; i++) {
-            // If in a scope, check for closing characters
-            if (this.lineState.activeScope) {
-                // Unless in a scope that continues until end of line
-                if (this.lineState.activeScope.isSingleLineComment()) {
-                    return;
-                }
+        // We don't want to color brackets inside a scope, so if a scope opener is encoutered, we mark where it ends
+        // If it doesn't end in this line, its marked as infinity
+        for (let i = this.resumeLineCheckPosition; i <= bracketPosition; i++) {
 
-                if (this.lineState.activeScope.closer) {
-                    if (this.scopeChecker.contains(i, this.lineState.activeScope.closer)) {
-                        i += this.lineState.activeScope.closer.match.length - 1;
-                        this.scopeEndPosition = i;
-                        this.lineState.activeScope = undefined;
+            if (!this.lineState.activeScope) {
+                this.lineState.activeScope = this.getOpeningScope(i);
+            }
+
+            const scope = this.lineState.activeScope;
+
+            if (scope) {
+                if (scope.closer) {
+                    this.scopeEndPosition = this.getClosingScopePosition(i + scope.opener.match.length, scope.closer);
+                    if (this.scopeEndPosition !== Infinity) {
+                        // If closer & Infinity keep scope alive so it gets analyzed next line
+                        this.lineState.activeScope = null;
                     }
                 }
                 else {
-                    throw new Error("Closing character is undefined");
-                }
-            }
-            else {
-                i += this.checkForOpeningScope(i);
-            }
-        }
-        this.lastModifierCheckPos = bracketPosition + bracket.length +1;
-    }
-
-    private checkForOpeningScope(position: number): number {
-        for (const scope of this.settings.scopes) {
-            if (this.scopeChecker.contains(position, scope.opener)) {
-                this.lineState.activeScope = scope;
-                if (scope.isSingleLineComment()) {
                     this.scopeEndPosition = Infinity;
                 }
-                else {
-                    this.scopeEndPosition = -1;
-                }
-                return scope.opener.match.length - 1;
+
+                i = this.scopeEndPosition;
             }
         }
 
-        return 0;
+        this.resumeLineCheckPosition = Math.max(bracketPosition + bracket.length - 1, this.scopeEndPosition) + 1;
+    }
+
+    private getClosingScopePosition(index: number, character: ScopeCharacter): number {
+        for (let i = index; i < this.content.length; i++) {
+            if (Match.contains(this.content, i, character)) {
+                return i + character.match.length - 1;
+            }
+        }
+
+        return Infinity;
+    }
+
+    private getOpeningScope(position: number): ScopePattern | null {
+        for (const scope of this.settings.scopes) {
+            if (Match.contains(this.content, position, scope.opener)) {
+                return scope;
+            }
+        }
+        return null;
     }
 }

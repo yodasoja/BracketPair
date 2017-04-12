@@ -34,12 +34,12 @@ export default class DocumentDecoration {
         }
         else {
             if (this.lines.length === 0) {
-                this.lines.push(new TextLine(this.settings, 0, document));
+                this.lines.push(new TextLine(document.lineAt(0).text, this.settings, 0));
             }
 
             for (let i = this.lines.length; i <= index; i++) {
                 const previousLine = this.lines[this.lines.length - 1];
-                const newLine = new TextLine(this.settings, i, document, previousLine.cloneState());
+                const newLine = new TextLine(document.lineAt(index).text, this.settings, i, previousLine.cloneState());
 
                 this.lines.push(newLine);
             }

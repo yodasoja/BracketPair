@@ -9,8 +9,4 @@ export default class ScopePattern {
         this.opener = opener;
         this.closer = closer;
     }
-
-    public isSingleLineComment() {
-        return this.closer === undefined;
-    }
 }
