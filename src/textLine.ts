@@ -94,15 +94,20 @@ export default class TextLine {
         // If it doesn't end in this line, its marked as infinity
         for (let i = this.resumeLineCheckPosition; i <= bracketPosition; i++) {
 
+            let checkPos = i;
+
             if (!this.lineState.activeScope) {
                 this.lineState.activeScope = this.getOpeningScope(i);
+                if (this.lineState.activeScope) {
+                    checkPos = i + this.lineState.activeScope.opener.match.length;
+                }
             }
 
             const scope = this.lineState.activeScope;
 
             if (scope) {
                 if (scope.closer) {
-                    this.scopeEndPosition = this.getClosingScopePosition(i + scope.opener.match.length, scope.closer);
+                    this.scopeEndPosition = this.getClosingScopePosition(checkPos, scope.closer);
                     if (this.scopeEndPosition !== Infinity) {
                         // If closer & Infinity keep scope alive so it gets analyzed next line
                         this.lineState.activeScope = null;
