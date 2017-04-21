@@ -6,6 +6,7 @@
         "lib": [
             "es6"
         ],
+        "forceConsistentCasingInFileNames": true,
         "sourceMap": true,
         "rootDir": ".",
         "strictNullChecks": true,

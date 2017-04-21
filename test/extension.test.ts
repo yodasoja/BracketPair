@@ -10,7 +10,7 @@ import * as assert from "assert";
 // as well as import your extension to test it
 import * as vscode from "vscode";
 import ColorMode from "../src/colorMode";
-import DocumentDecoration from "../src/DocumentDecoration";
+import DocumentDecoration from "../src/documentDecoration";
 import * as myExtension from "../src/extension";
 import Settings from "../src/settings";
 
