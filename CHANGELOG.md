@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.10.2
+Fix Cannot find module './multipleIndexes'.
+
 ### 0.10.1
 Fix ligatures breaking when using empty colors
 
