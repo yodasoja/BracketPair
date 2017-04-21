@@ -1,6 +1,9 @@
 ## Release Notes
 
-### 0.9.1
+### 0.10.1
+Fix ligatures breaking when using empty colors
+
+### 0.10.0
 Fix support for F# multiline comments (* *)
 Internal refactoring, preparation for big code cleanup
 
