@@ -16,7 +16,7 @@ export default class LineState {
     private readonly settings: Settings;
 
     constructor(settings: Settings,
-        previousState?:
+                previousState?:
             {
                 colorIndexes: ColorIndexes;
                 previousBracketColor: string;
