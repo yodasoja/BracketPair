@@ -193,6 +193,10 @@ export default class DocumentDecoration {
         }
 
         for (const [color, decoration] of this.settings.bracketDecorations) {
+            if (color === "")
+            {
+                continue;
+            }
             const ranges = colorMap.get(color);
             editors.forEach((editor) => {
                 if (ranges !== undefined) {
