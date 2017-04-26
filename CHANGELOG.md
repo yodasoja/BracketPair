@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.10.3
+Add powershell support
+
 ### 0.10.2
 Fix Cannot find module './multipleIndexes'.
 

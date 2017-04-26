@@ -33,11 +33,11 @@ export default class Settings {
         const hash = new ScopeCharacter("#");
         const hashComment = new ScopePattern(hash);
 
-        const notEscapedDoubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
-        const notEscapedDoubleQuoteBlock = new ScopePattern(notEscapedDoubleQuote, notEscapedDoubleQuote);
+        const doubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
+        const doubleQuoteBlock = new ScopePattern(doubleQuote, doubleQuote);
 
-        const notEscapedSingleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
-        const notEscapedSingleQuoteBlock = new ScopePattern(notEscapedSingleQuote, notEscapedSingleQuote);
+        const singleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
+        const singleQuoteBlock = new ScopePattern(singleQuote, singleQuote);
 
         const backtick = new ScopeCharacter("`");
         const backtickQuoteBlock = new ScopePattern(backtick, backtick);
@@ -77,11 +77,33 @@ export default class Settings {
         const rubyCommentClose = new ScopeCharacter("=end");
         const rubyCommentBlock = new ScopePattern(rubyCommentOpen, rubyCommentClose);
 
+        const powerShellCommentOpen = new ScopeCharacter("<#");
+        const powerShellCommentClose = new ScopeCharacter("#>");
+        const powerShellCommentBlock = new ScopePattern(powerShellCommentOpen, powerShellCommentClose);
+
+        const powerShellPound = new ScopeCharacter("#", { escapeCharacter: "`" });
+        const powerShellSingleLineComment = new ScopePattern(powerShellPound);
+
+        const powerShellDoubleQuote = new ScopeCharacter("\"", { escapeCharacter: "`" });
+        const powerShellDoubleQuoteBlock = new ScopePattern(powerShellDoubleQuote, powerShellDoubleQuote);
+
+        const powerShellSingleQuote = new ScopeCharacter("'", { escapeCharacter: "`" });
+        const powerShellSingleQuoteEnd = new ScopeCharacter("'");
+        const powerShellSingleQuoteBlock = new ScopePattern(powerShellSingleQuote, powerShellSingleQuoteEnd);
+
         switch (settings.languageID) {
+            case "powershell":
+                {
+                    this.scopes.push(powerShellCommentBlock);
+                    this.scopes.push(powerShellSingleLineComment);
+                    this.scopes.push(powerShellDoubleQuoteBlock);
+                    this.scopes.push(powerShellSingleQuoteBlock);
+                    break;
+                }
             case "python": {
                 this.scopes.push(hashComment);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
-                this.scopes.push(notEscapedSingleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
                 break;
             }
             case "typescript":
@@ -89,8 +111,8 @@ export default class Settings {
                 this.scopes.push(doubleForwardslashComment);
                 this.scopes.push(slashCommentBlock);
                 this.scopes.push(backtickQuoteBlock);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
-                this.scopes.push(notEscapedSingleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
                 break;
             }
             case "c":
@@ -102,54 +124,54 @@ export default class Settings {
                 {
                     this.scopes.push(doubleForwardslashComment);
                     this.scopes.push(slashCommentBlock);
-                    this.scopes.push(notEscapedDoubleQuoteBlock);
-                    this.scopes.push(notEscapedSingleQuoteBlock);
+                    this.scopes.push(doubleQuoteBlock);
+                    this.scopes.push(singleQuoteBlock);
                     break;
                 }
             case "swift":
             case "json": {
                 this.scopes.push(doubleForwardslashComment);
                 this.scopes.push(slashCommentBlock);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
                 break;
             }
             case "php": {
                 this.scopes.push(doubleForwardslashComment);
                 this.scopes.push(hashComment);
                 this.scopes.push(slashCommentBlock);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
-                this.scopes.push(notEscapedSingleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
                 break;
             }
             case "ruby": {
                 this.scopes.push(hashComment);
                 this.scopes.push(rubyCommentBlock);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
-                this.scopes.push(notEscapedSingleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
                 break;
             }
             case "r": {
                 this.scopes.push(hashComment);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
-                this.scopes.push(notEscapedSingleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
                 break;
             }
             case "html": {
                 this.scopes.push(htmlCommentBlock);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
-                this.scopes.push(notEscapedSingleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
                 break;
             }
             case "css": {
                 this.scopes.push(slashCommentBlock);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
-                this.scopes.push(notEscapedSingleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
                 break;
             }
             case "fsharp": {
                 this.scopes.push(tripleDoubleQuoteBlock);
-                this.scopes.push(notEscapedDoubleQuoteBlock);
-                this.scopes.push(notEscapedSingleQuoteBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
                 this.scopes.push(roundBracketCommentBlock);
                 this.scopes.push(doubleForwardslashComment);
                 // this.scopes.push(verbatimQuoteBlock);
