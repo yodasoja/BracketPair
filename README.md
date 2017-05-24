@@ -41,12 +41,14 @@ Contextual parsing will ignore brackets in comments or strings.
 Contextual parsing has experimental support for the following languages:  
 ```
 - c
+- clojure (; only)
 - cpp
 - csharp
 - css
 - html
 - java
 - javascript
+- javascriptreact
 - less
 - php
 - powershell

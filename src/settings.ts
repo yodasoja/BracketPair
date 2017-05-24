@@ -91,6 +91,9 @@ export default class Settings {
         const powerShellSingleQuoteEnd = new ScopeCharacter("'");
         const powerShellSingleQuoteBlock = new ScopePattern(powerShellSingleQuote, powerShellSingleQuoteEnd);
 
+        const semicolen = new ScopeCharacter(';');
+        const clojureComment = new ScopePattern(semicolen);
+
         switch (settings.languageID) {
             case "powershell":
                 {
@@ -107,7 +110,8 @@ export default class Settings {
                 break;
             }
             case "typescript":
-            case "javascript": {
+            case "javascript":
+            case "javascriptreact": {
                 this.scopes.push(doubleForwardslashComment);
                 this.scopes.push(slashCommentBlock);
                 this.scopes.push(backtickQuoteBlock);
@@ -175,6 +179,10 @@ export default class Settings {
                 this.scopes.push(roundBracketCommentBlock);
                 this.scopes.push(doubleForwardslashComment);
                 // this.scopes.push(verbatimQuoteBlock);
+                break;
+            }
+            case "clojure": {
+                this.scopes.push(clojureComment);
                 break;
             }
             // tslint:disable-next-line:no-empty

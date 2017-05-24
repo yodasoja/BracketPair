@@ -1,5 +1,10 @@
 ## Release Notes
 
+### 0.10.4
+Add contextual parsing for:
+- clojure (`;` only)
+- javascriptreact
+
 ### 0.10.3
 Add powershell support
 

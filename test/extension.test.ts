@@ -146,7 +146,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Line 1", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line0 = document.getLine(0, textDocument);
@@ -209,7 +209,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Line 2", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line1 = document.getLine(1, textDocument);
@@ -257,7 +257,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Line 3", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line2 = document.getLine(2, textDocument);
@@ -305,7 +305,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Line 4", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line3 = document.getLine(3, textDocument);
@@ -331,7 +331,7 @@ suite("Consecutive Coloring Test", () => {
 
     test("Line 5", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line4 = document.getLine(4, textDocument);
@@ -379,7 +379,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Line 1", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line0 = document.getLine(0, textDocument);
@@ -442,7 +442,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Line 2", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line1 = document.getLine(1, textDocument);
@@ -490,7 +490,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Line 3", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line2 = document.getLine(2, textDocument);
@@ -538,7 +538,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Line 5", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line3 = document.getLine(3, textDocument);
@@ -564,7 +564,7 @@ suite("Consecutive Coloring Test Unique Opening Color", () => {
 
     test("Line 6", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line4 = document.getLine(4, textDocument);
@@ -645,7 +645,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Line 1", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line0 = document.getLine(0, textDocument);
@@ -708,7 +708,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Line 2", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line1 = document.getLine(1, textDocument);
@@ -756,7 +756,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Line 3", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line2 = document.getLine(2, textDocument);
@@ -804,7 +804,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Line 4", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line3 = document.getLine(3, textDocument);
@@ -830,7 +830,7 @@ suite("Consecutive Coloring Test Force Iteration Color Cycle", () => {
 
     test("Line 5", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line4 = document.getLine(4, textDocument);
@@ -933,7 +933,7 @@ suite("Independent Coloring Test", () => {
 
     test("Line 1", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line0 = document.getLine(0, textDocument);
@@ -996,7 +996,7 @@ suite("Independent Coloring Test", () => {
 
     test("Line 2", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line1 = document.getLine(1, textDocument);
@@ -1036,7 +1036,7 @@ suite("Independent Coloring Test", () => {
 
     test("Line 3", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line2 = document.getLine(2, textDocument);
@@ -1076,7 +1076,7 @@ suite("Independent Coloring Test", () => {
 
     test("Line 4", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line3 = document.getLine(3, textDocument);
@@ -1102,7 +1102,7 @@ suite("Independent Coloring Test", () => {
 
     test("Line 5", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line4 = document.getLine(4, textDocument);
@@ -1169,7 +1169,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Line 1", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line0 = document.getLine(0, textDocument);
@@ -1232,7 +1232,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Line 2", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line1 = document.getLine(1, textDocument);
@@ -1276,7 +1276,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Line 3", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line2 = document.getLine(2, textDocument);
@@ -1320,7 +1320,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Line 4", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line3 = document.getLine(3, textDocument);
@@ -1346,7 +1346,7 @@ suite("Independent Coloring Test Unique Opening Color", () => {
 
     test("Line 5", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line4 = document.getLine(4, textDocument);
@@ -1425,7 +1425,7 @@ suite("Comment and quote", () => {
 
     test("Line 5", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line5 = document.getLine(5, textDocument);
@@ -1437,7 +1437,7 @@ suite("Comment and quote", () => {
 
     test("Line 6", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line6 = document.getLine(6, textDocument);
@@ -1454,7 +1454,7 @@ suite("Comment and quote", () => {
 
     test("Line 7", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line7 = document.getLine(7, textDocument);
@@ -1466,7 +1466,7 @@ suite("Comment and quote", () => {
 
     test("Line 8", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line8 = document.getLine(8, textDocument);
@@ -1478,7 +1478,7 @@ suite("Comment and quote", () => {
 
     test("Line 9", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line9 = document.getLine(9, textDocument);
@@ -1490,7 +1490,7 @@ suite("Comment and quote", () => {
 
     test("Line 10", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line10 = document.getLine(10, textDocument);
@@ -1516,7 +1516,7 @@ suite("Comment and quote", () => {
 
     test("Line 11", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line11 = document.getLine(11, textDocument);
@@ -1528,7 +1528,7 @@ suite("Comment and quote", () => {
 
     test("Line 12", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line12 = document.getLine(12, textDocument);
@@ -1554,7 +1554,7 @@ suite("Comment and quote", () => {
 
     test("Line 13", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line13 = document.getLine(13, textDocument);
@@ -1566,7 +1566,7 @@ suite("Comment and quote", () => {
 
     test("Line 14", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line12 = document.getLine(14, textDocument);
@@ -1614,7 +1614,7 @@ suite("Typescript contextural parsing", () => {
 
     test("Line 15", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line15 = document.getLine(15, textDocument);
@@ -1640,7 +1640,7 @@ suite("Typescript contextural parsing", () => {
 
     test("Line 16", () => {
         {
-            const textDocument = vscode.window.activeTextEditor.document;
+            const textDocument = vscode.window.activeTextEditor!.document;
             const document = new DocumentDecoration(textDocument, settings);
             document.triggerUpdateDecorations();
             const line16 = document.getLine(16, textDocument);
