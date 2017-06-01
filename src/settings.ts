@@ -370,8 +370,8 @@ export default class Settings {
             for (const color of bracketPair.colors) {
                 const decoration = vscode.window.createTextEditorDecorationType(
                     {
-                        border: "1px solid " + color + "; opacity: 0.5",
                         backgroundColor: color,
+                        border: "1px solid " + color + "; opacity: 0.5",
                         rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
                     });
                 decorations.set(color, decoration);
