@@ -91,7 +91,7 @@ export default class Settings {
         const powerShellSingleQuoteEnd = new ScopeCharacter("'");
         const powerShellSingleQuoteBlock = new ScopePattern(powerShellSingleQuote, powerShellSingleQuoteEnd);
 
-        const semicolen = new ScopeCharacter(';');
+        const semicolen = new ScopeCharacter(";");
         const clojureComment = new ScopePattern(semicolen);
 
         switch (settings.languageID) {
@@ -347,11 +347,16 @@ export default class Settings {
 
         for (const bracketPair of bracketPairs) {
             for (const color of bracketPair.colors) {
-                const decoration = vscode.window.createTextEditorDecorationType({ color });
+                const decoration = vscode.window.createTextEditorDecorationType({
+                    color, rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+                });
                 decorations.set(color, decoration);
             }
 
-            const errorDecoration = vscode.window.createTextEditorDecorationType({ color: bracketPair.orphanColor });
+            const errorDecoration = vscode.window.createTextEditorDecorationType({
+                color: bracketPair.orphanColor,
+                rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+            });
             decorations.set(bracketPair.orphanColor, errorDecoration);
         }
 
@@ -364,8 +369,11 @@ export default class Settings {
         for (const bracketPair of bracketPairs) {
             for (const color of bracketPair.colors) {
                 const decoration = vscode.window.createTextEditorDecorationType(
-                    { border: "1px solid " + color + "; opacity: 0.5", backgroundColor: color },
-                );
+                    {
+                        border: "1px solid " + color + "; opacity: 0.5",
+                        backgroundColor: color,
+                        rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+                    });
                 decorations.set(color, decoration);
             }
         }
