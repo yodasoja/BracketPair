@@ -110,6 +110,7 @@ export default class Settings {
                 break;
             }
             case "typescript":
+            case "typescriptreact":
             case "javascript":
             case "javascriptreact": {
                 this.scopes.push(doubleForwardslashComment);
