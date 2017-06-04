@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.10.5
+Bracket Colors will no longer bleed into newly typed text when a timeout is set.
+
+Add contextual parsing for:
+- typescripttreact
+
 ### 0.10.4
 Add contextual parsing for:
 - clojure (`;` only)
