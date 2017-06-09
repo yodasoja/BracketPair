@@ -184,6 +184,7 @@ export default class Settings {
             }
             case "clojure": {
                 this.scopes.push(clojureComment);
+                this.scopes.push(doubleQuoteBlock);
                 break;
             }
             // tslint:disable-next-line:no-empty

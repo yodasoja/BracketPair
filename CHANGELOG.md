@@ -1,6 +1,10 @@
 ## Release Notes
 
 ### 0.10.5
+Add contextual parsing for:
+- clojure strings
+
+### 0.10.5
 Bracket Colors will no longer bleed into newly typed text when a timeout is set.
 
 Add contextual parsing for:
