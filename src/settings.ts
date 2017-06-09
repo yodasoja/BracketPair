@@ -126,6 +126,7 @@ export default class Settings {
             case "java":
             case "less":
             case "scss":
+            case "dart":
                 {
                     this.scopes.push(doubleForwardslashComment);
                     this.scopes.push(slashCommentBlock);
