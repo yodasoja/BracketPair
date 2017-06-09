@@ -1,6 +1,6 @@
 ## Release Notes
 
-### 0.10.6
+### 0.10.7
 Add contextual parsing for:
 - dart
 
