@@ -1,6 +1,6 @@
 ## Release Notes
 
-### 0.10.5
+### 0.10.6
 Add contextual parsing for:
 - clojure strings
 
