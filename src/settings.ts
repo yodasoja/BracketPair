@@ -156,6 +156,12 @@ export default class Settings {
                 this.scopes.push(singleQuoteBlock);
                 break;
             }
+            case "crystal": {
+                this.scopes.push(hashComment);
+                this.scopes.push(rubyCommentBlock);
+                this.scopes.push(doubleQuoteBlock);
+                this.scopes.push(singleQuoteBlock);
+            }
             case "r": {
                 this.scopes.push(hashComment);
                 this.scopes.push(doubleQuoteBlock);
