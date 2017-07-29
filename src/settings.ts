@@ -149,18 +149,13 @@ export default class Settings {
                 this.scopes.push(singleQuoteBlock);
                 break;
             }
-            case "ruby": {
-                this.scopes.push(hashComment);
-                this.scopes.push(rubyCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
+            case "ruby":
             case "crystal": {
                 this.scopes.push(hashComment);
                 this.scopes.push(rubyCommentBlock);
                 this.scopes.push(doubleQuoteBlock);
                 this.scopes.push(singleQuoteBlock);
+                break;
             }
             case "r": {
                 this.scopes.push(hashComment);
