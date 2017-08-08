@@ -43,6 +43,7 @@ Contextual parsing has experimental support for the following languages:
 - c
 - clojure (partial, wip)
 - cpp
+- crystal
 - csharp
 - css
 - dart
