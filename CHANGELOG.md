@@ -1,5 +1,10 @@
 ## Release Notes
 
+### 0.10.8
+Add contextual parsing for:
+- go
+- crystal
+
 ### 0.10.7
 Add contextual parsing for:
 - dart
