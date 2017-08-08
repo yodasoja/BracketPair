@@ -112,14 +112,16 @@ export default class Settings {
             case "typescript":
             case "typescriptreact":
             case "javascript":
-            case "javascriptreact": {
-                this.scopes.push(doubleForwardslashComment);
-                this.scopes.push(slashCommentBlock);
-                this.scopes.push(backtickQuoteBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
+            case "javascriptreact":
+            case "go":
+                {
+                    this.scopes.push(doubleForwardslashComment);
+                    this.scopes.push(slashCommentBlock);
+                    this.scopes.push(backtickQuoteBlock);
+                    this.scopes.push(doubleQuoteBlock);
+                    this.scopes.push(singleQuoteBlock);
+                    break;
+                }
             case "c":
             case "cpp":
             case "csharp":
