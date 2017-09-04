@@ -59,6 +59,7 @@ Contextual parsing has experimental support for the following languages:
 - python
 - r
 - ruby
+- rust
 - scss
 - swift
 - typescript
