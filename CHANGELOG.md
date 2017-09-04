@@ -1,5 +1,10 @@
 ## Release Notes
 
+### 0.10.9
+Add contextual parsing for:
+- rust
+- sql
+
 ### 0.10.8
 Add contextual parsing for:
 - go
