@@ -68,6 +68,9 @@ export default class Settings {
         // <!---> invalid -->
         // <!-- inva--lid -->
         const hypen = new ScopeCharacter("-");
+        const doubleHyphen = new ScopeCharacter("--");
+        const doubleHyphenComment = new ScopePattern(doubleHyphen);
+
         const htmlCommentOpen = new ScopeCharacter("<!--");
         const htmlCommentClose = new ScopeCharacter("-->",
             { mustMatchAtOffset: [{ offset: -1, character: hypen }] });
@@ -190,6 +193,12 @@ export default class Settings {
             case "clojure": {
                 this.scopes.push(clojureComment);
                 this.scopes.push(doubleQuoteBlock);
+                break;
+            }
+            case "sql": {
+                this.scopes.push(doubleHyphenComment);
+                this.scopes.push(slashCommentBlock);
+                this.scopes.push(singleQuoteBlock);
                 break;
             }
             // tslint:disable-next-line:no-empty
