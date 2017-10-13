@@ -106,13 +106,14 @@ export default class Settings {
 
         switch (settings.languageID) {
             case "lua":
-            {
-                this.scopes.push(luaStringScopeBlock);
-                this.scopes.push(doubleHyphenComment);
-                this.scopes.push(luaScopeCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-            }
+                {
+                    this.scopes.push(luaStringScopeBlock);
+                    this.scopes.push(doubleHyphenComment);
+                    this.scopes.push(luaScopeCommentBlock);
+                    this.scopes.push(doubleQuoteBlock);
+                    this.scopes.push(singleQuoteBlock);
+                    break;
+                }
             case "powershell":
                 {
                     this.scopes.push(powerShellCommentBlock);
