@@ -97,7 +97,23 @@ export default class Settings {
         const semicolen = new ScopeCharacter(";");
         const clojureComment = new ScopePattern(semicolen);
 
+        const luaStringScopeOpen = new scopeCharacter("[[");
+        const luaStringScopeClose = new scopeCharacter("]]");
+        const luaStringScopeBlock = new scopePattern(luaStringScopeOpen, luaStringScopeClose);
+        const luaScopeCommentOpen = new scopeCharacter("--[[");
+        const luaScopeCommentClose = new scopeCharacter("]]");
+        const luaScopeCommentBlock = new scopePattern(luaScopeCommentOpen, luaScopeCommentClose);
+
         switch (settings.languageID) {
+            case "lua":
+                {
+                    this.scopes.push(luaStringScopeBlock);
+                    this.scopes.push(doubleHyphenComment);
+                    this.scopes.push(luaScopeCommentBlock);
+                    this.scopes.push(doubleQuoteBlock);
+                    this.scopes.push(singleQuoteBlock);
+                    break;
+                }
             case "powershell":
                 {
                     this.scopes.push(powerShellCommentBlock);
