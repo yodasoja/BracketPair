@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.10.11
+Add multi-root support
+
 ### 0.10.10
 Add contextual parsing for:
 - lua
