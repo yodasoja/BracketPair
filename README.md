@@ -54,6 +54,7 @@ Contextual parsing has experimental support for the following languages:
 - javascript
 - javascriptreact
 - less
+- lua
 - php
 - powershell
 - python

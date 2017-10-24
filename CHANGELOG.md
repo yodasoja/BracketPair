@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 0.11.0
+Add contextual parsing for:
+- lua
+
 ### 0.10.9
 Add contextual parsing for:
 - rust
