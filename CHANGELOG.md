@@ -1,6 +1,6 @@
 ## Release Notes
 
-### 0.11.0
+### 0.10.10
 Add contextual parsing for:
 - lua
 

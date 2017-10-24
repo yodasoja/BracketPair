@@ -97,12 +97,12 @@ export default class Settings {
         const semicolen = new ScopeCharacter(";");
         const clojureComment = new ScopePattern(semicolen);
 
-        const luaStringScopeOpen = new scopeCharacter("[[");
-        const luaStringScopeClose = new scopeCharacter("]]");
-        const luaStringScopeBlock = new scopePattern(luaStringScopeOpen, luaStringScopeClose);
-        const luaScopeCommentOpen = new scopeCharacter("--[[");
-        const luaScopeCommentClose = new scopeCharacter("]]");
-        const luaScopeCommentBlock = new scopePattern(luaScopeCommentOpen, luaScopeCommentClose);
+        const luaStringScopeOpen = new ScopeCharacter("[[");
+        const luaStringScopeClose = new ScopeCharacter("]]");
+        const luaStringScopeBlock = new ScopePattern(luaStringScopeOpen, luaStringScopeClose);
+        const luaScopeCommentOpen = new ScopeCharacter("--[[");
+        const luaScopeCommentClose = new ScopeCharacter("]]");
+        const luaScopeCommentBlock = new ScopePattern(luaScopeCommentOpen, luaScopeCommentClose);
 
         switch (settings.languageID) {
             case "lua":

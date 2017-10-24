@@ -1,5 +1,7 @@
 # Bracket Pair Colorizer
 
+Note: This extension has grown beyond its initial requirements and needs a rewrite for better language support..
+
 This extension allows matching brackets to be identified with colours. The user can define which characters to match, and which colours to use.
 
 Screenshot:  
