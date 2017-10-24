@@ -32,27 +32,27 @@ export default class Match {
 
     private static checkOffsetCondition(content: string, postion: number, character: ScopeCharacter): boolean {
         if (character.mustMatchAtOffset) {
-            character.mustMatchAtOffset.forEach((matchCondition) => {
+            for (const matchCondition of character.mustMatchAtOffset) {
                 const checkPosition = postion + matchCondition.offset;
 
                 if (checkPosition < 0) {
                     return false;
                 }
 
-                if (!this.checkMatch(content, checkPosition, character)) {
+                if (!this.checkMatch(content, checkPosition, matchCondition.character)) {
                     return false;
                 }
-            });
+            }
         }
 
         if (character.mustNotMatchAtOffset) {
-            character.mustNotMatchAtOffset.forEach((matchCondition) => {
+            for (const matchCondition of character.mustNotMatchAtOffset) {
                 const checkPosition = postion + matchCondition.offset;
 
-                if (checkPosition >= 0 && this.checkMatch(content, checkPosition, character)) {
+                if (checkPosition >= 0 && this.checkMatch(content, checkPosition, matchCondition.character)) {
                     return false;
                 }
-            });
+            }
         }
 
         return true;

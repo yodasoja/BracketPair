@@ -39,6 +39,12 @@ export default class Settings {
         const singleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
         const singleQuoteBlock = new ScopePattern(singleQuote, singleQuote);
 
+        const oneWidthchar = new ScopeCharacter("'", {
+            escapeCharacter: backslash,
+            mustMatchAtOffset: [{ offset: 2, character: singleQuote }],
+        });
+        const charBlock = new ScopePattern(oneWidthchar, singleQuote);
+
         const backtick = new ScopeCharacter("`");
         const backtickQuoteBlock = new ScopePattern(backtick, backtick);
 
@@ -148,12 +154,19 @@ export default class Settings {
             case "less":
             case "scss":
             case "dart":
-            case "rust":
                 {
                     this.scopes.push(doubleForwardslashComment);
                     this.scopes.push(slashCommentBlock);
                     this.scopes.push(doubleQuoteBlock);
                     this.scopes.push(singleQuoteBlock);
+                    break;
+                }
+            case "rust":
+                {
+                    this.scopes.push(doubleForwardslashComment);
+                    this.scopes.push(slashCommentBlock);
+                    this.scopes.push(doubleQuoteBlock);
+                    this.scopes.push(charBlock);
                     break;
                 }
             case "swift":
