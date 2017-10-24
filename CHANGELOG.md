@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.10.12
+Better support for detecting rust apostrophes when not being used to define a char
+
 ### 0.10.11
 Add multi-root support
 
