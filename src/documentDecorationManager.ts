@@ -62,7 +62,7 @@ export default class DocumentDecorationManager {
 
         if (documentDecorations === undefined) {
             try {
-                const settings = new Settings({ languageID: document.languageId });
+                const settings = new Settings({ document });
                 documentDecorations = new DocumentDecoration(document, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {

@@ -18,7 +18,7 @@ export default class Settings {
     public isDisposed = false;
 
     constructor(settings: {
-        languageID: string,
+        document: vscode.TextDocument,
         timeOutLength?: number,
         forceUniqueOpeningColor?: boolean,
         forceIterationColorCycle?: boolean,
@@ -104,7 +104,7 @@ export default class Settings {
         const luaScopeCommentClose = new ScopeCharacter("]]");
         const luaScopeCommentBlock = new ScopePattern(luaScopeCommentOpen, luaScopeCommentClose);
 
-        switch (settings.languageID) {
+        switch (settings.document.languageId) {
             case "lua":
                 {
                     this.scopes.push(luaStringScopeBlock);
@@ -224,7 +224,7 @@ export default class Settings {
         // Longest openers get checked first
         this.scopes.sort((a, b) => b.opener.match.length - a.opener.match.length);
 
-        const configuration = vscode.workspace.getConfiguration();
+        const configuration = vscode.workspace.getConfiguration(undefined, settings.document.uri);
 
         this.forceUniqueOpeningColor = settings.forceUniqueOpeningColor !== undefined ?
             settings.forceUniqueOpeningColor :
