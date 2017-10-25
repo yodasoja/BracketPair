@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import { Position, Range } from "vscode";
 import Bracket from "./bracket";
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
@@ -32,7 +32,7 @@ export default class MultipleIndexes implements ColorIndexes {
         }
     }
 
-    public getScope(position: vscode.Position): Scope | undefined {
+    public getScope(position: Position): Scope | undefined {
         for (const scope of this.bracketScopes) {
             if (scope.range.contains(position)) {
                 return scope;
@@ -44,7 +44,7 @@ export default class MultipleIndexes implements ColorIndexes {
         return this.previousOpenBracketColorIndexes[bracketPair.openCharacter];
     }
 
-    public setCurrent(bracketPair: BracketPair, range: vscode.Range, colorIndex: number) {
+    public setCurrent(bracketPair: BracketPair, range: Range, colorIndex: number) {
         this.openBrackets[bracketPair.openCharacter].push(new Bracket(range, colorIndex));
         this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = colorIndex;
     }
@@ -53,11 +53,11 @@ export default class MultipleIndexes implements ColorIndexes {
         return this.openBrackets[bracketPair.openCharacter].length;
     }
 
-    public getCurrentColorIndex(bracketPair: BracketPair, range: vscode.Range): number | undefined {
+    public getCurrentColorIndex(bracketPair: BracketPair, range: Range): number | undefined {
         const openBracket = this.openBrackets[bracketPair.openCharacter].pop();
         if (openBracket) {
             const closeBracket = new Bracket(range, openBracket.colorIndex);
-            const scopeRange = new vscode.Range(openBracket.range.start, range.end);
+            const scopeRange = new Range(openBracket.range.start, range.end);
             this.bracketScopes.push(
                 new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex], openBracket, closeBracket),
             );

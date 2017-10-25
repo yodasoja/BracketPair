@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import { Position, Range } from "vscode";
 import LineState from "./lineState";
 import Match from "./match";
 import ModifierPair from "./modifierPair";
@@ -8,7 +8,7 @@ import ScopePattern from "./scopePattern";
 import Settings from "./settings";
 
 export default class TextLine {
-    public colorRanges = new Map<string, vscode.Range[]>();
+    public colorRanges = new Map<string, Range[]>();
     public readonly index: number;
     private resumeLineCheckPosition = 0;
     private lineState: LineState;
@@ -35,7 +35,7 @@ export default class TextLine {
         return this.lineState.copyMultilineContext();
     }
 
-    public getScope(position: vscode.Position): Scope | undefined {
+    public getScope(position: Position): Scope | undefined {
         return this.lineState.getScope(position);
     }
 
@@ -53,9 +53,9 @@ export default class TextLine {
             }
         }
 
-        const bracketOpenPosition = new vscode.Position(this.index, position);
-        const bracketClosePosition = new vscode.Position(this.index, position + bracket.length);
-        const range = new vscode.Range(
+        const bracketOpenPosition = new Position(this.index, position);
+        const bracketClosePosition = new Position(this.index, position + bracket.length);
+        const range = new Range(
             bracketOpenPosition,
             bracketClosePosition,
         );

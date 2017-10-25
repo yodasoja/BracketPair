@@ -1,30 +1,28 @@
-import * as vscode from "vscode";
+import { ExtensionContext, window, workspace } from "vscode";
 import DocumentDecorationManager from "./documentDecorationManager";
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: ExtensionContext) {
     const documentDecorationManager = new DocumentDecorationManager();
 
-    vscode.workspace.onDidChangeConfiguration((event) => {
+    context.subscriptions.push(workspace.onDidChangeConfiguration((event) => {
         documentDecorationManager.reset();
-    }, null, context.subscriptions);
+    }));
 
-    vscode.window.onDidChangeVisibleTextEditors(() => {
+    context.subscriptions.push(window.onDidChangeVisibleTextEditors(() => {
         documentDecorationManager.updateAllDocuments();
-    }, null, context.subscriptions);
+    }));
 
-    vscode.workspace.onDidChangeTextDocument((event) => {
+    context.subscriptions.push(workspace.onDidChangeTextDocument((event) => {
         documentDecorationManager.onDidChangeTextDocument(event.document, event.contentChanges);
-
-    }, null, context.subscriptions);
+    }));
 
     // vscode.window.onDidChangeTextEditorSelection((event) => {
     //     documentDecorationManager.onDidChangeSelection(event);
     // }, null, context.subscriptions);
 
-    vscode.workspace.onDidCloseTextDocument((event) => {
+    context.subscriptions.push(workspace.onDidCloseTextDocument((event) => {
         documentDecorationManager.onDidCloseTextDocument(event);
-
-    }, null, context.subscriptions);
+    }));
 
     documentDecorationManager.reset();
 }

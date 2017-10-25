@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import { TextDocument, TextDocumentContentChangeEvent, TextEditorSelectionChangeEvent, window } from "vscode";
 import DocumentDecoration from "./documentDecoration";
 import Settings from "./settings";
 
@@ -14,7 +14,7 @@ export default class DocumentDecorationManager {
         this.updateAllDocuments();
     }
 
-    public updateDocument(document: vscode.TextDocument) {
+    public updateDocument(document: TextDocument) {
         const documentDecoration = this.getDocumentDecorations(document);
         if (documentDecoration) {
             documentDecoration.triggerUpdateDecorations();
@@ -22,22 +22,22 @@ export default class DocumentDecorationManager {
     }
 
     public onDidChangeTextDocument(
-        document: vscode.TextDocument,
-        contentChanges: vscode.TextDocumentContentChangeEvent[]) {
+        document: TextDocument,
+        contentChanges: TextDocumentContentChangeEvent[]) {
         const documentDecoration = this.getDocumentDecorations(document);
         if (documentDecoration) {
             documentDecoration.onDidChangeTextDocument(contentChanges);
         }
     }
 
-    public onDidChangeSelection(event: vscode.TextEditorSelectionChangeEvent) {
+    public onDidChangeSelection(event: TextEditorSelectionChangeEvent) {
         const documentDecoration = this.getDocumentDecorations(event.textEditor.document);
         if (documentDecoration) {
             documentDecoration.updateScopeDecorations(event);
         }
     }
 
-    public onDidCloseTextDocument(closedDocument: vscode.TextDocument) {
+    public onDidCloseTextDocument(closedDocument: TextDocument) {
         const uri = closedDocument.uri.toString();
         const document = this.documents.get(uri);
         if (document !== undefined) {
@@ -47,12 +47,12 @@ export default class DocumentDecorationManager {
     }
 
     public updateAllDocuments() {
-        vscode.window.visibleTextEditors.forEach((editor) => {
+        window.visibleTextEditors.forEach((editor) => {
             this.updateDocument(editor.document);
         });
     }
 
-    private getDocumentDecorations(document: vscode.TextDocument): DocumentDecoration | undefined {
+    private getDocumentDecorations(document: TextDocument): DocumentDecoration | undefined {
         if (!this.isValidDocument(document)) {
             return;
         }
@@ -62,13 +62,13 @@ export default class DocumentDecorationManager {
 
         if (documentDecorations === undefined) {
             try {
-                const settings = new Settings({ document });
+                const settings = new Settings({ languageID: document.languageId, documentUri: document.uri });
                 documentDecorations = new DocumentDecoration(document, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
                 if (error instanceof Error) {
                     if (this.showError) {
-                        vscode.window.showErrorMessage("BracketPair Settings: " + error.message);
+                        window.showErrorMessage("BracketPair Settings: " + error.message);
 
                         // Don't spam errors
                         this.showError = false;
@@ -84,7 +84,7 @@ export default class DocumentDecorationManager {
         return documentDecorations;
     }
 
-    private isValidDocument(document?: vscode.TextDocument): boolean {
+    private isValidDocument(document?: TextDocument): boolean {
         if (document === undefined) {
             return false;
         }
