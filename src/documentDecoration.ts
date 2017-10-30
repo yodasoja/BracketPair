@@ -129,21 +129,14 @@ export default class DocumentDecoration {
     }
 
     private updateDecorations() {
-        const editors: vscode.TextEditor[] = [];
-
         // One document may be shared by multiple editors (side by side view)
-        vscode.window.visibleTextEditors.forEach((editor) => {
-            if (editor.document && editor.document.lineCount !== 0 && this.document === editor.document) {
-                editors.push(editor);
-            }
-        });
+        const editors: vscode.TextEditor[] =
+            vscode.window.visibleTextEditors.filter((e) => this.document === e.document);
 
         if (editors.length === 0) {
+            console.warn("No editors associated with document: " + this.document.fileName);
             return;
         }
-
-        // Only have to analyze the first document, since it is shared between the editors
-        const document = editors[0].document;
 
         const lineNumber = this.lineToUpdateWhenTimeoutEnds;
 
@@ -152,19 +145,19 @@ export default class DocumentDecoration {
         // Remove cached lines that need to be updated
         this.lines.splice(lineNumber, amountToRemove);
 
-        const text = document.getText();
+        const text = this.document.getText();
         const regex = new RegExp(this.settings.regexPattern, "g");
 
-        regex.lastIndex = document.offsetAt(new vscode.Position(lineNumber, 0));
+        regex.lastIndex = this.document.offsetAt(new vscode.Position(lineNumber, 0));
 
         let match: RegExpExecArray | null;
         // tslint:disable-next-line:no-conditional-assignment
         while ((match = regex.exec(text)) !== null) {
-            const startPos = document.positionAt(match.index);
+            const startPos = this.document.positionAt(match.index);
 
             const endPos = startPos.translate(0, match[0].length);
 
-            const currentLine = this.getLine(startPos.line, document);
+            const currentLine = this.getLine(startPos.line, this.document);
             currentLine.addBracket(match[0], startPos.character);
         }
 
@@ -193,8 +186,7 @@ export default class DocumentDecoration {
         }
 
         for (const [color, decoration] of this.settings.bracketDecorations) {
-            if (color === "")
-            {
+            if (color === "") {
                 continue;
             }
             const ranges = colorMap.get(color);

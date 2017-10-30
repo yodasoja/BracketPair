@@ -85,11 +85,8 @@ export default class DocumentDecorationManager {
     }
 
     private isValidDocument(document?: TextDocument): boolean {
-        if (document === undefined) {
-            return false;
-        }
-
-        if (document.lineCount === 0) {
+        if (document === undefined || document.lineCount === 0) {
+            console.warn("Invalid document");
             return false;
         }
 
