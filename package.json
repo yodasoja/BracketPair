@@ -2,7 +2,7 @@
     "name": "bracket-pair-colorizer",
     "displayName": "Bracket Pair Colorizer",
     "description": "A customizable extension for colorizing matching brackets",
-    "version": "0.10.12",
+    "version": "0.10.13",
     "publisher": "CoenraadS",
     "engines": {
         "vscode": "^1.18.0"
@@ -16,7 +16,8 @@
     ],
     "keywords": [
         "bracket",
-        "brackets"
+        "brackets",
+        "multi-root ready"
     ],
     "galleryBanner": {
         "color": "#1E1E1E",
