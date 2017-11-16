@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 0.10.14
+Multi-root ready attempt #2 (Settings were not resource scoped)
+
 ### 0.10.13
 Multi-root ready
 

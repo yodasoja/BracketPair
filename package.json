@@ -2,7 +2,7 @@
     "name": "bracket-pair-colorizer",
     "displayName": "Bracket Pair Colorizer",
     "description": "A customizable extension for colorizing matching brackets",
-    "version": "0.10.13",
+    "version": "0.10.14",
     "publisher": "CoenraadS",
     "engines": {
         "vscode": "^1.18.0"
@@ -32,22 +32,26 @@
                 "bracketPairColorizer.contextualParsing": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Ignore brackets in comments or strings"
+                    "description": "Ignore brackets in comments or strings",
+                    "scope": "resource"
                 },
                 "bracketPairColorizer.timeOut": {
                     "type": "number",
                     "default": 200,
-                    "description": "How long the user should idle for, before the document is colorized. Set to 0 to disable"
+                    "description": "How long the user should idle for, before the document is colorized. Set to 0 to disable",
+                    "scope": "resource"
                 },
                 "bracketPairColorizer.forceUniqueOpeningColor": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Ensure that an opening brackets color does not match a previous brackets color"
+                    "description": "Ensure that an opening brackets color does not match a previous brackets color",
+                    "scope": "resource"
                 },
                 "bracketPairColorizer.forceIterationColorCycle": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Should opening brackets iterate the color cycle even if they are not nested"
+                    "description": "Should opening brackets iterate the color cycle even if they are not nested",
+                    "scope": "resource"
                 },
                 "bracketPairColorizer.colorMode": {
                     "type": "string",
@@ -56,7 +60,8 @@
                         "Independent"
                     ],
                     "default": "Consecutive",
-                    "description": "Should different brackets share a color group (Consecutive), or use their own color group (Independent)"
+                    "description": "Should different brackets share a color group (Consecutive), or use their own color group (Independent)",
+                    "scope": "resource"
                 },
                 "bracketPairColorizer.consecutivePairColors": {
                     "type": "array",
@@ -71,7 +76,8 @@
                         ],
                         "Red"
                     ],
-                    "description": "Define paired characters and their shared color group"
+                    "description": "Define paired characters and their shared color group",
+                    "scope": "resource"
                 },
                 "bracketPairColorizer.independentPairColors": {
                     "type": [
@@ -111,7 +117,8 @@
                             "Red"
                         ]
                     ],
-                    "description": "Define paired characters and their color groups"
+                    "description": "Define paired characters and their color groups",
+                    "scope": "resource"
                 }
             }
         }
