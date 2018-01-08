@@ -205,6 +205,7 @@ export default class Settings {
                 this.scopes.push(singleQuoteBlock);
                 break;
             }
+            case "stylable":
             case "css": {
                 this.scopes.push(slashCommentBlock);
                 this.scopes.push(doubleQuoteBlock);

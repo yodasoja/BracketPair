@@ -65,6 +65,7 @@ Contextual parsing has experimental support for the following languages:
 - rust
 - scss
 - sql
+- stylable
 - swift
 - typescript
 ```
