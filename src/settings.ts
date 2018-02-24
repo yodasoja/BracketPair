@@ -13,7 +13,9 @@ export default class Settings {
     public readonly regexPattern: string;
     public readonly scopeDecorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly timeOutLength: number;
-    public readonly alwaysHighlightActiveScope: boolean;
+    public readonly highlightActiveScope: boolean;
+    public readonly activeScopeBackgroundColor: string;
+    public readonly activeScopeBorderStyle: string;
     public isDisposed = false;
 
     constructor(
@@ -22,6 +24,25 @@ export default class Settings {
     ) {
         this.prismLanguageID = languageID;
         const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
+
+        this.activeScopeBackgroundColor = configuration.get("activeScopeBackgroundColor") as string;
+
+        if (typeof this.activeScopeBackgroundColor !== "string") {
+            throw new Error("activeScopeBackgroundColor is not a string");
+        }
+
+        this.activeScopeBorderStyle = configuration.get("activeScopeBorderStyle") as string;
+
+        if (typeof this.activeScopeBorderStyle !== "string") {
+            throw new Error("activeScopeBorderStyle is not a string");
+        }
+
+        this.highlightActiveScope = configuration.get("highlightActiveScope") as boolean;
+
+        if (typeof this.highlightActiveScope !== "boolean") {
+            throw new Error("alwaysHighlightActiveScope is not a boolean");
+        }
+
 
         this.forceUniqueOpeningColor = configuration.get("forceUniqueOpeningColor") as boolean;
 
@@ -177,8 +198,8 @@ export default class Settings {
             for (const color of bracketPair.colors) {
                 const decoration = vscode.window.createTextEditorDecorationType(
                     {
-                        backgroundColor: color,
-                        border: "1px solid " + color + "; opacity: 0.5",
+                        backgroundColor: this.activeScopeBackgroundColor.replace("{color}", color),
+                        border: this.activeScopeBorderStyle.replace("{color}", color),
                         rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
                     });
                 decorations.set(color, decoration);

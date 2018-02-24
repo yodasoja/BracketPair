@@ -37,6 +37,18 @@ Independent brackets allow each bracket type to use its own color pool
 ![Consecutive](images/consecutiveExample.png "Consecutive Example")
 ![Independent](images/independentExample.png "Independent Example")
 
+> `"bracketPairColorizer.highlightActiveScope"`  
+Should the currently scoped brackets always be highlighted?
+
+> `"bracketPairColorizer.activeScopeBorderStyle"`  
+Choose a border style to highlight the active scope. Use `{color}` to match the existing bracket color  
+It is recommended to disable the inbuilt `editor.matchBrackets` setting if using this feature  
+![BorderStyle](images/activeScopeBorder.png "Active Scope Border Example")
+
+> `"bracketPairColorizer.activeScopeBackgroundColor"`  
+Choose a border background to highlight the active scope. Use `{color}` to match the existing bracket color  
+![BorderBackground](images/activeScopeBackground.png "Active Scope Background Example")
+
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
 > Example for matching '<>'

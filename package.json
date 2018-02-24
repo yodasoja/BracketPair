@@ -57,6 +57,24 @@
                     "description": "Should different brackets share a color group (Consecutive), or use their own color group (Independent)",
                     "scope": "resource"
                 },
+                "bracketPairColorizer.highlightActiveScope": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should the active scope brackets always be highlighted? Recommended to disable editor.matchBrackets if using this feature.",
+                    "scope": "resource"
+                },
+                "bracketPairColorizer.activeScopeBackgroundColor": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Background color for active scope highlighting. Use {color} to match bracket color.",
+                    "scope": "resource"
+                },
+                "bracketPairColorizer.activeScopeBorderStyle": {
+                    "type": "string",
+                    "default": "1px solid {color}; opacity: 0.5",
+                    "description": "Border style for active scope highlighting. Use {color} to match bracket color.",
+                    "scope": "resource"
+                },
                 "bracketPairColorizer.consecutivePairColors": {
                     "type": "array",
                     "default": [

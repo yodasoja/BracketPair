@@ -1,15 +1,23 @@
 ## Release Notes
 
+### 1.0.5
+Added feature to highlight active scope  
+It can be configured with the following settings:  
+`"bracketPairColorizer.highlightActiveScope"`  
+`"bracketPairColorizer.activeScopeBorderStyle"`  
+`"bracketPairColorizer.activeScopeBackgroundColor"`  
+See [README.md](README.md) for details
+
 ### 1.0.4
-Added OpenSCAD again..
+Added OpenSCAD support again  
 Added Visual Basic Support
 
 ### 1.0.3
-Removed incorrect OpenSCAD support
+Removed incorrect OpenSCAD support  
 Added json with comments support
 
 ### 1.0.2
-Previous release broke everything
+Previous release broke everything  
 Fix OpenSCAD support
 
 ### 1.0.1
@@ -19,8 +27,8 @@ Fix .jsx and .tsx support
 Parsing offloaded to PrismJS.
 
 ### 0.10.16
-Stylable support (Thanks @tomrav)
-Visual Studio Live Share support (Thanks @lostintangent)
+Stylable support (Thanks @tomrav)  
+Visual Studio Live Share support (Thanks @lostintangent)  
 OpenSCAD support (Thanks @atnbueno)
 
 ### 0.10.14
