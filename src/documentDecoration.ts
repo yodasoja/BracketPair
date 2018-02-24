@@ -5,7 +5,6 @@ import Settings from "./settings";
 import TextLine from "./textLine";
 
 export default class DocumentDecoration {
-    private prismLanguages = require("prism-languages");
     private updateDecorationTimeout: NodeJS.Timer | null;
 
     // This program caches lines, and will only analyze linenumbers including or above a modified line
@@ -95,12 +94,21 @@ export default class DocumentDecoration {
         // Remove cached lines that need to be updated
         this.lines.splice(lineNumber, amountToRemove);
 
-        const languages = Object.keys(this.prismLanguages);
+        let languageId = this.document.languageId;
+
+        // Some VSCode language ids need to be mapped to match http://prismjs.com/#languages-list
+        switch (languageId) {
+            case "javascriptreact": languageId = "jsx";
+                break;
+            case "typescriptreact": languageId = "tsx";
+                break;
+            default: break;
+        }
 
         const text = this.document.getText();
         let tokenized: Array<string | prism.Token>;
         try {
-            tokenized = prism.tokenize(text, prism.languages[this.document.languageId]);
+            tokenized = prism.tokenize(text, prism.languages[languageId]);
             if (!tokenized) {
                 return;
             }

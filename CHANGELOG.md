@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.1
+Fix .jsx and .tsx support
+
 ### 1.0.0
 Parsing offloaded to PrismJS.
 
