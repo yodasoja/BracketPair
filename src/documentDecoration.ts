@@ -104,7 +104,6 @@ export default class DocumentDecoration {
                 break;
             case "typescriptreact": languageId = "tsx";
                 break;
-            case "scad": languageId = "json";
             default: break;
         }
 
