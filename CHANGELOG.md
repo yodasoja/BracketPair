@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 1.0.3
+Removed incorrect OpenSCAD support
+Mapped jsonc -> json5
+
 ### 1.0.2
 Previous release broke everything
 Fix OpenSCAD support
