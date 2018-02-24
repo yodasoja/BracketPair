@@ -13,6 +13,7 @@ export default class DocumentDecoration {
     private lines: TextLine[] = [];
     private readonly document: vscode.TextDocument;
     private readonly settings: Settings;
+    private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
 
     constructor(document: vscode.TextDocument, settings: Settings) {
         this.settings = settings;
@@ -64,7 +65,12 @@ export default class DocumentDecoration {
             }
 
             this.updateDecorationTimeout = setTimeout(() => {
+                this.updateDecorationTimeout = null;
                 this.updateDecorations();
+                if (this.updateScopeEvent) {
+                    this.updateScopeDecorations(this.updateScopeEvent);
+                    this.updateScopeEvent = undefined;
+                }
             }, this.settings.timeOutLength);
         }
         else {
@@ -73,6 +79,11 @@ export default class DocumentDecoration {
     }
 
     public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
+        if (this.updateDecorationTimeout) {
+            this.updateScopeEvent = event;
+            return;
+        }
+
         const scopes: Set<Scope> = new Set<Scope>();
 
         event.selections.forEach((selection) => {
