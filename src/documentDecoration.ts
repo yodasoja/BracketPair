@@ -1,9 +1,11 @@
+import * as prism from "prismjs";
 import * as vscode from "vscode";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
 
 export default class DocumentDecoration {
+    private prismLanguages = require("prism-languages");
     private updateDecorationTimeout: NodeJS.Timer | null;
 
     // This program caches lines, and will only analyze linenumbers including or above a modified line
@@ -70,57 +72,6 @@ export default class DocumentDecoration {
         }
     }
 
-    public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
-        const scopes: Set<Scope> = new Set<Scope>();
-
-        event.selections.forEach((selection) => {
-            const scope = this.getScope(selection.active);
-
-            if (scope) {
-                scopes.add(scope);
-            }
-        });
-
-        const colorMap = new Map<string, vscode.Range[]>();
-
-        // Reduce all the colors/ranges of the lines into a singular map
-        for (const scope of scopes) {
-            {
-                const existingRanges = colorMap.get(scope.color);
-
-                if (existingRanges !== undefined) {
-                    existingRanges.push(scope.open.range);
-                    existingRanges.push(scope.close.range);
-                }
-                else {
-                    colorMap.set(scope.color, [scope.open.range, scope.close.range]);
-                }
-            }
-        }
-
-        for (const [color, decoration] of this.settings.scopeDecorations) {
-            const ranges = colorMap.get(color);
-            if (ranges !== undefined) {
-                event.textEditor.setDecorations(decoration, ranges);
-            }
-            else {
-                // We must set non-used colors to an empty array
-                // or previous decorations will not be invalidated
-                event.textEditor.setDecorations(decoration, []);
-            }
-        }
-    }
-
-    private getScope(position: vscode.Position): Scope | undefined {
-        for (let i = position.line; i < this.lines.length; i++) {
-            const scope = this.lines[i].getScope(position);
-
-            if (scope) {
-                return scope;
-            }
-        }
-    }
-
     private updateLowestLineNumber(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         for (const contentChange of contentChanges) {
             this.lineToUpdateWhenTimeoutEnds =
@@ -129,6 +80,102 @@ export default class DocumentDecoration {
     }
 
     private updateDecorations() {
+        // One document may be shared by multiple editors (side by side view)
+        const editors: vscode.TextEditor[] =
+            vscode.window.visibleTextEditors.filter((e) => this.document === e.document);
+
+        if (editors.length === 0) {
+            console.warn("No editors associated with document: " + this.document.fileName);
+            return;
+        }
+
+        const languages = Object.keys(this.prismLanguages);
+
+        const text = this.document.getText();
+        let tokenized: Array<string | prism.Token>;
+        try {
+            tokenized = prism.tokenize(text, prism.languages[this.document.languageId]);
+            if (!tokenized) {
+                return;
+            }
+        }
+        catch (err) {
+            console.warn(err);
+            return;
+        }
+
+        let lineIndex = 0;
+        let charIndex = 0;
+        charIndex = this.parseTokenOrStringArray(tokenized, charIndex);
+
+        const regex = new RegExp(this.settings.regexPattern, "g");
+
+        let match: RegExpExecArray | null;
+        // tslint:disable-next-line:no-conditional-assignment
+        while ((match = regex.exec(text)) !== null) {
+            const startPos = this.document.positionAt(match.index);
+
+            const endPos = startPos.translate(0, match[0].length);
+
+            const currentLine = this.getLine(startPos.line, this.document);
+            currentLine.addBracket(match[0], startPos.character);
+        }
+
+    }
+
+    private parseTokenOrStringArray(tokenized: Array<string | prism.Token>, charIndex: number) {
+        tokenized.forEach((token) => {
+            if (token instanceof prism.Token) {
+                charIndex = this.parseToken(token, charIndex);
+            }
+            else {
+                charIndex = this.parseString(token, charIndex);
+            }
+        });
+        return charIndex;
+    }
+
+    private parseString(token: string, charIndex: number) {
+        charIndex += token.length;
+        return charIndex;
+    }
+
+    private parseToken(token: prism.Token, charIndex: number) {
+        if (typeof token.content === "string") {
+            charIndex = this.parseString(token.content, charIndex);
+        }
+        else if (Array.isArray(token.content)) {
+            charIndex = this.parseTokenOrStringArray(token.content, charIndex);
+        }
+        else {
+            // Token
+            if (Array.isArray(token.content.content)) {
+                charIndex = this.parseTokenOrStringArray(token.content.content, charIndex);
+            }
+            else {
+                if (typeof token.content.content === "string") {
+                    const content = token.content.content;
+                    if (token.type === "punctuation") {
+                        if (content.match(this.settings.regexPattern)) {
+                            // TODO Finally made it here...
+                        }
+                    }
+                    charIndex += this.parseString(content, charIndex);
+
+                }
+                else {
+                    charIndex += this.parseToken(token.content.content, charIndex);
+                }
+            }
+        }
+        return charIndex;
+    }
+
+    private parseTokenNode(tokenNode: prism.TokenNode, charIndex: number) {
+        return charIndex;
+    }
+
+    private updateDecorationsOLD() {
         // One document may be shared by multiple editors (side by side view)
         const editors: vscode.TextEditor[] =
             vscode.window.visibleTextEditors.filter((e) => this.document === e.document);

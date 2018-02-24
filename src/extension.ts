@@ -5,7 +5,9 @@ export function activate(context: ExtensionContext) {
     const documentDecorationManager = new DocumentDecorationManager();
 
     context.subscriptions.push(workspace.onDidChangeConfiguration((event) => {
-        documentDecorationManager.reset();
+        if (event.affectsConfiguration("bracketPairColorizer")) {
+            documentDecorationManager.reset();
+        }
     }));
 
     context.subscriptions.push(window.onDidChangeVisibleTextEditors(() => {
@@ -15,10 +17,6 @@ export function activate(context: ExtensionContext) {
     context.subscriptions.push(workspace.onDidChangeTextDocument((event) => {
         documentDecorationManager.onDidChangeTextDocument(event.document, event.contentChanges);
     }));
-
-    // vscode.window.onDidChangeTextEditorSelection((event) => {
-    //     documentDecorationManager.onDidChangeSelection(event);
-    // }, null, context.subscriptions);
 
     context.subscriptions.push(workspace.onDidCloseTextDocument((event) => {
         documentDecorationManager.onDidCloseTextDocument(event);

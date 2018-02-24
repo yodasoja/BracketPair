@@ -30,13 +30,6 @@ export default class DocumentDecorationManager {
         }
     }
 
-    public onDidChangeSelection(event: TextEditorSelectionChangeEvent) {
-        const documentDecoration = this.getDocumentDecorations(event.textEditor.document);
-        if (documentDecoration) {
-            documentDecoration.updateScopeDecorations(event);
-        }
-    }
-
     public onDidCloseTextDocument(closedDocument: TextDocument) {
         const uri = closedDocument.uri.toString();
         const document = this.documents.get(uri);

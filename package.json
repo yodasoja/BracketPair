@@ -5,7 +5,7 @@
     "version": "0.10.16",
     "publisher": "CoenraadS",
     "engines": {
-        "vscode": "^1.18.0"
+        "vscode": "^1.20.0"
     },
     "icon": "images/icon.png",
     "categories": [
@@ -131,6 +131,7 @@
     "devDependencies": {
         "@types/mocha": "^2.2.32",
         "@types/node": "^6.0.40",
+        "@types/prismjs": "^1.9.0",
         "mocha": "^2.3.3",
         "tslint": "^4.5.1",
         "typescript": "^2.2.1",
@@ -141,5 +142,8 @@
         "url": "https://github.com/CoenraadS/BracketPair"
     },
     "license": "SEE LICENSE IN LICENSE.md",
-    "dependencies": {}
+    "dependencies": {
+        "prism-languages": "^0.4.0",
+        "prismjs": "^1.11.0"
+    }
 }
