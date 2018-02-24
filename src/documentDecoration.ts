@@ -5,6 +5,7 @@ import Settings from "./settings";
 import TextLine from "./textLine";
 
 export default class DocumentDecoration {
+    // This is required although it is not used. Do not remove!
     private prismLanguages = require("prism-languages");
     private updateDecorationTimeout: NodeJS.Timer | null;
 
@@ -107,7 +108,6 @@ export default class DocumentDecoration {
             default: break;
         }
 
-        const languages = Object.keys(this.prismLanguages);
         const text = this.document.getText();
         let tokenized: Array<string | prism.Token>;
         try {
