@@ -68,6 +68,10 @@ export default class DocumentDecorationManager {
         if (documentDecorations === undefined) {
             try {
                 const languageID = this.getPrismLanguageID(document.languageId);
+                if (!this.supportedLanguages.has(languageID)) {
+                    return;
+                }
+
                 const settings = new Settings(languageID, document.uri);
                 documentDecorations = new DocumentDecoration(document, settings);
                 this.documents.set(uri, documentDecorations);
@@ -97,7 +101,7 @@ export default class DocumentDecorationManager {
             case "typescriptreact": return "tsx";
             case "jsonc": return "json5";
             case "scad": return "json";
-            case "vb" : return  "vbnet";
+            case "vb": return "vbnet";
             default: return languageID;
         }
     }
