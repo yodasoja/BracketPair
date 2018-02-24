@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 1.0.2
+Previous release broke everything
+Fix OpenSCARD support
+
 ### 1.0.1
 Fix .jsx and .tsx support
 
