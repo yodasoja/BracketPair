@@ -3,15 +3,17 @@ import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
 
 export default class Settings {
-    public readonly timeOutLength: number;
-    public readonly forceUniqueOpeningColor: boolean;
-    public readonly forceIterationColorCycle: boolean;
-    public readonly contextualParsing: boolean;
-    public readonly bracketPairs: BracketPair[] = [];
-    public readonly regexPattern: string;
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
+    public readonly bracketPairs: BracketPair[] = [];
     public readonly colorMode: ColorMode;
+    public readonly contextualParsing: boolean;
+    public readonly forceIterationColorCycle: boolean;
+    public readonly forceUniqueOpeningColor: boolean;
     public readonly prismLanguageID: string;
+    public readonly regexPattern: string;
+    public readonly scopeDecorations: Map<string, vscode.TextEditorDecorationType>;
+    public readonly timeOutLength: number;
+    public readonly alwaysHighlightActiveScope: boolean;
     public isDisposed = false;
 
     constructor(
@@ -115,9 +117,15 @@ export default class Settings {
 
         this.regexPattern = this.createRegex(this.bracketPairs);
         this.bracketDecorations = this.createBracketDecorations(this.bracketPairs);
+        this.scopeDecorations = this.createScopeDecorations(this.bracketPairs);
     }
 
     public dispose() {
+        this.scopeDecorations.forEach((decoration, key) => {
+            decoration.dispose();
+        });
+        this.scopeDecorations.clear();
+
         this.bracketDecorations.forEach((decoration, key) => {
             decoration.dispose();
         });

@@ -51,6 +51,13 @@ export default class DocumentDecorationManager {
         }
     }
 
+    public onDidChangeSelection(event: TextEditorSelectionChangeEvent) {
+        const documentDecoration = this.getDocumentDecorations(event.textEditor.document);
+        if (documentDecoration) {
+            documentDecoration.updateScopeDecorations(event);
+        }
+    }
+
     public updateAllDocuments() {
         window.visibleTextEditors.forEach((editor) => {
             this.updateDocument(editor.document);

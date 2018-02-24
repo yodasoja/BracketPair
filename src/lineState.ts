@@ -4,6 +4,7 @@ import ColorMode from "./colorMode";
 import ColorIndexes from "./IColorIndexes";
 import ModifierPair from "./modifierPair";
 import MultipleIndexes from "./multipleIndexes";
+import Scope from "./scope";
 import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
@@ -81,5 +82,9 @@ export default class LineState {
             };
 
         return new LineState(this.settings, clone);
+    }
+
+    public getScope(position: Position): Scope | undefined {
+        return this.colorIndexes.getScope(position);
     }
 }

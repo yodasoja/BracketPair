@@ -2,11 +2,13 @@ import { Position, Range } from "vscode";
 import Bracket from "./bracket";
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
+import Scope from "./scope";
 import Settings from "./settings";
 
 export default class MultipleIndexes implements ColorIndexes {
     private openBrackets: { [character: string]: Bracket[]; } = {};
     private previousOpenBracketColorIndexes: { [character: string]: number; } = {};
+    private bracketScopes: Scope[] = [];
     private readonly settings: Settings;
 
     constructor(
@@ -48,7 +50,18 @@ export default class MultipleIndexes implements ColorIndexes {
         if (openBracket) {
             const closeBracket = new Bracket(range, openBracket.colorIndex);
             const scopeRange = new Range(openBracket.range.start, range.end);
+            this.bracketScopes.push(
+                new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex], openBracket, closeBracket),
+            );
             return openBracket.colorIndex;
+        }
+    }
+
+    public getScope(position: Position): Scope | undefined {
+        for (const scope of this.bracketScopes) {
+            if (scope.range.contains(position)) {
+                return scope;
+            }
         }
     }
 

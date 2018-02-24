@@ -28,6 +28,10 @@ export function activate(context: ExtensionContext) {
         documentDecorationManager.onDidOpenTextDocument(event);
     }));
 
+    context.subscriptions.push(window.onDidChangeTextEditorSelection((event) => {
+        documentDecorationManager.onDidChangeSelection(event);
+    }));
+
     documentDecorationManager.reset();
 }
 

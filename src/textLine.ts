@@ -2,6 +2,7 @@ import { Position, Range } from "vscode";
 import FoundBracket from "./foundBracket";
 import LineState from "./lineState";
 import ModifierPair from "./modifierPair";
+import Scope from "./scope";
 import Settings from "./settings";
 
 export default class TextLine {
@@ -56,5 +57,9 @@ export default class TextLine {
                 return;
             }
         }
+    }
+
+    public getScope(position: Position): Scope | undefined {
+        return this.lineState.getScope(position);
     }
 }

@@ -1,11 +1,11 @@
 import * as prism from "prismjs";
 import * as vscode from "vscode";
 import FoundBracket from "./foundBracket";
+import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
 
 export default class DocumentDecoration {
-
     private updateDecorationTimeout: NodeJS.Timer | null;
 
     // This program caches lines, and will only analyze linenumbers including or above a modified line
@@ -69,6 +69,57 @@ export default class DocumentDecoration {
         }
         else {
             this.updateDecorations();
+        }
+    }
+
+    public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
+        const scopes: Set<Scope> = new Set<Scope>();
+
+        event.selections.forEach((selection) => {
+            const scope = this.getScope(selection.active);
+
+            if (scope) {
+                scopes.add(scope);
+            }
+        });
+
+        const colorMap = new Map<string, vscode.Range[]>();
+
+        // Reduce all the colors/ranges of the lines into a singular map
+        for (const scope of scopes) {
+            {
+                const existingRanges = colorMap.get(scope.color);
+
+                if (existingRanges !== undefined) {
+                    existingRanges.push(scope.open.range);
+                    existingRanges.push(scope.close.range);
+                }
+                else {
+                    colorMap.set(scope.color, [scope.open.range, scope.close.range]);
+                }
+            }
+        }
+
+        for (const [color, decoration] of this.settings.scopeDecorations) {
+            const ranges = colorMap.get(color);
+            if (ranges !== undefined) {
+                event.textEditor.setDecorations(decoration, ranges);
+            }
+            else {
+                // We must set non-used colors to an empty array
+                // or previous decorations will not be invalidated
+                event.textEditor.setDecorations(decoration, []);
+            }
+        }
+    }
+
+    private getScope(position: vscode.Position): Scope | undefined {
+        for (let i = position.line; i < this.lines.length; i++) {
+            const scope = this.lines[i].getScope(position);
+
+            if (scope) {
+                return scope;
+            }
         }
     }
 
