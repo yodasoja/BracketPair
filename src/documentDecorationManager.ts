@@ -21,6 +21,13 @@ export default class DocumentDecorationManager {
         }
     }
 
+    public onDidOpenTextDocument(document: TextDocument) {
+        const documentDecoration = this.getDocumentDecorations(document);
+        if (documentDecoration) {
+            documentDecoration.triggerUpdateDecorations();
+        }
+    }
+
     public onDidChangeTextDocument(
         document: TextDocument,
         contentChanges: TextDocumentContentChangeEvent[]) {

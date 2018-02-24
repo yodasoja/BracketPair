@@ -22,6 +22,10 @@ export function activate(context: ExtensionContext) {
         documentDecorationManager.onDidCloseTextDocument(event);
     }));
 
+    context.subscriptions.push(workspace.onDidOpenTextDocument((event) => {
+        documentDecorationManager.onDidOpenTextDocument(event);
+    }));
+
     documentDecorationManager.reset();
 }
 

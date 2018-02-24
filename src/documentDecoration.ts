@@ -89,6 +89,12 @@ export default class DocumentDecoration {
             return;
         }
 
+        const lineNumber = this.lineToUpdateWhenTimeoutEnds;
+        const amountToRemove = this.lines.length - lineNumber;
+
+        // Remove cached lines that need to be updated
+        this.lines.splice(lineNumber, amountToRemove);
+
         const languages = Object.keys(this.prismLanguages);
 
         const text = this.document.getText();
@@ -111,8 +117,6 @@ export default class DocumentDecoration {
             const currentLine = this.getLine(element.range.start.line, this.document);
             currentLine.addBracket(element);
         });
-
-        this.colorDecorations(editors);
 
         this.colorDecorations(editors);
     }
@@ -157,7 +161,8 @@ export default class DocumentDecoration {
         if (typeof token.content === "string") {
             const content = token.content;
             if (token.type === "punctuation") {
-                if (content.match(this.settings.regexPattern)) {
+                if (lineIndex >= this.lineToUpdateWhenTimeoutEnds &&
+                    content.match(this.settings.regexPattern)) {
                     const startPos = new vscode.Position(lineIndex, charIndex);
                     const endPos = startPos.translate(0, content.length);
                     positions.push(new FoundBracket(new vscode.Range(startPos, endPos), content));
@@ -174,26 +179,7 @@ export default class DocumentDecoration {
                 return this.parseTokenOrStringArray(token.content.content, lineIndex, charIndex, positions);
             }
             else {
-                this.parseToken(token.content, lineIndex, charIndex, positions);
-                if (typeof token.content.content === "string") {
-                    const content = token.content.content;
-                    if (token.type === "punctuation") {
-                        if (content.match(this.settings.regexPattern)) {
-                            const startPos = new vscode.Position(lineIndex, charIndex);
-                            const endPos = startPos.translate(0, content.length);
-                            positions.push(new FoundBracket(new vscode.Range(startPos, endPos), content));
-                        }
-                        else {
-                            const result = this.parseString(content, lineIndex, charIndex);
-                            charIndex = result.charIndex;
-                            lineIndex = result.lineIndex;
-                        }
-                    }
-                    return this.parseString(content, lineIndex, charIndex);
-                }
-                else {
-                    return this.parseToken(token.content.content, lineIndex, charIndex, positions);
-                }
+                return this.parseToken(token.content, lineIndex, charIndex, positions);
             }
         }
     }
