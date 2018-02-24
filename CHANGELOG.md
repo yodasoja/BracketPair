@@ -1,8 +1,12 @@
 ## Release Notes
 
+### 1.0.4
+Added OpenSCAD again..
+Added Visual Basic Support
+
 ### 1.0.3
 Removed incorrect OpenSCAD support
-Mapped jsonc -> json5
+Added json with comments support
 
 ### 1.0.2
 Previous release broke everything

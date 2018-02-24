@@ -96,6 +96,8 @@ export default class DocumentDecorationManager {
             case "javascriptreact": return "jsx";
             case "typescriptreact": return "tsx";
             case "jsonc": return "json5";
+            case "scad": return "json";
+            case "vb" : return  "vbnet";
             default: return languageID;
         }
     }
