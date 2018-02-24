@@ -379,14 +379,16 @@ export default class Settings {
     // Create a regex to match open and close brackets
     // TODO Test what happens if user specifies other characters then []{}()
     private createRegex(bracketPairs: BracketPair[]): string {
-        let regex = "[";
-
+        const escape = (s: string) => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+        let regex = "";
         for (const bracketPair of bracketPairs) {
-            regex += `\\${bracketPair.openCharacter}\\${bracketPair.closeCharacter}`;
+            if (regex !== "") {
+                regex += "|";
+            }
+            regex += `(^${escape(bracketPair.openCharacter)}$)|(^${escape(bracketPair.closeCharacter)}$)`;
         }
-
+        regex = "[" + regex;
         regex += "]";
-
         return regex;
     }
 

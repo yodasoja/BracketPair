@@ -1,5 +1,6 @@
 import * as prism from "prismjs";
 import * as vscode from "vscode";
+import FoundBracket from "./foundBracket";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
@@ -104,75 +105,91 @@ export default class DocumentDecoration {
             return;
         }
 
-        let lineIndex = 0;
-        let charIndex = 0;
-        charIndex = this.parseTokenOrStringArray(tokenized, charIndex);
+        const positions: FoundBracket[] = [];
+        this.parseTokenOrStringArray(tokenized, 0, 0, positions);
 
-        const regex = new RegExp(this.settings.regexPattern, "g");
-
-        let match: RegExpExecArray | null;
-        // tslint:disable-next-line:no-conditional-assignment
-        while ((match = regex.exec(text)) !== null) {
-            const startPos = this.document.positionAt(match.index);
-
-            const endPos = startPos.translate(0, match[0].length);
-
-            const currentLine = this.getLine(startPos.line, this.document);
-            currentLine.addBracket(match[0], startPos.character);
-        }
-
+        this.colorDecorationsNew(editors, positions);
     }
 
-    private parseTokenOrStringArray(tokenized: Array<string | prism.Token>, charIndex: number) {
+    private parseTokenOrStringArray(
+        tokenized: Array<string | prism.Token>,
+        lineIndex: number,
+        charIndex: number,
+        positions: FoundBracket[]) {
         tokenized.forEach((token) => {
             if (token instanceof prism.Token) {
-                charIndex = this.parseToken(token, charIndex);
+                const result = this.parseToken(token, lineIndex, charIndex, positions);
+                charIndex = result.charIndex;
+                lineIndex = result.lineIndex;
             }
             else {
-                charIndex = this.parseString(token, charIndex);
+                const result = this.parseString(token, lineIndex, charIndex);
+                charIndex = result.charIndex;
+                lineIndex = result.lineIndex;
             }
         });
-        return charIndex;
+        return { lineIndex, charIndex };
     }
 
-    private parseString(token: string, charIndex: number) {
-        charIndex += token.length;
-        return charIndex;
+    private parseString(content: string, lineIndex: number, charIndex: number) {
+        const split = content.split("\n");
+        if (split.length > 1) {
+            lineIndex += split.length - 1;
+            charIndex = split[split.length - 1].length;
+        }
+        else {
+            charIndex += content.length;
+        }
+        return { lineIndex, charIndex };
     }
 
-    private parseToken(token: prism.Token, charIndex: number) {
+    private parseToken(
+        token: prism.Token,
+        lineIndex: number,
+        charIndex: number,
+        positions: FoundBracket[]): { lineIndex: number, charIndex: number } {
         if (typeof token.content === "string") {
-            charIndex = this.parseString(token.content, charIndex);
+            const content = token.content;
+            if (token.type === "punctuation") {
+                if (content.match(this.settings.regexPattern)) {
+                    const startPos = new vscode.Position(lineIndex, charIndex);
+                    const endPos = startPos.translate(0, content.length);
+                    positions.push(new FoundBracket(new vscode.Range(startPos, endPos), content));
+                }
+            }
+            return this.parseString(content, lineIndex, charIndex);
         }
         else if (Array.isArray(token.content)) {
-            charIndex = this.parseTokenOrStringArray(token.content, charIndex);
+            return this.parseTokenOrStringArray(token.content, lineIndex, charIndex, positions);
         }
         else {
             // Token
             if (Array.isArray(token.content.content)) {
-                charIndex = this.parseTokenOrStringArray(token.content.content, charIndex);
+                return this.parseTokenOrStringArray(token.content.content, lineIndex, charIndex, positions);
             }
             else {
+                this.parseToken(token.content, lineIndex, charIndex, positions);
                 if (typeof token.content.content === "string") {
                     const content = token.content.content;
                     if (token.type === "punctuation") {
                         if (content.match(this.settings.regexPattern)) {
-                            // TODO Finally made it here...
+                            const startPos = new vscode.Position(lineIndex, charIndex);
+                            const endPos = startPos.translate(0, content.length);
+                            positions.push(new FoundBracket(new vscode.Range(startPos, endPos), content));
+                        }
+                        else {
+                            const result = this.parseString(content, lineIndex, charIndex);
+                            charIndex = result.charIndex;
+                            lineIndex = result.lineIndex;
                         }
                     }
-                    charIndex += this.parseString(content, charIndex);
-
+                    return this.parseString(content, lineIndex, charIndex);
                 }
                 else {
-                    charIndex += this.parseToken(token.content.content, charIndex);
+                    return this.parseToken(token.content.content, lineIndex, charIndex, positions);
                 }
             }
         }
-        return charIndex;
-    }
-
-    private parseTokenNode(tokenNode: prism.TokenNode, charIndex: number) {
-        return charIndex;
     }
 
     private updateDecorationsOLD() {
@@ -209,6 +226,31 @@ export default class DocumentDecoration {
         }
 
         this.colorDecorations(editors);
+    }
+
+    private colorDecorationsNew(editors: vscode.TextEditor[], positions: FoundBracket[]) {
+        const decoration = vscode.window.createTextEditorDecorationType({
+            color: "yellow", rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+        });
+
+        // const lineDict = new Map<number, vscode.Range[]>();
+
+        // positions.forEach((element) => {
+        //     const existingRanges = lineDict.get(element.range.start.line);
+        //     if (!existingRanges)
+        //     {
+        //         lineDict.set(element.range.start.line, [element.range]);
+        //     }
+        //     else
+        //     {
+        //         existingRanges.push(element.range);
+        //     }
+        // });
+
+        const ranges = positions.map((x) => x.range);
+        editors.forEach((editor) => {
+            editor.setDecorations(decoration, ranges);
+        });
     }
 
     private colorDecorations(editors: vscode.TextEditor[]) {
