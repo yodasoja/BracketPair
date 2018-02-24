@@ -2,7 +2,9 @@ import { ExtensionContext, window, workspace } from "vscode";
 import DocumentDecorationManager from "./documentDecorationManager";
 
 export function activate(context: ExtensionContext) {
-    const documentDecorationManager = new DocumentDecorationManager();
+    // This is required although it is not used. Do not remove!
+    const prismLanguages = require("prism-languages");
+    const documentDecorationManager = new DocumentDecorationManager(new Set(Object.keys(prismLanguages)));
 
     context.subscriptions.push(workspace.onDidChangeConfiguration((event) => {
         if (event.affectsConfiguration("bracketPairColorizer")) {

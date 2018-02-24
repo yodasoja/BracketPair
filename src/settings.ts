@@ -11,58 +11,42 @@ export default class Settings {
     public readonly regexPattern: string;
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly colorMode: ColorMode;
+    public readonly prismLanguageID: string;
     public isDisposed = false;
 
-    constructor(settings: {
+    constructor(
         languageID: string,
         documentUri?: vscode.Uri,
-        timeOutLength?: number,
-        forceUniqueOpeningColor?: boolean,
-        forceIterationColorCycle?: boolean,
-        contextualParsing?: boolean,
-        colorMode?: ColorMode,
-        consecutiveSettings?: [{}],
-        independentSettings?: [[{}]],
-    },
     ) {
-        const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", settings.documentUri);
+        this.prismLanguageID = languageID;
+        const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
 
-        this.forceUniqueOpeningColor = settings.forceUniqueOpeningColor !== undefined ?
-            settings.forceUniqueOpeningColor :
-            configuration.get("forceUniqueOpeningColor") as boolean;
+        this.forceUniqueOpeningColor = configuration.get("forceUniqueOpeningColor") as boolean;
 
         if (typeof this.forceUniqueOpeningColor !== "boolean") {
             throw new Error("forceUniqueOpeningColor is not a boolean");
         }
 
-        this.forceIterationColorCycle = settings.forceIterationColorCycle !== undefined ?
-            settings.forceIterationColorCycle :
-            configuration.get("forceIterationColorCycle") as boolean;
+        this.forceIterationColorCycle = configuration.get("forceIterationColorCycle") as boolean;
 
         if (typeof this.forceIterationColorCycle !== "boolean") {
             throw new Error("forceIterationColorCycle is not a boolean");
         }
 
-        this.colorMode = settings.colorMode !== undefined ?
-            settings.colorMode :
-            (ColorMode as any)[configuration.get("colorMode") as string];
+        this.colorMode = (ColorMode as any)[configuration.get("colorMode") as string];
 
         if (typeof this.colorMode !== "number") {
             throw new Error("colorMode enum could not be parsed");
         }
 
-        this.timeOutLength = settings.timeOutLength !== undefined ?
-            settings.timeOutLength :
-            configuration.get<number>("timeOut") as number;
+        this.timeOutLength = configuration.get<number>("timeOut") as number;
 
         if (typeof this.timeOutLength !== "number") {
             throw new Error("timeOutLength is not a number");
         }
 
         if (this.colorMode === ColorMode.Consecutive) {
-            const consecutiveSettings: [{}] = (settings.consecutiveSettings !== undefined ?
-                settings.consecutiveSettings :
-                configuration.get("consecutivePairColors") as [{}]);
+            const consecutiveSettings = configuration.get<[{}]>("consecutivePairColors");
 
             if (!Array.isArray(consecutiveSettings)) {
                 throw new Error("consecutivePairColors is not an array");
@@ -95,9 +79,7 @@ export default class Settings {
             });
         }
         else {
-            const independentSettings: [[{}]] = settings.independentSettings !== undefined ?
-                settings.independentSettings :
-                configuration.get("independentPairColors") as [[{}]];
+            const independentSettings = configuration.get<[[{}]]>("independentPairColors");
 
             if (!Array.isArray(independentSettings)) {
                 throw new Error("independentPairColors is not an array");

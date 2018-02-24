@@ -3,8 +3,13 @@ import DocumentDecoration from "./documentDecoration";
 import Settings from "./settings";
 
 export default class DocumentDecorationManager {
+    private readonly supportedLanguages: Set<string>;
     private showError = true;
     private documents = new Map<string, DocumentDecoration>();
+
+    constructor(supportedLanguages: Set<string>) {
+        this.supportedLanguages = supportedLanguages;
+    }
 
     public reset() {
         this.documents.forEach((document, key) => {
@@ -62,7 +67,8 @@ export default class DocumentDecorationManager {
 
         if (documentDecorations === undefined) {
             try {
-                const settings = new Settings({ languageID: document.languageId, documentUri: document.uri });
+                const languageID = this.getPrismLanguageID(document.languageId);
+                const settings = new Settings(languageID, document.uri);
                 documentDecorations = new DocumentDecoration(document, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
@@ -82,6 +88,16 @@ export default class DocumentDecorationManager {
         }
 
         return documentDecorations;
+    }
+
+    private getPrismLanguageID(languageID: string) {
+        // Some VSCode language ids need to be mapped to match http://prismjs.com/#languages-list
+        switch (languageID) {
+            case "javascriptreact": return "jsx";
+            case "typescriptreact": return "tsx";
+            case "jsonc": return "json5";
+            default: return languageID;
+        }
     }
 
     private isValidDocument(document?: TextDocument): boolean {
