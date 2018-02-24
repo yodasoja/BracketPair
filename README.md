@@ -17,12 +17,7 @@ Screenshot:
 
 > A list of colors can be configured, as well as a specific color for orphaned brackets.
 
-### Fast
-
-> Bracket Pair Colorizer will only update during configurable idle time.
-
-> Bracket Pair Colorizer will only update iterative changes to the document, caching already parsed lines.
-
+> Language support provided by PrismJS: http://prismjs.com/#languages-list
 -----------------------------------------------------------------------------------------------------------
 
 ## Settings
@@ -37,40 +32,6 @@ Set to 0 to disable.
 
 > `"bracketPairColorizer.forceIterationColorCycle"`  
 ![Enabled](images/forceIterationColorCycleEnabled.png "forceIterationColorCycle Enabled")
-
->`"bracketPairColorizer.contextualParsing"`  
-Contextual parsing will ignore brackets in comments or strings.  
-Contextual parsing has experimental support for the following languages:  
-```
-- c
-- clojure (partial, wip)
-- cpp
-- crystal
-- crystal
-- csharp
-- css
-- dart
-- go
-- html
-- java
-- javascript
-- javascriptreact
-- less
-- lua
-- OpenSCAD
-- php
-- powershell
-- python
-- r
-- ruby
-- rust
-- scss
-- sql
-- stylable
-- Stylable
-- swift
-- typescript
-```
 
 >`"bracketPairColorizer.colorMode"`  
 Consecutive brackets share a color pool for all bracket types  

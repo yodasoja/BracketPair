@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
-import ScopeCharacter from "./scopeCharacter";
-import ScopePattern from "./scopePattern";
 
 export default class Settings {
     public readonly timeOutLength: number;
@@ -12,9 +10,7 @@ export default class Settings {
     public readonly bracketPairs: BracketPair[] = [];
     public readonly regexPattern: string;
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
-    public readonly scopeDecorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly colorMode: ColorMode;
-    public readonly scopes: ScopePattern[] = [];
     public isDisposed = false;
 
     constructor(settings: {
@@ -29,222 +25,11 @@ export default class Settings {
         independentSettings?: [[{}]],
     },
     ) {
-        const backslash = "\\";
-
-        const hash = new ScopeCharacter("#");
-        const hashComment = new ScopePattern(hash);
-
-        const doubleQuote = new ScopeCharacter("\"", { escapeCharacter: backslash });
-        const doubleQuoteBlock = new ScopePattern(doubleQuote, doubleQuote);
-
-        const singleQuote = new ScopeCharacter("'", { escapeCharacter: backslash });
-        const singleQuoteBlock = new ScopePattern(singleQuote, singleQuote);
-
-        const oneWidthchar = new ScopeCharacter("'", {
-            escapeCharacter: backslash,
-            mustMatchAtOffset: [{ offset: 2, character: singleQuote }],
-        });
-        const charBlock = new ScopePattern(oneWidthchar, singleQuote);
-
-        const backtick = new ScopeCharacter("`");
-        const backtickQuoteBlock = new ScopePattern(backtick, backtick);
-
-        const doubleForwardslash = new ScopeCharacter("//");
-        const doubleForwardslashComment = new ScopePattern(doubleForwardslash);
-
-        const slashCommentOpen = new ScopeCharacter("/*");
-        const slashCommentClose = new ScopeCharacter("*/");
-        const slashCommentBlock = new ScopePattern(slashCommentOpen, slashCommentClose);
-
-        const roundBracketCommentOpen = new ScopeCharacter("(*");
-        const roundBracketCommentClose = new ScopeCharacter("*)");
-        const roundBracketCommentBlock = new ScopePattern(roundBracketCommentOpen, roundBracketCommentClose);
-
-        const tripleDoubleQuote = new ScopeCharacter("\"\"\"");
-        const tripleDoubleQuoteBlock = new ScopePattern(tripleDoubleQuote, tripleDoubleQuote);
-
-        // const verbatimQuote = new ScopeCharacter("@\"");
-        // const verbatimEndQuote = new ScopeCharacter("\"",
-        //     { mustNotMatchAtOffset: [{ offset: -1, character: notEscapedDoubleQuote }] });
-        // const verbatimQuoteBlock = new ScopePattern(verbatimQuote, verbatimEndQuote);
-
-        // VSCode does not follow html comment spec
-        // The following invalid examples still are highlighted as comments
-        // So we will also follow this pattern and not parse these cases
-        // <!--> invalid -->
-        // <!---> invalid -->
-        // <!-- inva--lid -->
-        const hypen = new ScopeCharacter("-");
-        const doubleHyphen = new ScopeCharacter("--");
-        const doubleHyphenComment = new ScopePattern(doubleHyphen);
-
-        const htmlCommentOpen = new ScopeCharacter("<!--");
-        const htmlCommentClose = new ScopeCharacter("-->",
-            { mustMatchAtOffset: [{ offset: -1, character: hypen }] });
-        const htmlCommentBlock = new ScopePattern(htmlCommentOpen, htmlCommentClose);
-
-        const rubyCommentOpen = new ScopeCharacter("=begin");
-        const rubyCommentClose = new ScopeCharacter("=end");
-        const rubyCommentBlock = new ScopePattern(rubyCommentOpen, rubyCommentClose);
-
-        const powerShellCommentOpen = new ScopeCharacter("<#");
-        const powerShellCommentClose = new ScopeCharacter("#>");
-        const powerShellCommentBlock = new ScopePattern(powerShellCommentOpen, powerShellCommentClose);
-
-        const powerShellPound = new ScopeCharacter("#", { escapeCharacter: "`" });
-        const powerShellSingleLineComment = new ScopePattern(powerShellPound);
-
-        const powerShellDoubleQuote = new ScopeCharacter("\"", { escapeCharacter: "`" });
-        const powerShellDoubleQuoteBlock = new ScopePattern(powerShellDoubleQuote, powerShellDoubleQuote);
-
-        const powerShellSingleQuote = new ScopeCharacter("'", { escapeCharacter: "`" });
-        const powerShellSingleQuoteEnd = new ScopeCharacter("'");
-        const powerShellSingleQuoteBlock = new ScopePattern(powerShellSingleQuote, powerShellSingleQuoteEnd);
-
-        const semicolen = new ScopeCharacter(";");
-        const clojureComment = new ScopePattern(semicolen);
-
-        const luaStringScopeOpen = new ScopeCharacter("[[");
-        const luaStringScopeClose = new ScopeCharacter("]]");
-        const luaStringScopeBlock = new ScopePattern(luaStringScopeOpen, luaStringScopeClose);
-        const luaScopeCommentOpen = new ScopeCharacter("--[[");
-        const luaScopeCommentClose = new ScopeCharacter("]]");
-        const luaScopeCommentBlock = new ScopePattern(luaScopeCommentOpen, luaScopeCommentClose);
-
-        switch (settings.languageID) {
-            case "lua":
-                {
-                    this.scopes.push(luaStringScopeBlock);
-                    this.scopes.push(doubleHyphenComment);
-                    this.scopes.push(luaScopeCommentBlock);
-                    this.scopes.push(doubleQuoteBlock);
-                    this.scopes.push(singleQuoteBlock);
-                    break;
-                }
-            case "powershell":
-                {
-                    this.scopes.push(powerShellCommentBlock);
-                    this.scopes.push(powerShellSingleLineComment);
-                    this.scopes.push(powerShellDoubleQuoteBlock);
-                    this.scopes.push(powerShellSingleQuoteBlock);
-                    break;
-                }
-            case "python": {
-                this.scopes.push(hashComment);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
-            case "typescript":
-            case "typescriptreact":
-            case "javascript":
-            case "javascriptreact":
-            case "go":
-                {
-                    this.scopes.push(doubleForwardslashComment);
-                    this.scopes.push(slashCommentBlock);
-                    this.scopes.push(backtickQuoteBlock);
-                    this.scopes.push(doubleQuoteBlock);
-                    this.scopes.push(singleQuoteBlock);
-                    break;
-                }
-            case "c":
-            case "cpp":
-            case "csharp":
-            case "java":
-            case "less":
-            case "scss":
-            case "dart":
-                {
-                    this.scopes.push(doubleForwardslashComment);
-                    this.scopes.push(slashCommentBlock);
-                    this.scopes.push(doubleQuoteBlock);
-                    this.scopes.push(singleQuoteBlock);
-                    break;
-                }
-            case "rust":
-                {
-                    this.scopes.push(doubleForwardslashComment);
-                    this.scopes.push(slashCommentBlock);
-                    this.scopes.push(doubleQuoteBlock);
-                    this.scopes.push(charBlock);
-                    break;
-                }
-            case "scad":
-            case "swift":
-            case "json": {
-                this.scopes.push(doubleForwardslashComment);
-                this.scopes.push(slashCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                break;
-            }
-            case "php": {
-                this.scopes.push(doubleForwardslashComment);
-                this.scopes.push(hashComment);
-                this.scopes.push(slashCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
-            case "ruby":
-            case "crystal": {
-                this.scopes.push(hashComment);
-                this.scopes.push(rubyCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
-            case "r": {
-                this.scopes.push(hashComment);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
-            case "html": {
-                this.scopes.push(htmlCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
-            case "stylable":
-            case "css": {
-                this.scopes.push(slashCommentBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
-            case "fsharp": {
-                this.scopes.push(tripleDoubleQuoteBlock);
-                this.scopes.push(doubleQuoteBlock);
-                this.scopes.push(singleQuoteBlock);
-                this.scopes.push(roundBracketCommentBlock);
-                this.scopes.push(doubleForwardslashComment);
-                // this.scopes.push(verbatimQuoteBlock);
-                break;
-            }
-            case "clojure": {
-                this.scopes.push(clojureComment);
-                this.scopes.push(doubleQuoteBlock);
-                break;
-            }
-            case "sql": {
-                this.scopes.push(doubleHyphenComment);
-                this.scopes.push(slashCommentBlock);
-                this.scopes.push(singleQuoteBlock);
-                break;
-            }
-            // tslint:disable-next-line:no-empty
-            default: { }
-        }
-
-        // Longest openers get checked first
-        this.scopes.sort((a, b) => b.opener.match.length - a.opener.match.length);
-
-        const configuration = vscode.workspace.getConfiguration(undefined, settings.documentUri);
+        const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", settings.documentUri);
 
         this.forceUniqueOpeningColor = settings.forceUniqueOpeningColor !== undefined ?
             settings.forceUniqueOpeningColor :
-            configuration.get("bracketPairColorizer.forceUniqueOpeningColor") as boolean;
+            configuration.get("forceUniqueOpeningColor") as boolean;
 
         if (typeof this.forceUniqueOpeningColor !== "boolean") {
             throw new Error("forceUniqueOpeningColor is not a boolean");
@@ -252,27 +37,15 @@ export default class Settings {
 
         this.forceIterationColorCycle = settings.forceIterationColorCycle !== undefined ?
             settings.forceIterationColorCycle :
-            configuration.get("bracketPairColorizer.forceIterationColorCycle") as boolean;
+            configuration.get("forceIterationColorCycle") as boolean;
 
         if (typeof this.forceIterationColorCycle !== "boolean") {
             throw new Error("forceIterationColorCycle is not a boolean");
         }
 
-        if (this.scopes.length !== 0) {
-            this.contextualParsing = settings.contextualParsing !== undefined ?
-                settings.contextualParsing : configuration.get("bracketPairColorizer.contextualParsing") as boolean;
-        }
-        else {
-            this.contextualParsing = false;
-        }
-
-        if (typeof this.contextualParsing !== "boolean") {
-            throw new Error("contextualParsing is not a boolean");
-        }
-
         this.colorMode = settings.colorMode !== undefined ?
             settings.colorMode :
-            (ColorMode as any)[configuration.get("bracketPairColorizer.colorMode") as string];
+            (ColorMode as any)[configuration.get("colorMode") as string];
 
         if (typeof this.colorMode !== "number") {
             throw new Error("colorMode enum could not be parsed");
@@ -280,16 +53,16 @@ export default class Settings {
 
         this.timeOutLength = settings.timeOutLength !== undefined ?
             settings.timeOutLength :
-            configuration.get("bracketPairColorizer.timeOut") as number;
+            configuration.get<number>("timeOut") as number;
 
         if (typeof this.timeOutLength !== "number") {
-            throw new Error("timeOutLength was is a number");
+            throw new Error("timeOutLength is not a number");
         }
 
         if (this.colorMode === ColorMode.Consecutive) {
             const consecutiveSettings: [{}] = (settings.consecutiveSettings !== undefined ?
                 settings.consecutiveSettings :
-                configuration.get("bracketPairColorizer.consecutivePairColors") as [{}]);
+                configuration.get("consecutivePairColors") as [{}]);
 
             if (!Array.isArray(consecutiveSettings)) {
                 throw new Error("consecutivePairColors is not an array");
@@ -324,7 +97,7 @@ export default class Settings {
         else {
             const independentSettings: [[{}]] = settings.independentSettings !== undefined ?
                 settings.independentSettings :
-                configuration.get("bracketPairColorizer.independentPairColors") as [[{}]];
+                configuration.get("independentPairColors") as [[{}]];
 
             if (!Array.isArray(independentSettings)) {
                 throw new Error("independentPairColors is not an array");
@@ -360,15 +133,9 @@ export default class Settings {
 
         this.regexPattern = this.createRegex(this.bracketPairs);
         this.bracketDecorations = this.createBracketDecorations(this.bracketPairs);
-        this.scopeDecorations = this.createScopeDecorations(this.bracketPairs);
     }
 
     public dispose() {
-        this.scopeDecorations.forEach((decoration, key) => {
-            decoration.dispose();
-        });
-        this.scopeDecorations.clear();
-
         this.bracketDecorations.forEach((decoration, key) => {
             decoration.dispose();
         });

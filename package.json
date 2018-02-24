@@ -29,12 +29,6 @@
             "type": "object",
             "title": "BracketPair",
             "properties": {
-                "bracketPairColorizer.contextualParsing": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Ignore brackets in comments or strings",
-                    "scope": "resource"
-                },
                 "bracketPairColorizer.timeOut": {
                     "type": "number",
                     "default": 200,

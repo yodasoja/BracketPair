@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.0
+Parsing offloaded to PrismJS.
+
 ### 0.10.16
 Stylable support (Thanks @tomrav)
 Visual Studio Live Share support (Thanks @lostintangent)

@@ -2,12 +2,10 @@ import * as vscode from "vscode";
 import Bracket from "./bracket";
 import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
-import Scope from "./scope";
 
 export default class SingularIndex implements ColorIndexes {
     private openBrackets: Bracket[] = [];
     private previousOpenBracketColorIndex: number = -1;
-    private bracketScopes: Scope[] = [];
 
     constructor(
         previousState?: {
@@ -18,14 +16,6 @@ export default class SingularIndex implements ColorIndexes {
         if (previousState !== undefined) {
             this.openBrackets = previousState.currentOpenBracketColorIndexes;
             this.previousOpenBracketColorIndex = previousState.previousOpenBracketColorIndex;
-        }
-    }
-
-    public getScope(position: vscode.Position): Scope | undefined {
-        for (const scope of this.bracketScopes) {
-            if (scope.range.contains(position)) {
-                return scope;
-            }
         }
     }
 
@@ -47,9 +37,6 @@ export default class SingularIndex implements ColorIndexes {
         if (openBracket) {
             const closeBracket = new Bracket(range, openBracket.colorIndex);
             const scopeRange = new vscode.Range(openBracket.range.start, range.end);
-            this.bracketScopes.push(
-                new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex], openBracket, closeBracket),
-            );
             return openBracket.colorIndex;
         }
     }

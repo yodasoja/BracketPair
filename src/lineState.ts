@@ -4,13 +4,10 @@ import ColorMode from "./colorMode";
 import ColorIndexes from "./IColorIndexes";
 import ModifierPair from "./modifierPair";
 import MultipleIndexes from "./multipleIndexes";
-import Scope from "./scope";
-import ScopePattern from "./scopePattern";
 import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class LineState {
-    public activeScope: ScopePattern | null;
     private colorIndexes: ColorIndexes;
     private previousBracketColor: string;
     private readonly settings: Settings;
@@ -20,14 +17,12 @@ export default class LineState {
             {
                 colorIndexes: ColorIndexes;
                 previousBracketColor: string;
-                activeScope: ScopePattern | null;
             }) {
         this.settings = settings;
 
         if (previousState !== undefined) {
             this.colorIndexes = previousState.colorIndexes;
             this.previousBracketColor = previousState.previousBracketColor;
-            this.activeScope = previousState.activeScope;
         }
         else {
             switch (settings.colorMode) {
@@ -38,10 +33,6 @@ export default class LineState {
                 default: throw new RangeError("Not implemented enum value");
             }
         }
-    }
-
-    public getScope(position: Position): Scope | undefined {
-        return this.colorIndexes.getScope(position);
     }
 
     public getOpenBracketColor(bracketPair: BracketPair, range: Range): string {
@@ -83,15 +74,8 @@ export default class LineState {
     }
 
     public copyMultilineContext(): LineState {
-        let scope = null;
-
-        if (this.activeScope && this.activeScope.closer) {
-            scope = this.activeScope;
-        }
-
         const clone =
             {
-                activeScope: scope,
                 colorIndexes: this.colorIndexes.clone(),
                 previousBracketColor: this.previousBracketColor,
             };

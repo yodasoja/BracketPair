@@ -1,7 +1,6 @@
 import * as prism from "prismjs";
 import * as vscode from "vscode";
 import FoundBracket from "./foundBracket";
-import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
 
@@ -108,7 +107,14 @@ export default class DocumentDecoration {
         const positions: FoundBracket[] = [];
         this.parseTokenOrStringArray(tokenized, 0, 0, positions);
 
-        this.colorDecorationsNew(editors, positions);
+        positions.forEach((element) => {
+            const currentLine = this.getLine(element.range.start.line, this.document);
+            currentLine.addBracket(element);
+        });
+
+        this.colorDecorations(editors);
+
+        this.colorDecorations(editors);
     }
 
     private parseTokenOrStringArray(
@@ -190,67 +196,6 @@ export default class DocumentDecoration {
                 }
             }
         }
-    }
-
-    private updateDecorationsOLD() {
-        // One document may be shared by multiple editors (side by side view)
-        const editors: vscode.TextEditor[] =
-            vscode.window.visibleTextEditors.filter((e) => this.document === e.document);
-
-        if (editors.length === 0) {
-            console.warn("No editors associated with document: " + this.document.fileName);
-            return;
-        }
-
-        const lineNumber = this.lineToUpdateWhenTimeoutEnds;
-
-        const amountToRemove = this.lines.length - lineNumber;
-
-        // Remove cached lines that need to be updated
-        this.lines.splice(lineNumber, amountToRemove);
-
-        const text = this.document.getText();
-        const regex = new RegExp(this.settings.regexPattern, "g");
-
-        regex.lastIndex = this.document.offsetAt(new vscode.Position(lineNumber, 0));
-
-        let match: RegExpExecArray | null;
-        // tslint:disable-next-line:no-conditional-assignment
-        while ((match = regex.exec(text)) !== null) {
-            const startPos = this.document.positionAt(match.index);
-
-            const endPos = startPos.translate(0, match[0].length);
-
-            const currentLine = this.getLine(startPos.line, this.document);
-            currentLine.addBracket(match[0], startPos.character);
-        }
-
-        this.colorDecorations(editors);
-    }
-
-    private colorDecorationsNew(editors: vscode.TextEditor[], positions: FoundBracket[]) {
-        const decoration = vscode.window.createTextEditorDecorationType({
-            color: "yellow", rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-        });
-
-        // const lineDict = new Map<number, vscode.Range[]>();
-
-        // positions.forEach((element) => {
-        //     const existingRanges = lineDict.get(element.range.start.line);
-        //     if (!existingRanges)
-        //     {
-        //         lineDict.set(element.range.start.line, [element.range]);
-        //     }
-        //     else
-        //     {
-        //         existingRanges.push(element.range);
-        //     }
-        // });
-
-        const ranges = positions.map((x) => x.range);
-        editors.forEach((editor) => {
-            editor.setDecorations(decoration, ranges);
-        });
     }
 
     private colorDecorations(editors: vscode.TextEditor[]) {
