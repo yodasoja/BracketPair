@@ -15,7 +15,7 @@ Screenshot:
 
 > A list of colors can be configured, as well as a specific color for orphaned brackets.
 
-> Language support provided by PrismJS: http://prismjs.com/#languages-list
+> Language support provided by Prism.js: http://prismjs.com/#languages-list
 -----------------------------------------------------------------------------------------------------------
 
 ## Settings
@@ -51,36 +51,12 @@ Choose a border background to highlight the active scope. Use `{color}` to match
 
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
-> Example for matching '<>'
->````
->[
->    "()",
->    "[]",
->    "{}",
->    "<>",                  // New bracket
->    [                      // CSS Color cycle
->        "Gold",
->        "Orchid",
->        "LightSkyBlue"
->    ],
->    "Red"                  // Orphaned bracket color
->]
->````
+> Note: Pair must be supported punctuation type by Prism.js
 
 > `"bracketPairColorizer.independentPairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
-> Example for matching '<>'
->````
->[
->    "<>",                   // New bracket
->    [                       // CSS Color cycle
->        "Gold",
->        "Orchid",
->        "LightSkyBlue"
->    ],
->    "Red"                   // Orphaned bracket color
->]
->````
+> Note: Pair must be supported punctuation type by Prism.js
+
 
 
 
