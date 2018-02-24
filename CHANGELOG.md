@@ -1,5 +1,10 @@
 ## Release Notes
 
+### 0.10.16
+Stylable support (Thanks @tomrav)
+Visual Studio Live Share support (Thanks @lostintangent)
+OpenSCAD support (Thanks @atnbueno)
+
 ### 0.10.14
 Multi-root ready attempt #2 (Settings were not resource scoped)
 

@@ -57,6 +57,7 @@ Contextual parsing has experimental support for the following languages:
 - javascriptreact
 - less
 - lua
+- OpenSCAD
 - php
 - powershell
 - python
@@ -66,6 +67,7 @@ Contextual parsing has experimental support for the following languages:
 - scss
 - sql
 - stylable
+- Stylable
 - swift
 - typescript
 ```
