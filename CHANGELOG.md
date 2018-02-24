@@ -2,7 +2,7 @@
 
 ### 1.0.2
 Previous release broke everything
-Fix OpenSCARD support
+Fix OpenSCAD support
 
 ### 1.0.1
 Fix .jsx and .tsx support
