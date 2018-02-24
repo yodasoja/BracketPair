@@ -170,6 +170,7 @@ export default class Settings {
                     this.scopes.push(charBlock);
                     break;
                 }
+            case "scad":
             case "swift":
             case "json": {
                 this.scopes.push(doubleForwardslashComment);
