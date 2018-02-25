@@ -36,7 +36,6 @@ export default class Settings {
             throw new Error("alwaysHighlightActiveScope is not a boolean");
         }
 
-
         this.forceUniqueOpeningColor = configuration.get("forceUniqueOpeningColor") as boolean;
 
         if (typeof this.forceUniqueOpeningColor !== "boolean") {

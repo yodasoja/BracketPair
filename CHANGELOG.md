@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.8
+Improved OpenSCAD support
+
 ### 1.0.7
 Replace settings  
 `"bracketPairColorizer.activeScopeBorderStyle"`  
