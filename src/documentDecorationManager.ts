@@ -104,11 +104,15 @@ export default class DocumentDecorationManager {
     private getPrismLanguageID(languageID: string) {
         // Some VSCode language ids need to be mapped to match http://prismjs.com/#languages-list
         switch (languageID) {
+            case "html": return "markup";
             case "javascriptreact": return "jsx";
-            case "typescriptreact": return "tsx";
             case "jsonc": return "json5";
+            case "mathml": return "markup";
             case "scad": return "swift"; // workaround for unsupported language in Prism
+            case "svg": return "markup";
+            case "typescriptreact": return "tsx";
             case "vb": return "vbnet";
+            case "xml": return "markup";
             default: return languageID;
         }
     }

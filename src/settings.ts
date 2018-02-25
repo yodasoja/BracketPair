@@ -82,15 +82,16 @@ export default class Settings {
                 throw new Error("consecutivePairColors[" + (consecutiveSettings.length - 2) + "] is not a string[]");
             }
 
-            consecutiveSettings.slice(0, consecutiveSettings.length - 2).forEach((value, index) => {
-                if (typeof value !== "string") {
-                    throw new Error("consecutivePairColors[ " + index + "] is not a string");
+            consecutiveSettings.slice(0, consecutiveSettings.length - 2).forEach((brackets, index) => {
+                if (typeof brackets === "string" || Array.isArray(brackets)) {
+                    if (brackets.length !== 2) {
+                        throw new Error("consecutivePairColors[" + index + "] requires 2 element, e.g. ['(',')']");
+                    }
+                    this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
+                    return;
                 }
-                const brackets = value;
-                if (brackets.length < 2) {
-                    throw new Error("consecutivePairColors[" + index + "] needs at least 2 characters");
-                }
-                this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
+
+                throw new Error("consecutivePairColors[ " + index + "] should be a string or an array of strings");
             });
         }
         else {
@@ -106,12 +107,12 @@ export default class Settings {
                 }
 
                 const brackets = innerArray[0] as string;
-                if (typeof brackets !== "string") {
-                    throw new Error("independentSettings[" + index + "][0] is not a string");
+                if (typeof brackets !== "string" || Array.isArray(brackets)) {
+                    throw new Error("independentSettings[" + index + "][0] is not a string or an array of strings");
                 }
 
                 if (brackets.length < 2) {
-                    throw new Error("independentSettings[" + index + "][0] needs at least 2 characters");
+                    throw new Error("independentSettings[" + index + "][0] needs at least 2 elements");
                 }
 
                 const colors = innerArray[1] as string[];
@@ -146,17 +147,25 @@ export default class Settings {
         this.isDisposed = true;
     }
 
-    // Create a regex to match open and close brackets
-    // TODO Test what happens if user specifies other characters then []{}()
     private createRegex(bracketPairs: BracketPair[]): string {
         const escape = (s: string) => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
         let regex = "";
-        for (const bracketPair of bracketPairs) {
+        const matches: string[] = [];
+        bracketPairs.forEach((bracketPair) => {
+            matches.push(bracketPair.openCharacter);
+            matches.push(bracketPair.closeCharacter);
+        });
+
+        const sortedByLengthMatches = matches.sort((a, b) => b.length - a.length);
+
+        sortedByLengthMatches.forEach((match) => {
             if (regex !== "") {
                 regex += "|";
             }
-            regex += `(^${escape(bracketPair.openCharacter)}$)|(^${escape(bracketPair.closeCharacter)}$)`;
-        }
+            regex += `(${escape(match)})`;
+            // regex += `(^${escape(match)}$)`;
+        });
+
         regex = "[" + regex;
         regex += "]";
         return regex;
@@ -186,7 +195,7 @@ export default class Settings {
     private createScopeDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
         const decorations = new Map<string, vscode.TextEditorDecorationType>();
 
-        const xxx = this.activeScopeCSS.map((e) =>
+        const cssElements = this.activeScopeCSS.map((e) =>
             [e.substring(0, e.indexOf(":")).trim(),
             e.substring(e.indexOf(":") + 1).trim()]);
 
@@ -196,7 +205,7 @@ export default class Settings {
                     rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
                 };
 
-                xxx.forEach((element) => {
+                cssElements.forEach((element) => {
                     decorationSettings[element[0]] = element[1].replace("{color}", color);
                 });
 
