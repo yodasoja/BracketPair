@@ -107,7 +107,7 @@ export default class DocumentDecorationManager {
             case "javascriptreact": return "jsx";
             case "typescriptreact": return "tsx";
             case "jsonc": return "json5";
-            case "scad": return "json";
+            case "scad": return "swift"; // workaround for unsupported language in Prism
             case "vb": return "vbnet";
             default: return languageID;
         }
