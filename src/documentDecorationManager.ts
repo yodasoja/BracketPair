@@ -53,7 +53,7 @@ export default class DocumentDecorationManager {
 
     public onDidChangeSelection(event: TextEditorSelectionChangeEvent) {
         const documentDecoration = this.getDocumentDecorations(event.textEditor.document);
-        if (documentDecoration) {
+        if (documentDecoration && documentDecoration.settings.highlightActiveScope) {
             documentDecoration.updateScopeDecorations(event);
         }
     }

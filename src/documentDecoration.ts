@@ -6,13 +6,13 @@ import Settings from "./settings";
 import TextLine from "./textLine";
 
 export default class DocumentDecoration {
-    private updateDecorationTimeout: NodeJS.Timer | null;
+    public readonly settings: Settings;
 
+    private updateDecorationTimeout: NodeJS.Timer | null;
     // This program caches lines, and will only analyze linenumbers including or above a modified line
     private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
     private readonly document: vscode.TextDocument;
-    private readonly settings: Settings;
     private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
 
     constructor(document: vscode.TextDocument, settings: Settings) {

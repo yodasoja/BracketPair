@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.6
+Fix `"bracketPairColorizer.highlightActiveScope"` setting not being respected
+
 ### 1.0.5
 Added feature to highlight active scope  
 It can be configured with the following settings:  
