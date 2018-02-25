@@ -14,8 +14,7 @@ export default class Settings {
     public readonly scopeDecorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
-    public readonly activeScopeBackgroundColor: string;
-    public readonly activeScopeBorderStyle: string;
+    public readonly activeScopeCSS: string[];
     public isDisposed = false;
 
     constructor(
@@ -25,16 +24,10 @@ export default class Settings {
         this.prismLanguageID = languageID;
         const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
 
-        this.activeScopeBackgroundColor = configuration.get("activeScopeBackgroundColor") as string;
+        this.activeScopeCSS = configuration.get("activeScopeCSS") as string[];
 
-        if (typeof this.activeScopeBackgroundColor !== "string") {
-            throw new Error("activeScopeBackgroundColor is not a string");
-        }
-
-        this.activeScopeBorderStyle = configuration.get("activeScopeBorderStyle") as string;
-
-        if (typeof this.activeScopeBorderStyle !== "string") {
-            throw new Error("activeScopeBorderStyle is not a string");
+        if (!Array.isArray(this.activeScopeCSS)) {
+            throw new Error("activeScopeCSS is not an array");
         }
 
         this.highlightActiveScope = configuration.get("highlightActiveScope") as boolean;
@@ -194,14 +187,22 @@ export default class Settings {
     private createScopeDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
         const decorations = new Map<string, vscode.TextEditorDecorationType>();
 
+        const xxx = this.activeScopeCSS.map((e) =>
+            [e.substring(0, e.indexOf(":")).trim(),
+            e.substring(e.indexOf(":") + 1).trim()]);
+
         for (const bracketPair of bracketPairs) {
             for (const color of bracketPair.colors) {
-                const decoration = vscode.window.createTextEditorDecorationType(
-                    {
-                        backgroundColor: this.activeScopeBackgroundColor.replace("{color}", color),
-                        border: this.activeScopeBorderStyle.replace("{color}", color),
-                        rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-                    });
+                const decorationSettings = {
+                    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+                };
+
+                xxx.forEach((element) => {
+                    decorationSettings[element[0]] = element[1].replace("{color}", color);
+                });
+
+                const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
+
                 decorations.set(color, decoration);
             }
         }

@@ -63,16 +63,14 @@
                     "description": "Should the active scope brackets always be highlighted? Recommended to disable editor.matchBrackets if using this feature.",
                     "scope": "resource"
                 },
-                "bracketPairColorizer.activeScopeBackgroundColor": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Background color for active scope highlighting. Use {color} to match bracket color.",
-                    "scope": "resource"
-                },
-                "bracketPairColorizer.activeScopeBorderStyle": {
-                    "type": "string",
-                    "default": "1px solid {color}; opacity: 0.5",
-                    "description": "Border style for active scope highlighting. Use {color} to match bracket color.",
+                "bracketPairColorizer.activeScopeCSS": {
+                    "type": "array",
+                    "default": [
+                        "borderStyle : solid",
+                        "borderWidth : 1px",
+                        "borderColor : {color}; opacity: 0.5"
+                    ],
+                    "description": "CSS for the active scope. Use {color} to match the bracket color. The string types listed at https://code.visualstudio.com/docs/extensionAPI/vscode-api#DecorationRenderOptions can be used",
                     "scope": "resource"
                 },
                 "bracketPairColorizer.consecutivePairColors": {
