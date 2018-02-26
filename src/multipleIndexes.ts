@@ -32,6 +32,17 @@ export default class MultipleIndexes implements ColorIndexes {
         }
     }
 
+    public getOpenBrackets() {
+        const brackets = new Set<string>();
+        Object.keys(this.openBrackets).forEach((key) => {
+            if (this.openBrackets[key].length > 0) {
+                brackets.add(key);
+            }
+        });
+
+        return brackets;
+    }
+
     public getPreviousIndex(bracketPair: BracketPair): number {
         return this.previousOpenBracketColorIndexes[bracketPair.openCharacter];
     }

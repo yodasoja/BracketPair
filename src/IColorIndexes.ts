@@ -9,6 +9,7 @@ interface IColorIndex {
     getCurrentLength(bracketPair: BracketPair): number;
     getCurrentColorIndex(bracketPair: BracketPair, range: Range): number | undefined;
     getScope(position: Position): Scope | undefined;
+    getOpenBrackets(): Set<string>;
     clone(): IColorIndex;
 }
 

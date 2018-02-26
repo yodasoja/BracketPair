@@ -30,6 +30,13 @@ export default class TextLine {
     }
 
     public addBracket(bracket: FoundBracket) {
+        const openBrackets = this.lineState.getOpenBrackets();
+        const sortedPairs = this.settings.bracketPairs.sort((a, b) => {
+            const x = openBrackets.has(a.openCharacter);
+            const y = openBrackets.has(b.openCharacter);
+            return x === y ? 0 : x ? -1 : 1;
+        });
+
         for (const bracketPair of this.settings.bracketPairs) {
             if (bracketPair.openCharacter === bracket.character) {
                 const color = this.lineState.getOpenBracketColor(bracketPair, bracket.range);
