@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.9
+Restored HTML support
+
 ### 1.0.8
 Improved OpenSCAD support
 
