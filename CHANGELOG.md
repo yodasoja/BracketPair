@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.10
+Fixed JSON strings with single quotes in them breaking parsing
+
 ### 1.0.9
 Restored HTML support
 
