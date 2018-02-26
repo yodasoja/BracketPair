@@ -48,7 +48,7 @@ export default class MultipleIndexes implements ColorIndexes {
     }
 
     public setCurrent(bracketPair: BracketPair, range: Range, colorIndex: number) {
-        this.openBrackets[bracketPair.openCharacter].push(new Bracket(range, colorIndex));
+        this.openBrackets[bracketPair.openCharacter].push(new Bracket(bracketPair.openCharacter, range, colorIndex));
         this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = colorIndex;
     }
 
@@ -59,7 +59,7 @@ export default class MultipleIndexes implements ColorIndexes {
     public getCurrentColorIndex(bracketPair: BracketPair, range: Range): number | undefined {
         const openBracket = this.openBrackets[bracketPair.openCharacter].pop();
         if (openBracket) {
-            const closeBracket = new Bracket(range, openBracket.colorIndex);
+            const closeBracket = new Bracket(bracketPair.closeCharacter, range, openBracket.colorIndex);
             const scopeRange = new Range(openBracket.range.start, range.end);
             this.bracketScopes.push(
                 new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex], openBracket, closeBracket),

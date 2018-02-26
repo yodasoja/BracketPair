@@ -31,7 +31,7 @@ export default class TextLine {
 
     public addBracket(bracket: FoundBracket) {
         const openBrackets = this.lineState.getOpenBrackets();
-        const sortedPairs = this.settings.bracketPairs.sort((a, b) => {
+        this.settings.bracketPairs.sort((a, b) => {
             const x = openBrackets.has(a.openCharacter);
             const y = openBrackets.has(b.openCharacter);
             return x === y ? 0 : x ? -1 : 1;

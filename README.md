@@ -44,36 +44,34 @@ Should the currently scoped brackets always be highlighted?
 Choose a border style to highlight the active scope. Use `{color}` to match the existing bracket color  
 It is recommended to disable the inbuilt `editor.matchBrackets` setting if using this feature  
 ![BorderStyle](images/activeScopeBorder.png "Active Scope Border Example")  
->Tip: Add the value `"backgroundColor : {color}"` to increase visability
+>Tip: Add the value `"backgroundColor : {color}"` to increase visability  
 ![BorderBackground](images/activeScopeBackground.png "Active Scope Background Example")
 
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
 > Note: Pair must be supported punctuation type by Prism.js  
-> HTML Example:
-
-```
-[
-    "</",
-    ">"
-],
-[
-    "<",
-    "/>"
-],
-"<>",
-[
-    "Gold",
-    "Orchid",
-    "LightSkyBlue"
-],
-"Red"
-```
 
 > `"bracketPairColorizer.independentPairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
 > Note: Pair must be supported punctuation type by Prism.js
-
-
-
-
+ 
+>### HTML Configuration
+>An example configuration for HTML is:  
+```
+    "bracketPairColorizer.consecutivePairColors": [
+        [
+            "</",
+            ">"
+        ],
+        [
+            "<",
+            "/>"
+        ],
+        "<>",
+        [
+            "Gold",
+            "Orchid",
+            "LightSkyBlue"
+        ],
+        "Red"
+```

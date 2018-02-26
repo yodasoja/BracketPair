@@ -13,12 +13,11 @@ export default class LineState {
     private previousBracketColor: string;
     private readonly settings: Settings;
 
-    constructor(settings: Settings,
-        previousState?:
-            {
-                colorIndexes: ColorIndexes;
-                previousBracketColor: string;
-            }) {
+    constructor(settings: Settings, previousState?:
+        {
+            colorIndexes: ColorIndexes;
+            previousBracketColor: string;
+        }) {
         this.settings = settings;
 
         if (previousState !== undefined) {

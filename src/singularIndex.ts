@@ -22,14 +22,7 @@ export default class SingularIndex implements ColorIndexes {
     }
 
     public getOpenBrackets() {
-        const brackets = new Set<string>();
-        Object.keys(this.openBrackets).forEach((key) => {
-            if (this.openBrackets[key].length > 0) {
-                brackets.add(key);
-            }
-        });
-
-        return brackets;
+        return new Set<string>(this.openBrackets.map((e) => e.character));
     }
 
     public getPreviousIndex(bracketPair: BracketPair): number {
@@ -37,7 +30,7 @@ export default class SingularIndex implements ColorIndexes {
     }
 
     public setCurrent(bracketPair: BracketPair, range: vscode.Range, colorIndex: number) {
-        this.openBrackets.push(new Bracket(range, colorIndex));
+        this.openBrackets.push(new Bracket(bracketPair.openCharacter, range, colorIndex));
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
@@ -48,7 +41,7 @@ export default class SingularIndex implements ColorIndexes {
     public getCurrentColorIndex(bracketPair: BracketPair, range: vscode.Range): number | undefined {
         const openBracket = this.openBrackets.pop();
         if (openBracket) {
-            const closeBracket = new Bracket(range, openBracket.colorIndex);
+            const closeBracket = new Bracket(bracketPair.orphanColor, range, openBracket.colorIndex);
             const scopeRange = new vscode.Range(openBracket.range.start, range.end);
             this.bracketScopes.push(
                 new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex], openBracket, closeBracket),
