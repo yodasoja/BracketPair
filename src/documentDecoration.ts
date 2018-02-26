@@ -1,4 +1,3 @@
-import * as prism from "prismjs";
 import * as vscode from "vscode";
 import FoundBracket from "./foundBracket";
 import Scope from "./scope";
@@ -14,10 +13,11 @@ export default class DocumentDecoration {
     private lines: TextLine[] = [];
     private readonly document: vscode.TextDocument;
     private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
-
-    constructor(document: vscode.TextDocument, settings: Settings) {
+    private readonly prismJs: any;
+    constructor(document: vscode.TextDocument, prismJs: any, settings: Settings) {
         this.settings = settings;
         this.document = document;
+        this.prismJs = prismJs;
     }
 
     public dispose() {
@@ -160,9 +160,9 @@ export default class DocumentDecoration {
         const languageID = this.settings.prismLanguageID;
 
         const text = this.document.getText();
-        let tokenized: Array<string | prism.Token>;
+        let tokenized: Array<string | any>;
         try {
-            tokenized = prism.tokenize(text, prism.languages[languageID]);
+            tokenized = this.prismJs.tokenize(text, this.prismJs.languages[languageID]);
             if (!tokenized) {
                 return;
             }
@@ -184,12 +184,12 @@ export default class DocumentDecoration {
     }
 
     private parseTokenOrStringArray(
-        tokenized: Array<string | prism.Token>,
+        tokenized: Array<string | any>,
         lineIndex: number,
         charIndex: number,
         positions: FoundBracket[]) {
         tokenized.forEach((token) => {
-            if (token instanceof prism.Token) {
+            if (token instanceof this.prismJs.Token) {
                 const result = this.parseToken(token, lineIndex, charIndex, positions);
                 charIndex = result.charIndex;
                 lineIndex = result.lineIndex;
@@ -216,7 +216,7 @@ export default class DocumentDecoration {
     }
 
     private parseToken(
-        token: prism.Token,
+        token: any,
         lineIndex: number,
         charIndex: number,
         positions: FoundBracket[]): { lineIndex: number, charIndex: number } {

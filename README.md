@@ -74,4 +74,5 @@ It is recommended to disable the inbuilt `editor.matchBrackets` setting if using
             "LightSkyBlue"
         ],
         "Red"
+    ]
 ```
