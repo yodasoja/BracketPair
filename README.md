@@ -49,7 +49,26 @@ It is recommended to disable the inbuilt `editor.matchBrackets` setting if using
 
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
-> Note: Pair must be supported punctuation type by Prism.js
+> Note: Pair must be supported punctuation type by Prism.js  
+> HTML Example:
+
+```
+[
+    "</",
+    ">"
+],
+[
+    "<",
+    "/>"
+],
+"<>",
+[
+    "Gold",
+    "Orchid",
+    "LightSkyBlue"
+],
+"Red"
+```
 
 > `"bracketPairColorizer.independentPairColors"`   
 > A new bracket pair can be configured by adding it to the array.  

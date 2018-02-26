@@ -107,7 +107,7 @@ export default class Settings {
                 }
 
                 const brackets = innerArray[0] as string;
-                if (typeof brackets !== "string" || Array.isArray(brackets)) {
+                if (typeof brackets !== "string" && !Array.isArray(brackets)) {
                     throw new Error("independentSettings[" + index + "][0] is not a string or an array of strings");
                 }
 
@@ -162,8 +162,7 @@ export default class Settings {
             if (regex !== "") {
                 regex += "|";
             }
-            regex += `(${escape(match)})`;
-            // regex += `(^${escape(match)}$)`;
+            regex += `(^${escape(match)}$)`;
         });
 
         regex = "[" + regex;
