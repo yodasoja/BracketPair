@@ -104,7 +104,7 @@ export default class DocumentDecorationManager {
         switch (languageID) {
             case "html": return "markup";
             case "javascriptreact": return "jsx";
-            case "jsonc": return "json5";
+            case "jsonc": return "javascript";
             case "mathml": return "markup";
             case "scad": return "swift"; // workaround for unsupported language in Prism
             case "svg": return "markup";

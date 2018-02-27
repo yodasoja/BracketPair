@@ -10,7 +10,8 @@ export default class Settings {
     public readonly forceIterationColorCycle: boolean;
     public readonly forceUniqueOpeningColor: boolean;
     public readonly prismLanguageID: string;
-    public readonly regexPattern: string;
+    public readonly regexExact: RegExp;
+    public readonly regexNonExact: RegExp;
     public readonly scopeDecorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
@@ -129,7 +130,8 @@ export default class Settings {
             });
         }
 
-        this.regexPattern = this.createRegex(this.bracketPairs);
+        this.regexExact = this.createRegex(this.bracketPairs, true);
+        this.regexNonExact = this.createRegex(this.bracketPairs, false);
         this.bracketDecorations = this.createBracketDecorations(this.bracketPairs);
         this.scopeDecorations = this.createScopeDecorations(this.bracketPairs);
     }
@@ -147,7 +149,7 @@ export default class Settings {
         this.isDisposed = true;
     }
 
-    private createRegex(bracketPairs: BracketPair[]): string {
+    private createRegex(bracketPairs: BracketPair[], exact: boolean): RegExp {
         const escape = (s: string) => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
         let regex = "";
         const matches: string[] = [];
@@ -162,12 +164,18 @@ export default class Settings {
             if (regex !== "") {
                 regex += "|";
             }
-            regex += `(^${escape(match)}$)`;
+
+            if (exact) {
+                regex += `(^${escape(match)}$)`;
+            }
+            else {
+                regex += `(${escape(match)})`;
+            }
         });
 
         regex = "[" + regex;
         regex += "]";
-        return regex;
+        return new RegExp(regex, !exact ? "g" : undefined);;
     }
 
     private createBracketDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
