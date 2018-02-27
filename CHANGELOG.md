@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 1.0.11
+Fixed JSON parsing (again)  
+Added attribute parsing to HTML (should make Angular look nicer)
+
 ### 1.0.10
 Fixed JSON strings with single quotes in them breaking parsing
 
