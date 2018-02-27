@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.12
+Implement non-exact matching of tags. e.g. "</" can now be partially matched with "<"
+
 ### 1.0.11
 Fixed JSON parsing (again)  
 Added attribute parsing to HTML (should make Angular look nicer)

@@ -10,7 +10,6 @@ export default class Settings {
     public readonly forceIterationColorCycle: boolean;
     public readonly forceUniqueOpeningColor: boolean;
     public readonly prismLanguageID: string;
-    public readonly regexExact: RegExp;
     public readonly regexNonExact: RegExp;
     public readonly scopeDecorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly timeOutLength: number;
@@ -130,7 +129,6 @@ export default class Settings {
             });
         }
 
-        this.regexExact = this.createRegex(this.bracketPairs, true);
         this.regexNonExact = this.createRegex(this.bracketPairs, false);
         this.bracketDecorations = this.createBracketDecorations(this.bracketPairs);
         this.scopeDecorations = this.createScopeDecorations(this.bracketPairs);
@@ -166,15 +164,12 @@ export default class Settings {
             }
 
             if (exact) {
-                regex += `(^${escape(match)}$)`;
+                regex += `${escape(match)}`;
             }
             else {
-                regex += `(${escape(match)})`;
+                regex += `${escape(match)}`;
             }
         });
-
-        regex = "[" + regex;
-        regex += "]";
         return new RegExp(regex, !exact ? "g" : undefined);;
     }
 

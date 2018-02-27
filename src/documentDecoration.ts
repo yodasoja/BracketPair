@@ -228,7 +228,7 @@ export default class DocumentDecoration {
                 // tslint:disable-next-line:no-conditional-assignment
                 while ((match = this.settings.regexNonExact.exec(content)) !== null) {
                     const startPos = new vscode.Position(lineIndex, charIndex + match.index);
-                    const endPos = startPos.translate(0, match.length);
+                    const endPos = startPos.translate(0, match[0].length);
                     positions.push(new FoundBracket(new vscode.Range(startPos, endPos), match[0]));
                 }
             }
@@ -236,11 +236,15 @@ export default class DocumentDecoration {
         if (typeof token.content === "string") {
             const content = token.content;
             if (token.type === "punctuation") {
-                if (lineIndex >= this.lineToUpdateWhenTimeoutEnds &&
-                    content.match(this.settings.regexExact)) {
-                    const startPos = new vscode.Position(lineIndex, charIndex);
-                    const endPos = startPos.translate(0, content.length);
-                    positions.push(new FoundBracket(new vscode.Range(startPos, endPos), content));
+                if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
+                    this.settings.regexNonExact.lastIndex = 0;
+                    let match: RegExpExecArray | null;
+                    // tslint:disable-next-line:no-conditional-assignment
+                    while ((match = this.settings.regexNonExact.exec(content)) !== null) {
+                        const startPos = new vscode.Position(lineIndex, charIndex + match.index);
+                        const endPos = startPos.translate(0, match[0].length);
+                        positions.push(new FoundBracket(new vscode.Range(startPos, endPos), match[0]));
+                    }
                 }
             }
             return this.parseString(content, lineIndex, charIndex);
