@@ -239,13 +239,7 @@ export default class DocumentDecoration {
             return this.parseTokenOrStringArray(token.content, lineIndex, charIndex, positions);
         }
         else {
-            // Token
-            if (Array.isArray(token.content.content)) {
-                return this.parseTokenOrStringArray(token.content.content, lineIndex, charIndex, positions);
-            }
-            else {
-                return this.parseToken(token.content, lineIndex, charIndex, positions);
-            }
+            return this.parseToken(token.content, lineIndex, charIndex, positions);
         }
     }
 
