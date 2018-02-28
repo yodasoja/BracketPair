@@ -220,36 +220,22 @@ export default class DocumentDecoration {
         lineIndex: number,
         charIndex: number,
         positions: FoundBracket[]): { lineIndex: number, charIndex: number } {
-        if (token.type === "attr-name") {
-            const content = token.content[0] as string;
-            if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
-                this.settings.regexNonExact.lastIndex = 0;
-                let match: RegExpExecArray | null;
-                // tslint:disable-next-line:no-conditional-assignment
-                while ((match = this.settings.regexNonExact.exec(content)) !== null) {
-                    const startPos = new vscode.Position(lineIndex, charIndex + match.index);
-                    const endPos = startPos.translate(0, match[0].length);
-                    positions.push(new FoundBracket(new vscode.Range(startPos, endPos), match[0]));
-                }
-            }
-        }
         if (typeof token.content === "string") {
             const content = token.content;
             if (token.type === "punctuation") {
                 if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
-                    this.settings.regexNonExact.lastIndex = 0;
-                    let match: RegExpExecArray | null;
-                    // tslint:disable-next-line:no-conditional-assignment
-                    while ((match = this.settings.regexNonExact.exec(content)) !== null) {
-                        const startPos = new vscode.Position(lineIndex, charIndex + match.index);
-                        const endPos = startPos.translate(0, match[0].length);
-                        positions.push(new FoundBracket(new vscode.Range(startPos, endPos), match[0]));
-                    }
+                    this.findAndPushMatches(content, lineIndex, charIndex, positions);
                 }
             }
             return this.parseString(content, lineIndex, charIndex);
         }
         else if (Array.isArray(token.content)) {
+            if (token.type === "attr-name") {
+                const content = token.content[0] as string;
+                if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
+                    this.findAndPushMatches(content, lineIndex, charIndex, positions);
+                }
+            }
             return this.parseTokenOrStringArray(token.content, lineIndex, charIndex, positions);
         }
         else {
@@ -260,6 +246,17 @@ export default class DocumentDecoration {
             else {
                 return this.parseToken(token.content, lineIndex, charIndex, positions);
             }
+        }
+    }
+
+    private findAndPushMatches(content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) {
+        this.settings.regexNonExact.lastIndex = 0;
+        let match: RegExpExecArray | null;
+        // tslint:disable-next-line:no-conditional-assignment
+        while ((match = this.settings.regexNonExact.exec(content)) !== null) {
+            const startPos = new vscode.Position(lineIndex, charIndex + match.index);
+            const endPos = startPos.translate(0, match[0].length);
+            positions.push(new FoundBracket(new vscode.Range(startPos, endPos), match[0]));
         }
     }
 
