@@ -222,7 +222,7 @@ export default class DocumentDecoration {
         positions: FoundBracket[]): { lineIndex: number, charIndex: number } {
         if (typeof token.content === "string") {
             const content = token.content;
-            if (token.type === "punctuation") {
+            if (token.type === "punctuation" || token.type === "namespace") {
                 if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
                     this.findAndPushMatches(content, lineIndex, charIndex, positions);
                 }
