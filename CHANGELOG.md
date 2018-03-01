@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.13
+Improve powershell support by applying matches to namespaces
+
 ### 1.0.12
 Implement non-exact matching of tags. e.g. "</" can now be partially matched with "<"
 
