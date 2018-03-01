@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.14
+Fix cross-contamination of rules across languages
+
 ### 1.0.13
 Improve powershell support by applying matches to namespaces
 
