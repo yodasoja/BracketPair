@@ -14,11 +14,24 @@ export default class DocumentDecoration {
     private readonly document: vscode.TextDocument;
     private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private readonly prismJs: any;
+    private readonly stringMatches = new Set<string>();
+    private readonly arrayMatches = new Set<string>();
     constructor(document: vscode.TextDocument, prismJs: any, settings: Settings) {
         this.settings = settings;
         this.document = document;
         this.prismJs = prismJs;
+
+        this.stringMatches.add("punctuation");
+
+        if (settings.prismLanguageID === "markup") {
+            this.arrayMatches.add("attr-name");
+        }
+
+        if (settings.prismLanguageID === "powershell") {
+            this.stringMatches.add("namespace");
+        }
     }
+
 
     public dispose() {
         this.settings.dispose();
@@ -222,20 +235,22 @@ export default class DocumentDecoration {
         positions: FoundBracket[]): { lineIndex: number, charIndex: number } {
         if (typeof token.content === "string") {
             const content = token.content;
-            if (token.type === "punctuation" || token.type === "namespace") {
+            if (this.stringMatches.has(token.type)) {
                 if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
                     this.findAndPushMatches(content, lineIndex, charIndex, positions);
                 }
             }
+
             return this.parseString(content, lineIndex, charIndex);
         }
         else if (Array.isArray(token.content)) {
-            if (token.type === "attr-name") {
+            if (this.arrayMatches.has(token.type)) {
                 const content = token.content[0] as string;
                 if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
                     this.findAndPushMatches(content, lineIndex, charIndex, positions);
                 }
             }
+
             return this.parseTokenOrStringArray(token.content, lineIndex, charIndex, positions);
         }
         else {
