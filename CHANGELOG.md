@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.15
+Nunjucks support
+
 ### 1.0.14
 Fix cross-contamination of rules across languages
 

@@ -106,6 +106,7 @@ export default class DocumentDecorationManager {
             case "javascriptreact": return "jsx";
             case "jsonc": return "javascript";
             case "mathml": return "markup";
+            case "nunjucks": return "twig";
             case "scad": return "swift"; // workaround for unsupported language in Prism
             case "svg": return "markup";
             case "typescriptreact": return "tsx";
