@@ -14,21 +14,42 @@ export default class DocumentDecoration {
     private readonly document: vscode.TextDocument;
     private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private readonly prismJs: any;
-    private readonly stringMatches = new Set<string>();
-    private readonly arrayMatches = new Set<string>();
+    // What have I created..
+    private readonly stringStrategies = new Map<string,
+        (token: any, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
+            { lineIndex: number, charIndex: number }>();
+    private readonly arrayStrategies = new Map<string,
+        (token: any, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
+            { lineIndex: number, charIndex: number }>();
     constructor(document: vscode.TextDocument, prismJs: any, settings: Settings) {
         this.settings = settings;
         this.document = document;
         this.prismJs = prismJs;
 
-        this.stringMatches.add("punctuation");
+        const basicStringMatch = (token: any, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
+            return this.matchString(token.content as string, lineIndex, charIndex, positions);
+        };
+        // Match punctuation on all languages
+        this.stringStrategies.set("punctuation", basicStringMatch);
 
         if (settings.prismLanguageID === "markup") {
-            this.arrayMatches.add("attr-name");
+            this.stringStrategies.set("attr-name", basicStringMatch);
         }
 
         if (settings.prismLanguageID === "powershell") {
-            this.stringMatches.add("namespace");
+            this.stringStrategies.set("namespace", basicStringMatch);
+        }
+
+        if (settings.prismLanguageID === "markdown") {
+            const markdownUrl = (token: any, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
+                // Input: ![Disabled](images/forceUniqueOpeningColorDisabled.png "forceUniqueOpeningColor Disabled")
+                // [0]: ![Disabled](images/forceUniqueOpeningColorDisabled.png
+                // [1]: "forceUniqueOpeningColor Disabled"
+                // [2]: )
+                return this.matchArray([0, 2], token.content, lineIndex, charIndex, positions);
+            };
+            this.arrayStrategies.set("url", markdownUrl);
+            this.arrayStrategies.set("url-reference", markdownUrl);
         }
     }
 
@@ -234,21 +255,17 @@ export default class DocumentDecoration {
         charIndex: number,
         positions: FoundBracket[]): { lineIndex: number, charIndex: number } {
         if (typeof token.content === "string") {
-            const content = token.content;
-            if (this.stringMatches.has(token.type)) {
-                if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
-                    this.findAndPushMatches(content, lineIndex, charIndex, positions);
-                }
+            const strategy = this.stringStrategies.get(token.type);
+            if (strategy) {
+                return strategy(token, lineIndex, charIndex, positions);
             }
 
-            return this.parseString(content, lineIndex, charIndex);
+            return this.parseString(token.content, lineIndex, charIndex);
         }
         else if (Array.isArray(token.content)) {
-            if (this.arrayMatches.has(token.type)) {
-                const content = token.content[0] as string;
-                if (lineIndex >= this.lineToUpdateWhenTimeoutEnds) {
-                    this.findAndPushMatches(content, lineIndex, charIndex, positions);
-                }
+            const strategy = this.arrayStrategies.get(token.type);
+            if (strategy) {
+                return strategy(token, lineIndex, charIndex, positions);
             }
 
             return this.parseTokenOrStringArray(token.content, lineIndex, charIndex, positions);
@@ -258,7 +275,11 @@ export default class DocumentDecoration {
         }
     }
 
-    private findAndPushMatches(content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) {
+    private matchString(content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) {
+        if (lineIndex < this.lineToUpdateWhenTimeoutEnds) {
+            return this.parseString(content, lineIndex, charIndex);;
+        }
+
         this.settings.regexNonExact.lastIndex = 0;
         let match: RegExpExecArray | null;
         // tslint:disable-next-line:no-conditional-assignment
@@ -267,6 +288,31 @@ export default class DocumentDecoration {
             const endPos = startPos.translate(0, match[0].length);
             positions.push(new FoundBracket(new vscode.Range(startPos, endPos), match[0]));
         }
+
+        return this.parseString(content, lineIndex, charIndex);
+    }
+
+    // Array can be Token or String. Indexes are which indexes should be parsed for brackets
+    private matchArray(
+        indexes: number[], array: any[], lineIndex: number, charIndex: number, positions: FoundBracket[]) {
+        for (let i = 0; i < array.length; i++) {
+            const content = array[i];
+            let result: { lineIndex: number, charIndex: number };
+            if (indexes.indexOf(i) > -1) {
+                result = this.matchString(content, lineIndex, charIndex, positions);
+            }
+            else {
+                if (typeof (content) === "string") {
+                    result = this.parseTokenOrStringArray([content], lineIndex, charIndex, positions);
+                }
+                else {
+                    result = this.parseTokenOrStringArray(content, lineIndex, charIndex, positions);
+                }
+            }
+            lineIndex = result.lineIndex;
+            charIndex = result.charIndex;
+        }
+        return { lineIndex, charIndex };
     }
 
     private colorDecorations(editors: vscode.TextEditor[]) {
