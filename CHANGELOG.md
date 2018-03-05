@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.16
+Parse markdown URL brackets
+
 ### 1.0.15
 Nunjucks support
 
