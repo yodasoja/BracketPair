@@ -17,10 +17,10 @@ export default class DocumentDecoration {
     private readonly prismJs: any;
     // What have I created..
     private readonly stringStrategies = new Map<string,
-        (token: prism.Token, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
+        (content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
             { lineIndex: number, charIndex: number }>();
     private readonly stringOrTokenArrayStrategies = new Map<string,
-        (token: prism.Token, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
+        (array: Array<string | prism.Token>, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
             { lineIndex: number, charIndex: number }>();
 
     constructor(document: vscode.TextDocument, prismJs: any, settings: Settings) {
@@ -29,8 +29,8 @@ export default class DocumentDecoration {
         this.prismJs = prismJs;
 
         const basicStringMatch = (
-            token: prism.Token, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
-            return this.matchString(token.content as string, lineIndex, charIndex, positions);
+            content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
+            return this.matchString(content as string, lineIndex, charIndex, positions);
         };
         // Match punctuation on all languages
         this.stringStrategies.set("punctuation", basicStringMatch);
@@ -45,23 +45,18 @@ export default class DocumentDecoration {
 
         if (settings.prismLanguageID === "markdown") {
             const markdownUrl = (
-                token: prism.Token, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
+                array: Array<string | prism.Token>,
+                lineIndex: number,
+                charIndex: number,
+                positions: FoundBracket[]) => {
                 // Input: ![Disabled](images/forceUniqueOpeningColorDisabled.png "forceUniqueOpeningColor Disabled")
                 // [0]: ![Disabled](images/forceUniqueOpeningColorDisabled.png
                 // [1]: "forceUniqueOpeningColor Disabled"
                 // [2]: )
-                const content = token.content as Array<string | prism.Token>;
                 return this.matchStringOrTokenArray(
-                    new Set([0, content.length - 1]), content, lineIndex, charIndex, positions);
+                    new Set([0, array.length - 1]), array, lineIndex, charIndex, positions);
             };
             this.stringOrTokenArrayStrategies.set("url", markdownUrl);
-
-            const markdownRefUrl = (
-                token: prism.Token, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
-                return this.parseTokenOrStringArray(
-                    token.content as Array<string | prism.Token>, lineIndex, charIndex, positions);
-            };
-            this.stringOrTokenArrayStrategies.set("url-reference", markdownRefUrl);
         }
     }
 
@@ -268,7 +263,7 @@ export default class DocumentDecoration {
         if (typeof token.content === "string") {
             const strategy = this.stringStrategies.get(token.type);
             if (strategy) {
-                return strategy(token, lineIndex, charIndex, positions);
+                return strategy(token.content, lineIndex, charIndex, positions);
             }
 
             return this.parseString(token.content, lineIndex, charIndex);
@@ -276,7 +271,7 @@ export default class DocumentDecoration {
         else if (Array.isArray(token.content)) {
             const strategy = this.stringOrTokenArrayStrategies.get(token.type);
             if (strategy) {
-                return strategy(token, lineIndex, charIndex, positions);
+                return strategy(token.content, lineIndex, charIndex, positions);
             }
 
             return this.parseTokenOrStringArray(token.content, lineIndex, charIndex, positions);
@@ -310,9 +305,8 @@ export default class DocumentDecoration {
         for (let i = 0; i < array.length; i++) {
             const content = array[i];
             let result: { lineIndex: number, charIndex: number };
-            if (indexes.has(i)) {
-                indexes.delete(i);
-                result = this.matchString(content as string, lineIndex, charIndex, positions);
+            if (indexes.has(i) && typeof content === "string") {
+                result = this.matchString(content, lineIndex, charIndex, positions);
             }
             else {
                 result = this.parseTokenOrStringArray([content], lineIndex, charIndex, positions);
