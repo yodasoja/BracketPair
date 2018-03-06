@@ -40,7 +40,7 @@ Independent brackets allow each bracket type to use its own color pool
 > `"bracketPairColorizer.highlightActiveScope"`  
 Should the currently scoped brackets always be highlighted?
 
-> `"bracketPairColorizer.bracketPairColorizer.activeScopeCSS"`  
+> `"bracketPairColorizer.activeScopeCSS"`  
 Choose a border style to highlight the active scope. Use `{color}` to match the existing bracket color  
 It is recommended to disable the inbuilt `editor.matchBrackets` setting if using this feature  
 ![BorderStyle](images/activeScopeBorder.png "Active Scope Border Example")  
