@@ -112,6 +112,7 @@ export default class DocumentDecorationManager {
             case "svg": return ["markup"];
             case "typescriptreact": return ["tsx"];
             case "vb": return ["vbnet"];
+            case "vue": return ["markup", "javascript"];
             case "xml": return ["markup"];
             default: return [languageID];
         }
