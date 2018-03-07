@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.17
+Parse embedded javascript in HTML files
+
 ### 1.0.16
 Parse markdown URL brackets
 
@@ -10,7 +13,7 @@ Nunjucks support
 Fix cross-contamination of rules across languages
 
 ### 1.0.13
-Improve powershell support by applying matches to namespaces
+Improve PowerShell support by applying matches to namespaces
 
 ### 1.0.12
 Implement non-exact matching of tags. e.g. "</" can now be partially matched with "<"
@@ -115,7 +118,7 @@ Add contextual parsing for:
 - javascriptreact
 
 ### 0.10.3
-Add powershell support
+Add PowerShell support
 
 ### 0.10.2
 Fix Cannot find module './multipleIndexes'.
