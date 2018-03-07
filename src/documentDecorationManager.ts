@@ -71,13 +71,14 @@ export default class DocumentDecorationManager {
 
         if (documentDecorations === undefined) {
             try {
-                const languageID = this.getPrismLanguageID(document.languageId);
-                if (!this.supportedLanguages.has(languageID)) {
+                const languages = this.getPrismLanguageID(document.languageId);
+                const primaryLanguage = languages[0];
+                if (!this.supportedLanguages.has(primaryLanguage)) {
                     return;
                 }
 
-                const settings = new Settings(languageID, document.uri);
-                const prismJs = this.PrismLoader.createInstance([languageID]);
+                const settings = new Settings(primaryLanguage, document.uri);
+                const prismJs = this.PrismLoader.createInstance(languages);
                 documentDecorations = new DocumentDecoration(document, prismJs, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
@@ -99,20 +100,20 @@ export default class DocumentDecorationManager {
         return documentDecorations;
     }
 
-    private getPrismLanguageID(languageID: string) {
+    private getPrismLanguageID(languageID: string): string[] {
         // Some VSCode language ids need to be mapped to match http://prismjs.com/#languages-list
         switch (languageID) {
-            case "html": return "markup";
-            case "javascriptreact": return "jsx";
-            case "jsonc": return "javascript";
-            case "mathml": return "markup";
-            case "nunjucks": return "twig";
-            case "scad": return "swift"; // workaround for unsupported language in Prism
-            case "svg": return "markup";
-            case "typescriptreact": return "tsx";
-            case "vb": return "vbnet";
-            case "xml": return "markup";
-            default: return languageID;
+            case "html": return ["markup", "javascript"];
+            case "javascriptreact": return ["jsx"];
+            case "jsonc": return ["javascript"];
+            case "mathml": return ["markup"];
+            case "nunjucks": return ["twig"];
+            case "scad": return ["swift"]; // workaround for unsupported language in Prism
+            case "svg": return ["markup"];
+            case "typescriptreact": return ["tsx"];
+            case "vb": return ["vbnet"];
+            case "xml": return ["markup"];
+            default: return [languageID];
         }
     }
 
