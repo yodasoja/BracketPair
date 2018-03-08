@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.18
+Map .vue to HTML
+
 ### 1.0.17
 Parse embedded javascript in HTML files
 
