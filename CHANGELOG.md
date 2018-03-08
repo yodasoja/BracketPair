@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 1.0.19
+Updated PrismJs.  
+New languages: `clojure, arff, liquid`
+
 ### 1.0.18
 Map .vue to HTML
 
