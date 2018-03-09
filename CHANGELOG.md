@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.20
+PrismJs bump to restore nested commenting behaviour for clike languages
+
 ### 1.0.19
 Updated PrismJs.  
 New languages: `clojure, arff, liquid`
