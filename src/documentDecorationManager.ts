@@ -111,6 +111,7 @@ export default class DocumentDecorationManager {
             case "nunjucks": return ["twig"];
             case "scad": return ["swift"]; // workaround for unsupported language in Prism
             case "svg": return ["markup"];
+            case "systemverilog": return ["verilog"];
             case "typescriptreact": return ["tsx"];
             case "vb": return ["vbnet"];
             case "vue": return ["markup", "javascript"];
