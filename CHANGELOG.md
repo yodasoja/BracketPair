@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 1.0.24
+System Verilog support
+
+### 1.0.22
+Rollback to 1.0.20
+
 ### 1.0.21
 Fix powershell subexpressions  
 Fix rust byte literals  
