@@ -135,16 +135,18 @@ export default class Settings {
     }
 
     public dispose() {
-        this.scopeDecorations.forEach((decoration, key) => {
-            decoration.dispose();
-        });
-        this.scopeDecorations.clear();
+        if (!this.isDisposed) {
+            this.scopeDecorations.forEach((decoration, key) => {
+                decoration.dispose();
+            });
+            this.scopeDecorations.clear();
 
-        this.bracketDecorations.forEach((decoration, key) => {
-            decoration.dispose();
-        });
-        this.bracketDecorations.clear();
-        this.isDisposed = true;
+            this.bracketDecorations.forEach((decoration, key) => {
+                decoration.dispose();
+            });
+            this.bracketDecorations.clear();
+            this.isDisposed = true;
+        }
     }
 
     private createRegex(bracketPairs: BracketPair[], exact: boolean): RegExp {

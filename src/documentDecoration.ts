@@ -15,6 +15,7 @@ export default class DocumentDecoration {
     private readonly document: vscode.TextDocument;
     private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private readonly prismJs: any;
+    private readonly largeFileRange: vscode.Range;
     // What have I created..
     private readonly stringStrategies = new Map<string,
         (content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
@@ -27,6 +28,7 @@ export default class DocumentDecoration {
         this.settings = settings;
         this.document = document;
         this.prismJs = prismJs;
+        this.largeFileRange = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(5000, 0));
 
         const basicStringMatch = (
             content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
@@ -199,7 +201,7 @@ export default class DocumentDecoration {
 
         const languageID = this.settings.prismLanguageID;
 
-        const text = this.document.getText();
+        const text = this.document.getText(this.largeFileRange);
         let tokenized: Array<string | prism.Token>;
         try {
             tokenized = this.prismJs.tokenize(text, this.prismJs.languages[languageID]);
