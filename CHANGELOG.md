@@ -1,5 +1,10 @@
 ## Release Notes
 
+### 1.0.21
+Fix powershell subexpressions  
+Fix rust byte literals  
+Only color first 5000 lines to prevent performance degradation in extension host
+
 ### 1.0.20
 PrismJs bump to restore nested commenting behaviour for clike languages
 
