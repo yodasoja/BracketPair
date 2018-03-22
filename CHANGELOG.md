@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 1.0.26
+Fix minimum VSCode version
+
+### 1.0.25
+Version bump because marketplace seems to be stuck on v1.0.22
+
 ### 1.0.24
 System Verilog support
 
