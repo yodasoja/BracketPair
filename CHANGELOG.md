@@ -1,16 +1,10 @@
 ## Release Notes
 
-### 1.0.26
-Fix minimum VSCode version
-
-### 1.0.25
-Version bump because marketplace seems to be stuck on v1.0.22
+### 1.0.27
+Play nicely with other extensions using different PrismJs versions
 
 ### 1.0.24
 System Verilog support
-
-### 1.0.22
-Rollback to 1.0.20
 
 ### 1.0.21
 Fix powershell subexpressions  

@@ -2,10 +2,10 @@ import { TextDocument, TextDocumentContentChangeEvent, TextEditorSelectionChange
 import DocumentDecoration from "./documentDecoration";
 import PrismJsLanguages from "./prismJsLanguages";
 import Settings from "./settings";
-const Prism = require('prismjs/components/prism-core.js');
-const loadComponents = require('prismjs/components/index.js');
 
 export default class DocumentDecorationManager {
+    private readonly Prism = require('prismjs/components/prism-core.js');
+    private readonly loadLanguages = require('prismjs/components/index.js');
     private readonly supportedLanguages = new Set(PrismJsLanguages);
     private showError = true;
     private documents = new Map<string, DocumentDecoration>();
@@ -79,8 +79,8 @@ export default class DocumentDecorationManager {
                 }
 
                 const settings = new Settings(primaryLanguage, document.uri);
-                loadComponents(languages);
-                documentDecorations = new DocumentDecoration(document, Prism, settings);
+                this.loadLanguages(languages);
+                documentDecorations = new DocumentDecoration(document, this.Prism, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
                 if (error instanceof Error) {
