@@ -106,6 +106,7 @@ export default class DocumentDecorationManager {
         switch (languageID) {
             case "html": return ["markup", "javascript"];
             case "javascriptreact": return ["jsx"];
+            case "json5": return ["javascript"];
             case "jsonc": return ["javascript"];
             case "mathml": return ["markup"];
             case "nunjucks": return ["twig"];
