@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.28
+json5 support
+
 ### 1.0.27
 Play nicely with other extensions using different PrismJs versions
 
