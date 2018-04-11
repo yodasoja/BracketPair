@@ -153,6 +153,6 @@
     },
     "license": "SEE LICENSE IN LICENSE.md",
     "dependencies": {
-        "prismjs": "^1.13.0"
+        "prismjs": "^1.14.0"
     }
 }
