@@ -1,12 +1,14 @@
 import { TextDocument, TextDocumentContentChangeEvent, TextEditorSelectionChangeEvent, window } from "vscode";
 import DocumentDecoration from "./documentDecoration";
+import GutterIconManager from "./gutterIconManager";
 import PrismJsLanguages from "./prismJsLanguages";
 import Settings from "./settings";
 
 export default class DocumentDecorationManager {
-    private readonly Prism = require('prismjs/components/prism-core.js');
-    private readonly loadLanguages = require('prismjs/components/index.js');
+    private readonly Prism = require("prismjs/components/prism-core.js");
+    private readonly loadLanguages = require("prismjs/components/index.js");
     private readonly supportedLanguages = new Set(PrismJsLanguages);
+    private readonly gutterIcons = new GutterIconManager();
     private showError = true;
     private documents = new Map<string, DocumentDecoration>();
     public reset() {
@@ -78,7 +80,7 @@ export default class DocumentDecorationManager {
                     return;
                 }
 
-                const settings = new Settings(primaryLanguage, document.uri);
+                const settings = new Settings(primaryLanguage, this.gutterIcons, document.uri);
                 this.loadLanguages(languages);
                 documentDecorations = new DocumentDecoration(document, this.Prism, settings);
                 this.documents.set(uri, documentDecorations);

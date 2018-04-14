@@ -1,6 +1,9 @@
 import * as prism from "prismjs";
 import * as vscode from "vscode";
+import { TextEditorDecorationType } from "vscode";
+import Bracket from "./bracket";
 import FoundBracket from "./foundBracket";
+import GutterIconManager from "./gutterIconManager";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
@@ -16,6 +19,8 @@ export default class DocumentDecoration {
     private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private readonly prismJs: any;
     private readonly largeFileRange: vscode.Range;
+    private gutterDecorations: TextEditorDecorationType[] = [];
+
     // What have I created..
     private readonly stringStrategies = new Map<string,
         (content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
@@ -64,6 +69,7 @@ export default class DocumentDecoration {
 
     public dispose() {
         this.settings.dispose();
+        this.disposeGutter();
     }
 
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
@@ -126,6 +132,8 @@ export default class DocumentDecoration {
             return;
         }
 
+        this.disposeGutter();
+
         const scopes: Set<Scope> = new Set<Scope>();
 
         event.selections.forEach((selection) => {
@@ -136,34 +144,25 @@ export default class DocumentDecoration {
             }
         });
 
-        const colorMap = new Map<string, vscode.Range[]>();
-
-        // Reduce all the colors/ranges of the lines into a singular map
         for (const scope of scopes) {
             {
-                const existingRanges = colorMap.get(scope.color);
+                const decorationOpen = this.settings.createScopeDecorations(scope.color, scope.open.character);
+                event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
+                this.gutterDecorations.push(decorationOpen);
 
-                if (existingRanges !== undefined) {
-                    existingRanges.push(scope.open.range);
-                    existingRanges.push(scope.close.range);
-                }
-                else {
-                    colorMap.set(scope.color, [scope.open.range, scope.close.range]);
-                }
+                const decorationClose = this.settings.createScopeDecorations(scope.color, scope.close.character);
+                event.textEditor.setDecorations(decorationClose, [scope.close.range]);
+                this.gutterDecorations.push(decorationClose);
             }
         }
+    }
 
-        for (const [color, decoration] of this.settings.scopeDecorations) {
-            const ranges = colorMap.get(color);
-            if (ranges !== undefined) {
-                event.textEditor.setDecorations(decoration, ranges);
-            }
-            else {
-                // We must set non-used colors to an empty array
-                // or previous decorations will not be invalidated
-                event.textEditor.setDecorations(decoration, []);
-            }
-        }
+    private disposeGutter() {
+        this.gutterDecorations.forEach((decoration) => {
+            decoration.dispose();
+        });
+
+        this.gutterDecorations = [];
     }
 
     private getScope(position: vscode.Position): Scope | undefined {

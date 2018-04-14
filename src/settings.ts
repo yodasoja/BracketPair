@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
+import GutterIconManager from "./gutterIconManager";
 
 export default class Settings {
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
@@ -11,24 +12,33 @@ export default class Settings {
     public readonly forceUniqueOpeningColor: boolean;
     public readonly prismLanguageID: string;
     public readonly regexNonExact: RegExp;
-    public readonly scopeDecorations: Map<string, vscode.TextEditorDecorationType>;
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
-    public readonly activeScopeCSS: string[];
     public isDisposed = false;
+    private readonly gutterIcons: GutterIconManager;
+    private readonly cssElements: string[][];
+    private readonly fontFamily: string;
 
     constructor(
         languageID: string,
+        gutterIcons: GutterIconManager,
         documentUri?: vscode.Uri,
     ) {
+        this.gutterIcons = gutterIcons;
         this.prismLanguageID = languageID;
+
+        this.fontFamily = vscode.workspace.getConfiguration("editor", documentUri).fontFamily;
+
         const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
+        const activeScopeCSS = configuration.get("activeScopeCSS") as string[];
 
-        this.activeScopeCSS = configuration.get("activeScopeCSS") as string[];
-
-        if (!Array.isArray(this.activeScopeCSS)) {
+        if (!Array.isArray(activeScopeCSS)) {
             throw new Error("activeScopeCSS is not an array");
         }
+
+        this.cssElements = activeScopeCSS.map((e) =>
+            [e.substring(0, e.indexOf(":")).trim(),
+            e.substring(e.indexOf(":") + 1).trim()]);
 
         this.highlightActiveScope = configuration.get("highlightActiveScope") as boolean;
 
@@ -131,22 +141,32 @@ export default class Settings {
 
         this.regexNonExact = this.createRegex(this.bracketPairs, false);
         this.bracketDecorations = this.createBracketDecorations(this.bracketPairs);
-        this.scopeDecorations = this.createScopeDecorations(this.bracketPairs);
     }
 
     public dispose() {
         if (!this.isDisposed) {
-            this.scopeDecorations.forEach((decoration, key) => {
-                decoration.dispose();
-            });
-            this.scopeDecorations.clear();
-
             this.bracketDecorations.forEach((decoration, key) => {
                 decoration.dispose();
             });
             this.bracketDecorations.clear();
             this.isDisposed = true;
         }
+    }
+
+    public createScopeDecorations(color: string, bracket: string) {
+        const gutterIcon = this.gutterIcons.GetIconUri(bracket, color, this.fontFamily);
+
+        const decorationSettings: vscode.DecorationRenderOptions = {
+            gutterIconPath: gutterIcon,
+            rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+        };
+
+        this.cssElements.forEach((element) => {
+            decorationSettings[element[0]] = element[1].replace("{color}", color);
+        });
+
+        const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
+        return decoration;
     }
 
     private createRegex(bracketPairs: BracketPair[], exact: boolean): RegExp {
@@ -191,32 +211,6 @@ export default class Settings {
                 rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
             });
             decorations.set(bracketPair.orphanColor, errorDecoration);
-        }
-
-        return decorations;
-    }
-
-    private createScopeDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
-        const decorations = new Map<string, vscode.TextEditorDecorationType>();
-
-        const cssElements = this.activeScopeCSS.map((e) =>
-            [e.substring(0, e.indexOf(":")).trim(),
-            e.substring(e.indexOf(":") + 1).trim()]);
-
-        for (const bracketPair of bracketPairs) {
-            for (const color of bracketPair.colors) {
-                const decorationSettings = {
-                    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-                };
-
-                cssElements.forEach((element) => {
-                    decorationSettings[element[0]] = element[1].replace("{color}", color);
-                });
-
-                const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
-
-                decorations.set(color, decoration);
-            }
         }
 
         return decorations;

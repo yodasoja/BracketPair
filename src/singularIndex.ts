@@ -41,7 +41,7 @@ export default class SingularIndex implements ColorIndexes {
     public getCurrentColorIndex(bracketPair: BracketPair, range: vscode.Range): number | undefined {
         const openBracket = this.openBrackets.pop();
         if (openBracket) {
-            const closeBracket = new Bracket(bracketPair.orphanColor, range, openBracket.colorIndex);
+            const closeBracket = new Bracket(bracketPair.closeCharacter, range, openBracket.colorIndex);
             const scopeRange = new vscode.Range(openBracket.range.start, range.end);
             this.bracketScopes.push(
                 new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex], openBracket, closeBracket),
