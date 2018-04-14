@@ -146,13 +146,21 @@ export default class DocumentDecoration {
 
         for (const scope of scopes) {
             {
-                const decorationOpen = this.settings.createScopeDecorations(scope.color, scope.open.character);
-                event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
-                this.gutterDecorations.push(decorationOpen);
+                if (scope.open.range.start.line === scope.close.range.start.line) {
+                    const decoration =
+                        this.settings.createScopeDecorations(scope.color, scope.open.character + scope.close.character);
+                    event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
+                    this.gutterDecorations.push(decoration);
+                }
+                else {
+                    const decorationOpen = this.settings.createScopeDecorations(scope.color, scope.open.character);
+                    event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
+                    this.gutterDecorations.push(decorationOpen);
 
-                const decorationClose = this.settings.createScopeDecorations(scope.color, scope.close.character);
-                event.textEditor.setDecorations(decorationClose, [scope.close.range]);
-                this.gutterDecorations.push(decorationClose);
+                    const decorationClose = this.settings.createScopeDecorations(scope.color, scope.close.character);
+                    event.textEditor.setDecorations(decorationClose, [scope.close.range]);
+                    this.gutterDecorations.push(decorationClose);
+                }
             }
         }
     }
