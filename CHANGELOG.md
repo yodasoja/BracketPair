@@ -1,7 +1,11 @@
 ## Release Notes
 
+### 1.0.30
+Support both open/close brackets in gutter at same time
+
 ### 1.0.29
-Added gutter icon support via `bracketPairColorizer.showBracketsInGutter`
+Added gutter icon support via `bracketPairColorizer.showBracketsInGutter`  
+![Gutter](images/gutter.png "Gutter Brackets Example")  
 
 ### 1.0.28
 json5 support  
