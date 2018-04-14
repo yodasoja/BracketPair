@@ -14,6 +14,7 @@ export default class Settings {
     public readonly regexNonExact: RegExp;
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
+    public readonly showBracketsInGutter: boolean;
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
     private readonly cssElements: string[][];
@@ -44,6 +45,12 @@ export default class Settings {
 
         if (typeof this.highlightActiveScope !== "boolean") {
             throw new Error("alwaysHighlightActiveScope is not a boolean");
+        }
+
+        this.showBracketsInGutter = configuration.get("showBracketsInGutter") as boolean;
+
+        if (typeof this.showBracketsInGutter !== "boolean") {
+            throw new Error("showBracketsInGutter is not a boolean");
         }
 
         this.forceUniqueOpeningColor = configuration.get("forceUniqueOpeningColor") as boolean;
@@ -154,16 +161,19 @@ export default class Settings {
     }
 
     public createScopeDecorations(color: string, bracket: string) {
-        const gutterIcon = this.gutterIcons.GetIconUri(bracket, color, this.fontFamily);
+        const gutterIcon = this.showBracketsInGutter ?
+            this.gutterIcons.GetIconUri(bracket, color, this.fontFamily) : undefined;
 
         const decorationSettings: vscode.DecorationRenderOptions = {
             gutterIconPath: gutterIcon,
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
         };
 
-        this.cssElements.forEach((element) => {
-            decorationSettings[element[0]] = element[1].replace("{color}", color);
-        });
+        if (this.highlightActiveScope) {
+            this.cssElements.forEach((element) => {
+                decorationSettings[element[0]] = element[1].replace("{color}", color);
+            });
+        }
 
         const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
         return decoration;

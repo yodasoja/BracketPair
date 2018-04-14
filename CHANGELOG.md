@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.29
+Added gutter icon support via `bracketPairColorizer.showBracketsInGutter`
+
 ### 1.0.28
 json5 support  
 Better nested comment support

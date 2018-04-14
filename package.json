@@ -73,6 +73,12 @@
                     "description": "CSS for the active scope. Use {color} to match the bracket color. The string types listed at https://code.visualstudio.com/docs/extensionAPI/vscode-api#DecorationRenderOptions can be used",
                     "scope": "resource"
                 },
+                "bracketPairColorizer.showBracketsInGutter": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show active bracket scope in gutter?",
+                    "scope": "resource"
+                },
                 "bracketPairColorizer.consecutivePairColors": {
                     "type": "array",
                     "default": [

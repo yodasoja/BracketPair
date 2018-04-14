@@ -2,7 +2,6 @@ import Uri from "vscode-uri";
 
 export default class GutterIconManager {
     private fs = require("fs");
-    private tmp = require("tmp");
     private escape = require("escape-html");
 
     private iconDict = new Map<string, Map<string, Uri>>();
@@ -38,17 +37,6 @@ export default class GutterIconManager {
             return newUri;
         }
     }
-
-    // private getUri(color: string, bracket: string) {
-    //     const icon = this.createIcon(color, bracket);
-    //     const tmpobj = this.tmp.fileSync();
-    //     const filePath = this.tmp.fileSync().name as string;
-    //     const encode = this.PImage.encodePNGToStream(icon, this.fs.createWriteStream(filePath)) as Promise<void>;
-    //     return encode.then(() => {
-    //         this.disposables.push(tmpobj.removeCallback);
-    //         return Uri.file(filePath);
-    //     });
-    // }
 
     private createIcon(color: string, bracket: string, fontFamily: string): Uri {
         const svg =

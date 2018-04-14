@@ -47,6 +47,12 @@ It is recommended to disable the inbuilt `editor.matchBrackets` setting if using
 >Tip: Add the value `"backgroundColor : {color}"` to increase visibility  
 ![BorderBackground](images/activeScopeBackground.png "Active Scope Background Example")
 
+> `"bracketPairColorizer.showBracketsInGutter"`  
+> Show active scope brackets in the gutter  
+![Gutter](images/gutter.png "Gutter Brackets Example")  
+
+ 
+
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
 > Note: Pair must be supported punctuation type by Prism.js  
@@ -54,7 +60,7 @@ It is recommended to disable the inbuilt `editor.matchBrackets` setting if using
 > `"bracketPairColorizer.independentPairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
 > Note: Pair must be supported punctuation type by Prism.js
- 
+
 >### HTML Configuration
 >An example configuration for HTML is:  
 ```
