@@ -19,7 +19,7 @@ export default class DocumentDecoration {
     private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private readonly prismJs: any;
     private readonly largeFileRange: vscode.Range;
-    private gutterDecorations: TextEditorDecorationType[] = [];
+    private scopeDecorations: TextEditorDecorationType[] = [];
 
     // What have I created..
     private readonly stringStrategies = new Map<string,
@@ -69,7 +69,7 @@ export default class DocumentDecoration {
 
     public dispose() {
         this.settings.dispose();
-        this.disposeGutter();
+        this.disposeScopeDecorations();
     }
 
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
@@ -132,7 +132,7 @@ export default class DocumentDecoration {
             return;
         }
 
-        this.disposeGutter();
+        this.disposeScopeDecorations();
 
         const scopes: Set<Scope> = new Set<Scope>();
 
@@ -147,30 +147,43 @@ export default class DocumentDecoration {
         for (const scope of scopes) {
             {
                 if (scope.open.range.start.line === scope.close.range.start.line) {
+
                     const decoration =
                         this.settings.createScopeDecorations(scope.color, scope.open.character + scope.close.character);
                     event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
-                    this.gutterDecorations.push(decoration);
+                    this.scopeDecorations.push(decoration);
                 }
                 else {
                     const decorationOpen = this.settings.createScopeDecorations(scope.color, scope.open.character);
                     event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
-                    this.gutterDecorations.push(decorationOpen);
+                    this.scopeDecorations.push(decorationOpen);
+
+                    const middleRanges: vscode.Range[] = [];
+                    for (let i = scope.open.range.start.line; i <= scope.close.range.start.line; i++) {
+                        const emptyPosition = new vscode.Position(i, 0);
+                        middleRanges.push(new vscode.Range(emptyPosition, emptyPosition));
+                    }
+
+                    if (middleRanges) {
+                        const decorationMiddle = this.settings.createScopeDecorations(scope.color, "", false);
+                        event.textEditor.setDecorations(decorationMiddle, middleRanges);
+                        this.scopeDecorations.push(decorationMiddle);
+                    }
 
                     const decorationClose = this.settings.createScopeDecorations(scope.color, scope.close.character);
                     event.textEditor.setDecorations(decorationClose, [scope.close.range]);
-                    this.gutterDecorations.push(decorationClose);
+                    this.scopeDecorations.push(decorationClose);
                 }
             }
         }
     }
 
-    private disposeGutter() {
-        this.gutterDecorations.forEach((decoration) => {
+    private disposeScopeDecorations() {
+        this.scopeDecorations.forEach((decoration) => {
             decoration.dispose();
         });
 
-        this.gutterDecorations = [];
+        this.scopeDecorations = [];
     }
 
     private getScope(position: vscode.Position): Scope | undefined {

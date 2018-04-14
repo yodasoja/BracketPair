@@ -160,8 +160,12 @@ export default class Settings {
         }
     }
 
-    public createScopeDecorations(color: string, bracket: string) {
-        const gutterIcon = this.showBracketsInGutter ?
+    public createScopeDecorations(color: string, bracket: string, showGutter?: boolean) {
+        if (showGutter === undefined) {
+            showGutter = this.showBracketsInGutter;
+        }
+
+        const gutterIcon = showGutter ?
             this.gutterIcons.GetIconUri(bracket, color, this.fontFamily) : undefined;
 
         const decorationSettings: vscode.DecorationRenderOptions = {
