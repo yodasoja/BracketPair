@@ -185,7 +185,9 @@ export default class DocumentDecoration {
 
                     for (let lineIndex = start; lineIndex <= end; lineIndex++) {
                         const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
-                        leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
+                        if (firstCharIndex !== 0) {
+                            leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
+                        }
                     }
 
                     if (this.settings.showVerticalScopeLine) {
@@ -223,8 +225,10 @@ export default class DocumentDecoration {
                     }
 
                     for (let lineIndex = start; lineIndex <= end; lineIndex++) {
-                        const linePosition = new vscode.Position(lineIndex, leftBorderIndex);
-                        verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
+                        if (position === 0 || !this.document.lineAt(lineIndex).isEmptyOrWhitespace) {
+                            const linePosition = new vscode.Position(lineIndex, leftBorderIndex);
+                            verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
+                        }
                     }
 
                     if (verticalLineRanges) {
