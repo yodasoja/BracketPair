@@ -64,7 +64,8 @@ Dependant on `showVerticalScopeLine` being enabled
 Disable this to show the vertical line in column 0  
 ![Scope Line](images/no-relative.png "Gutter Brackets Example")  
   
->`"bracketPairColorizer.scopeLineCSS"`
+>`"bracketPairColorizer.scopeLineCSS"`  
+Choose a border style to highlight the active scope. Use `{color}` to match the existing bracket color 
 
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  
