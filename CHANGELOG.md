@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 1.0.34  
+New settings to show brackets in the ruler:
+
+> `"showBracketsInRuler"`  
+> `"rulerPosition"`  
+
 ### 1.0.33
 Make `"showBracketsInGutter"` not depend on `"highlightActiveScope"`
 

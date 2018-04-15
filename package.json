@@ -79,6 +79,24 @@
                     "description": "Show active bracket scope in gutter?",
                     "scope": "resource"
                 },
+                "bracketPairColorizer.showBracketsInRuler": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show active bracket scope in ruler?",
+                    "scope": "resource"
+                },
+                "bracketPairColorizer.rulerPosition": {
+                    "type": "string",
+                    "enum": [
+                        "Center",
+                        "Full",
+                        "Left",
+                        "Right"
+                    ],
+                    "default": "Center",
+                    "description": "Show active bracket scope in ruler?",
+                    "scope": "resource"
+                },
                 "bracketPairColorizer.showVerticalScopeLine": {
                     "type": "boolean",
                     "default": true,

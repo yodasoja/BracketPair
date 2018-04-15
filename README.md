@@ -49,7 +49,13 @@ It is recommended to disable the inbuilt `editor.matchBrackets` setting if using
 
 > `"bracketPairColorizer.showBracketsInGutter"`  
 > Show active scope brackets in the gutter  
-![Gutter](images/gutter.png "Gutter Brackets Example")  
+![Gutter](images/gutter.png "Gutter Brackets Example") 
+
+> `"bracketPairColorizer.showBracketsInRuler"`  
+> Show active scope brackets in the ruler  
+
+> `"bracketPairColorizer.rulerPosition"`  
+> Decoration position in the ruler
 
 >`"bracketPairColorizer.showVerticalScopeLine"`  
 Show a vertical line between the brackets?  Enabled by default   

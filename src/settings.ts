@@ -17,6 +17,7 @@ export default class Settings {
     public readonly showVerticalScopeLine: boolean;
     public readonly showHorizontalScopeLine: boolean;
     public readonly showBracketsInGutter: boolean;
+    public readonly showBracketsInRuler: boolean;
     public readonly scopeLineRelativePosition: boolean;
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
@@ -24,6 +25,7 @@ export default class Settings {
     private readonly activeScopeLineCSSElements: string[][];
     private readonly activeScopeLineCSSBorder: string;
     private readonly fontFamily: string;
+    private readonly rulerPosition: string;
 
     constructor(
         languageID: string,
@@ -92,6 +94,18 @@ export default class Settings {
 
         if (typeof this.showBracketsInGutter !== "boolean") {
             throw new Error("showBracketsInGutter is not a boolean");
+        }
+
+        this.showBracketsInRuler = configuration.get("showBracketsInRuler") as boolean;
+
+        if (typeof this.showBracketsInRuler !== "boolean") {
+            throw new Error("showBracketsInRuler is not a boolean");
+        }
+
+        this.rulerPosition = configuration.get("rulerPosition") as string;
+
+        if (typeof this.rulerPosition !== "string") {
+            throw new Error("rulerPosition is not a string");
         }
 
         this.forceUniqueOpeningColor = configuration.get("forceUniqueOpeningColor") as boolean;
@@ -201,10 +215,19 @@ export default class Settings {
         }
     }
 
-    public createGutterBracketDecorations(color: string, bracket: string, showGutter?: boolean) {
+    public createGutterBracketDecorations(color: string, bracket: string) {
         const gutterIcon = this.gutterIcons.GetIconUri(bracket, color, this.fontFamily);
         const decorationSettings: vscode.DecorationRenderOptions = {
             gutterIconPath: gutterIcon,
+        };
+        const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
+        return decoration;
+    }
+
+    public createRulerBracketDecorations(color: string) {
+        const decorationSettings: vscode.DecorationRenderOptions = {
+            overviewRulerColor: color,
+            overviewRulerLane: vscode.OverviewRulerLane[this.rulerPosition],
         };
         const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
         return decoration;

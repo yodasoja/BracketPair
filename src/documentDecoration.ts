@@ -173,6 +173,13 @@ export default class DocumentDecoration {
                 }
             }
 
+            if (this.settings.showBracketsInRuler) {
+                const decoration =
+                    this.settings.createRulerBracketDecorations(scope.color);
+                event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
+                this.scopeDecorations.push(decoration);
+            }
+
             if (this.settings.showVerticalScopeLine) {
                 const verticalLineRanges: vscode.Range[] = [];
 
@@ -191,7 +198,8 @@ export default class DocumentDecoration {
                 const end = lastBracketIsFirstCharacterOnLine ?
                     scope.close.range.start.line - 1 : scope.close.range.start.line;
 
-                for (let lineIndex = start; lineIndex <= end; lineIndex++) {
+                // Start -1 because prefer draw line at current indent level
+                for (let lineIndex = start - 1; lineIndex <= end; lineIndex++) {
                     const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
                     if (firstCharIndex !== 0) {
                         leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
