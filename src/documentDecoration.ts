@@ -385,7 +385,7 @@ export default class DocumentDecoration {
 
     private matchString(content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) {
         if (lineIndex < this.lineToUpdateWhenTimeoutEnds) {
-            return this.parseString(content, lineIndex, charIndex);;
+            return this.parseString(content, lineIndex, charIndex);
         }
 
         this.settings.regexNonExact.lastIndex = 0;
