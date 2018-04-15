@@ -51,7 +51,20 @@ It is recommended to disable the inbuilt `editor.matchBrackets` setting if using
 > Show active scope brackets in the gutter  
 ![Gutter](images/gutter.png "Gutter Brackets Example")  
 
- 
+>`"bracketPairColorizer.showVerticalScopeLine"`  
+Show a vertical line between the brackets?  
+![Scope Line](images/no-extra.png "Gutter Brackets Example")  
+
+>`"bracketPairColorizer.showHorizontalScopeLine"`  
+Show a horizontal line between the brackets? Enabled by default   
+Dependant on `showVerticalScopeLine` being enabled  
+![Scope Line](images/extra.png "Gutter Brackets Example")  
+
+>`"bracketPairColorizer.scopeLineRelativePosition"`  
+Disable this to show the vertical line in column 0  
+![Scope Line](images/no-relative.png "Gutter Brackets Example")  
+  
+>`"bracketPairColorizer.scopeLineCSS"`
 
 > `"bracketPairColorizer.consecutivePairColors"`   
 > A new bracket pair can be configured by adding it to the array.  

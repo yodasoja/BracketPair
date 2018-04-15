@@ -56,7 +56,7 @@ export default class DocumentDecorationManager {
         if (documentDecoration &&
             (documentDecoration.settings.highlightActiveScope ||
                 documentDecoration.settings.showBracketsInGutter ||
-                documentDecoration.settings.showScopeLine)) {
+                documentDecoration.settings.showVerticalScopeLine)) {
             documentDecoration.updateScopeDecorations(event);
         }
     }

@@ -79,13 +79,13 @@
                     "description": "Show active bracket scope in gutter?",
                     "scope": "resource"
                 },
-                "bracketPairColorizer.showScopeLine": {
+                "bracketPairColorizer.showVerticalScopeLine": {
                     "type": "boolean",
                     "default": false,
                     "description": "Show a vertical line on the left side of the editor representing the active bracket scope?",
                     "scope": "resource"
                 },
-                "bracketPairColorizer.showScopeLineExtra": {
+                "bracketPairColorizer.showHorizontalScopeLine": {
                     "type": "boolean",
                     "default": true,
                     "description": "Show a horizontal line to create a block around the active bracket scope?",

@@ -165,7 +165,7 @@ export default class DocumentDecoration {
                     }
                 }
 
-                if (this.settings.showScopeLine) {
+                if (this.settings.showVerticalScopeLine) {
                     const verticalLineRanges: vscode.Range[] = [];
 
                     const position =
@@ -188,7 +188,7 @@ export default class DocumentDecoration {
                         leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
                     }
 
-                    if (this.settings.showScopeLineExtra) {
+                    if (this.settings.showVerticalScopeLine) {
                         const underlineLineRanges: vscode.Range[] = [];
                         const overlineLineRanges: vscode.Range[] = [];
 

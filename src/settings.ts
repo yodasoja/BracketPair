@@ -14,8 +14,8 @@ export default class Settings {
     public readonly regexNonExact: RegExp;
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
-    public readonly showScopeLine: boolean;
-    public readonly showScopeLineExtra: boolean;
+    public readonly showVerticalScopeLine: boolean;
+    public readonly showHorizontalScopeLine: boolean;
     public readonly showBracketsInGutter: boolean;
     public readonly scopeLineRelativePosition: boolean;
     public isDisposed = false;
@@ -70,16 +70,16 @@ export default class Settings {
             throw new Error("alwaysHighlightActiveScope is not a boolean");
         }
 
-        this.showScopeLine = configuration.get("showScopeLine") as boolean;
+        this.showVerticalScopeLine = configuration.get("showVerticalScopeLine") as boolean;
 
-        if (typeof this.showScopeLine !== "boolean") {
-            throw new Error("showScopeLine is not a boolean");
+        if (typeof this.showVerticalScopeLine !== "boolean") {
+            throw new Error("showVerticalScopeLine is not a boolean");
         }
 
-        this.showScopeLineExtra = configuration.get("showScopeLineExtra") as boolean;
+        this.showHorizontalScopeLine = configuration.get("showHorizontalScopeLine") as boolean;
 
-        if (typeof this.showScopeLineExtra !== "boolean") {
-            throw new Error("showScopeLineExtra is not a boolean");
+        if (typeof this.showHorizontalScopeLine !== "boolean") {
+            throw new Error("showHorizontalScopeLine is not a boolean");
         }
 
         this.scopeLineRelativePosition = configuration.get("scopeLineRelativePosition") as boolean;
