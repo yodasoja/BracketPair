@@ -52,7 +52,7 @@ It is recommended to disable the inbuilt `editor.matchBrackets` setting if using
 ![Gutter](images/gutter.png "Gutter Brackets Example")  
 
 >`"bracketPairColorizer.showVerticalScopeLine"`  
-Show a vertical line between the brackets?  
+Show a vertical line between the brackets?  Enabled by default   
 ![Scope Line](images/no-extra.png "Gutter Brackets Example")  
 
 >`"bracketPairColorizer.showHorizontalScopeLine"`  

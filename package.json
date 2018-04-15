@@ -81,7 +81,7 @@
                 },
                 "bracketPairColorizer.showVerticalScopeLine": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "Show a vertical line on the left side of the editor representing the active bracket scope?",
                     "scope": "resource"
                 },

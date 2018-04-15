@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 1.0.32
+Better handling of empty lines when drawing line scope  
+Enabled `"bracketPairColorizer.showVerticalScopeLine"` by default
+
 ### 1.0.31
 ![Line Scope](images/extra.png "Active Line Scope Example")  
 
