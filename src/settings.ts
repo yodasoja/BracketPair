@@ -15,12 +15,14 @@ export default class Settings {
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
     public readonly showScopeLine: boolean;
+    public readonly showScopeLineExtra: boolean;
     public readonly showBracketsInGutter: boolean;
     public readonly scopeLineRelativePosition: boolean;
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
     private readonly activeBracketCSSElements: string[][];
     private readonly activeScopeLineCSSElements: string[][];
+    private readonly activeScopeLineCSSBorder: string;
     private readonly fontFamily: string;
 
     constructor(
@@ -54,6 +56,14 @@ export default class Settings {
             [e.substring(0, e.indexOf(":")).trim(),
             e.substring(e.indexOf(":") + 1).trim()]);
 
+        const borderStyle = this.activeScopeLineCSSElements.filter((e) => e[0] === "borderStyle");
+        if (borderStyle && borderStyle[0].length === 2) {
+            this.activeScopeLineCSSBorder = borderStyle[0][1];
+        }
+        else {
+            this.activeScopeLineCSSBorder = "none";
+        }
+
         this.highlightActiveScope = configuration.get("highlightActiveScope") as boolean;
 
         if (typeof this.highlightActiveScope !== "boolean") {
@@ -64,6 +74,12 @@ export default class Settings {
 
         if (typeof this.showScopeLine !== "boolean") {
             throw new Error("showScopeLine is not a boolean");
+        }
+
+        this.showScopeLineExtra = configuration.get("showScopeLineExtra") as boolean;
+
+        if (typeof this.showScopeLineExtra !== "boolean") {
+            throw new Error("showScopeLineExtra is not a boolean");
         }
 
         this.scopeLineRelativePosition = configuration.get("scopeLineRelativePosition") as boolean;
@@ -206,14 +222,23 @@ export default class Settings {
         return decoration;
     }
 
-    public createScopeLineDecorations(color: string) {
+    public createScopeLineDecorations(color: string, top = true, right = true, bottom = true, left = true) {
         const decorationSettings: vscode.DecorationRenderOptions = {
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
         };
 
+        const none = "none";
+        const topBorder = top ? this.activeScopeLineCSSBorder : none;
+        const rightBorder = right ? this.activeScopeLineCSSBorder : none;
+        const botBorder = bottom ? this.activeScopeLineCSSBorder : none;
+        const leftBorder = left ? this.activeScopeLineCSSBorder : none;
+
         this.activeScopeLineCSSElements.forEach((element) => {
             decorationSettings[element[0]] = element[1].replace("{color}", color);
         });
+
+        // tslint:disable-next-line:no-string-literal
+        decorationSettings["borderStyle"] = `${topBorder} ${rightBorder} ${botBorder} ${leftBorder}`;
 
         const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
         return decoration;

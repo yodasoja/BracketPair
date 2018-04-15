@@ -146,19 +146,14 @@ export default class DocumentDecoration {
 
         for (const scope of scopes) {
             {
-                if (scope.open.range.start.line === scope.close.range.start.line) {
-                    if (!this.settings.highlightActiveScope) {
-                        continue;
+                if (this.settings.highlightActiveScope) {
+                    if (scope.open.range.start.line === scope.close.range.start.line) {
+                        const decoration = this.settings.createScopeBracketDecorations
+                            (scope.color, scope.open.character + scope.close.character);
+                        event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
+                        this.scopeDecorations.push(decoration);
                     }
-
-                    const decoration = this.settings.createScopeBracketDecorations
-                        (scope.color, scope.open.character + scope.close.character);
-                    event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
-                    this.scopeDecorations.push(decoration);
-                }
-                else {
-                    if (this.settings.highlightActiveScope) {
-
+                    else {
                         const decorationOpen =
                             this.settings.createScopeBracketDecorations(scope.color, scope.open.character);
                         event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
@@ -168,28 +163,62 @@ export default class DocumentDecoration {
                         event.textEditor.setDecorations(decorationClose, [scope.close.range]);
                         this.scopeDecorations.push(decorationClose);
                     }
+                }
 
-                    if (this.settings.showScopeLine) {
-                        const lineRanges: vscode.Range[] = [];
+                if (this.settings.showScopeLine) {
+                    const verticalLineRanges: vscode.Range[] = [];
 
-                        const position =
-                            this.settings.scopeLineRelativePosition ?
-                                Math.min(scope.close.range.start.character, scope.open.range.start.character) : 0;
+                    const position =
+                        this.settings.scopeLineRelativePosition ?
+                            Math.min(scope.close.range.start.character, scope.open.range.start.character) : 0;
 
-                        const offset = this.settings.scopeLineRelativePosition ? 1 : 0;
-                        const start = scope.open.range.start.line + offset;
-                        const end = scope.close.range.start.line - offset;
-                        for (let i = start; i <= end; i++) {
-                            const emptyPosition = new vscode.Position(i, position);
-                            lineRanges.push(new vscode.Range(emptyPosition, emptyPosition));
+                    const start = scope.open.range.start.line + 1;
+                    const end = scope.close.range.start.line - 1;
+                    let leftBorderIndex = position;
+                    for (let lineIndex = start; lineIndex <= end; lineIndex++) {
+                        const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
+                        leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
+                    }
+
+                    if (this.settings.showScopeLineExtra) {
+                        const underlineLineRanges: vscode.Range[] = [];
+                        const overlineLineRanges: vscode.Range[] = [];
+
+                        if (scope.open.range.start.line === scope.close.range.start.line) {
+                            underlineLineRanges.push(new vscode.Range(scope.open.range.start, scope.close.range.end));
+                        }
+                        else {
+                            const leftStartPos = new vscode.Position(scope.open.range.start.line, leftBorderIndex);
+                            const leftEndPos = new vscode.Position(scope.close.range.start.line, leftBorderIndex);
+                            underlineLineRanges.push(new vscode.Range(leftStartPos, scope.open.range.end));
+                            overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
                         }
 
-                        if (lineRanges) {
+                        if (underlineLineRanges) {
                             const lineDecoration =
-                                this.settings.createScopeLineDecorations(scope.color);
-                            event.textEditor.setDecorations(lineDecoration, lineRanges);
+                                this.settings.createScopeLineDecorations(scope.color, false, false, true, false);
+                            event.textEditor.setDecorations(lineDecoration, underlineLineRanges);
                             this.scopeDecorations.push(lineDecoration);
                         }
+
+                        if (overlineLineRanges) {
+                            const lineDecoration =
+                                this.settings.createScopeLineDecorations(scope.color, true, false, false, false);
+                            event.textEditor.setDecorations(lineDecoration, overlineLineRanges);
+                            this.scopeDecorations.push(lineDecoration);
+                        }
+                    }
+
+                    for (let lineIndex = start; lineIndex <= end; lineIndex++) {
+                        const linePosition = new vscode.Position(lineIndex, leftBorderIndex);
+                        verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
+                    }
+
+                    if (verticalLineRanges) {
+                        const lineDecoration =
+                            this.settings.createScopeLineDecorations(scope.color);
+                        event.textEditor.setDecorations(lineDecoration, verticalLineRanges);
+                        this.scopeDecorations.push(lineDecoration);
                     }
                 }
             }
