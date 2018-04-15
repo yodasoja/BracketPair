@@ -206,7 +206,7 @@ export default class DocumentDecoration {
                     }
                 }
 
-                if (this.settings.showVerticalScopeLine) {
+                if (this.settings.showHorizontalScopeLine) {
                     const underlineLineRanges: vscode.Range[] = [];
                     const overlineLineRanges: vscode.Range[] = [];
 

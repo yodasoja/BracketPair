@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.35  
+Fix `"showHorizontalScopeLine"` settings not being respected
+
 ### 1.0.34  
 New settings to show brackets in the ruler:
 
