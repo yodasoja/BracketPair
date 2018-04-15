@@ -1,16 +1,21 @@
 import { TextDocument, TextDocumentContentChangeEvent, TextEditorSelectionChangeEvent, window } from "vscode";
 import DocumentDecoration from "./documentDecoration";
 import GutterIconManager from "./gutterIconManager";
-import PrismJsLanguages from "./prismJsLanguages";
 import Settings from "./settings";
 
 export default class DocumentDecorationManager {
     private readonly Prism = require("prismjs/components/prism-core.js");
     private readonly loadLanguages = require("prismjs/components/index.js");
-    private readonly supportedLanguages = new Set(PrismJsLanguages);
+    private readonly components = require("prismjs/components");
+    private readonly supportedLanguages: Set<string>;
     private readonly gutterIcons = new GutterIconManager();
     private showError = true;
     private documents = new Map<string, DocumentDecoration>();
+
+    constructor() {
+        this.supportedLanguages = new Set(Object.keys(this.components.languages));
+    }
+
     public reset() {
         this.documents.forEach((document, key) => {
             document.dispose();
