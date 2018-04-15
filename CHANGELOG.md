@@ -1,5 +1,12 @@
 ## Release Notes
 
+### 1.0.31
+New settings to show a vertical line for the active scope:
+
+>`"bracketPairColorizer.showScopeLine"`  
+>`"bracketPairColorizer.scopeLineRelativePosition"`  
+>`"bracketPairColorizer.scopeLineCSS"`
+
 ### 1.0.30
 Support both open/close brackets in gutter at same time
 

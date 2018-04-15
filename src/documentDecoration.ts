@@ -147,32 +147,50 @@ export default class DocumentDecoration {
         for (const scope of scopes) {
             {
                 if (scope.open.range.start.line === scope.close.range.start.line) {
+                    if (!this.settings.highlightActiveScope) {
+                        continue;
+                    }
 
-                    const decoration =
-                        this.settings.createScopeDecorations(scope.color, scope.open.character + scope.close.character);
+                    const decoration = this.settings.createScopeBracketDecorations
+                        (scope.color, scope.open.character + scope.close.character);
                     event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
                     this.scopeDecorations.push(decoration);
                 }
                 else {
-                    const decorationOpen = this.settings.createScopeDecorations(scope.color, scope.open.character);
-                    event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
-                    this.scopeDecorations.push(decorationOpen);
+                    if (this.settings.highlightActiveScope) {
 
-                    const middleRanges: vscode.Range[] = [];
-                    for (let i = scope.open.range.start.line; i <= scope.close.range.start.line; i++) {
-                        const emptyPosition = new vscode.Position(i, 0);
-                        middleRanges.push(new vscode.Range(emptyPosition, emptyPosition));
+                        const decorationOpen =
+                            this.settings.createScopeBracketDecorations(scope.color, scope.open.character);
+                        event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
+                        this.scopeDecorations.push(decorationOpen);
+                        const decorationClose =
+                            this.settings.createScopeBracketDecorations(scope.color, scope.close.character);
+                        event.textEditor.setDecorations(decorationClose, [scope.close.range]);
+                        this.scopeDecorations.push(decorationClose);
                     }
 
-                    if (middleRanges) {
-                        const decorationMiddle = this.settings.createScopeDecorations(scope.color, "", false);
-                        event.textEditor.setDecorations(decorationMiddle, middleRanges);
-                        this.scopeDecorations.push(decorationMiddle);
-                    }
+                    if (this.settings.showScopeLine) {
+                        const lineRanges: vscode.Range[] = [];
 
-                    const decorationClose = this.settings.createScopeDecorations(scope.color, scope.close.character);
-                    event.textEditor.setDecorations(decorationClose, [scope.close.range]);
-                    this.scopeDecorations.push(decorationClose);
+                        const position =
+                            this.settings.scopeLineRelativePosition ?
+                                Math.min(scope.close.range.start.character, scope.open.range.start.character) : 0;
+
+                        const offset = this.settings.scopeLineRelativePosition ? 1 : 0;
+                        const start = scope.open.range.start.line + offset;
+                        const end = scope.close.range.start.line - offset;
+                        for (let i = start; i <= end; i++) {
+                            const emptyPosition = new vscode.Position(i, position);
+                            lineRanges.push(new vscode.Range(emptyPosition, emptyPosition));
+                        }
+
+                        if (lineRanges) {
+                            const lineDecoration =
+                                this.settings.createScopeLineDecorations(scope.color);
+                            event.textEditor.setDecorations(lineDecoration, lineRanges);
+                            this.scopeDecorations.push(lineDecoration);
+                        }
+                    }
                 }
             }
         }

@@ -14,10 +14,13 @@ export default class Settings {
     public readonly regexNonExact: RegExp;
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
+    public readonly showScopeLine: boolean;
     public readonly showBracketsInGutter: boolean;
+    public readonly scopeLineRelativePosition: boolean;
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
-    private readonly cssElements: string[][];
+    private readonly activeBracketCSSElements: string[][];
+    private readonly activeScopeLineCSSElements: string[][];
     private readonly fontFamily: string;
 
     constructor(
@@ -37,7 +40,17 @@ export default class Settings {
             throw new Error("activeScopeCSS is not an array");
         }
 
-        this.cssElements = activeScopeCSS.map((e) =>
+        this.activeBracketCSSElements = activeScopeCSS.map((e) =>
+            [e.substring(0, e.indexOf(":")).trim(),
+            e.substring(e.indexOf(":") + 1).trim()]);
+
+        const scopeLineCSS = configuration.get("scopeLineCSS") as string[];
+
+        if (!Array.isArray(scopeLineCSS)) {
+            throw new Error("scopeLineCSS is not an array");
+        }
+
+        this.activeScopeLineCSSElements = scopeLineCSS.map((e) =>
             [e.substring(0, e.indexOf(":")).trim(),
             e.substring(e.indexOf(":") + 1).trim()]);
 
@@ -45,6 +58,18 @@ export default class Settings {
 
         if (typeof this.highlightActiveScope !== "boolean") {
             throw new Error("alwaysHighlightActiveScope is not a boolean");
+        }
+
+        this.showScopeLine = configuration.get("showScopeLine") as boolean;
+
+        if (typeof this.showScopeLine !== "boolean") {
+            throw new Error("showScopeLine is not a boolean");
+        }
+
+        this.scopeLineRelativePosition = configuration.get("scopeLineRelativePosition") as boolean;
+
+        if (typeof this.scopeLineRelativePosition !== "boolean") {
+            throw new Error("scopeLineRelativePosition is not a boolean");
         }
 
         this.showBracketsInGutter = configuration.get("showBracketsInGutter") as boolean;
@@ -160,7 +185,7 @@ export default class Settings {
         }
     }
 
-    public createScopeDecorations(color: string, bracket: string, showGutter?: boolean) {
+    public createScopeBracketDecorations(color: string, bracket: string, showGutter?: boolean) {
         if (showGutter === undefined) {
             showGutter = this.showBracketsInGutter;
         }
@@ -173,11 +198,22 @@ export default class Settings {
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
         };
 
-        if (this.highlightActiveScope) {
-            this.cssElements.forEach((element) => {
-                decorationSettings[element[0]] = element[1].replace("{color}", color);
-            });
-        }
+        this.activeBracketCSSElements.forEach((element) => {
+            decorationSettings[element[0]] = element[1].replace("{color}", color);
+        });
+
+        const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
+        return decoration;
+    }
+
+    public createScopeLineDecorations(color: string) {
+        const decorationSettings: vscode.DecorationRenderOptions = {
+            rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+        };
+
+        this.activeScopeLineCSSElements.forEach((element) => {
+            decorationSettings[element[0]] = element[1].replace("{color}", color);
+        });
 
         const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
         return decoration;

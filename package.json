@@ -79,6 +79,28 @@
                     "description": "Show active bracket scope in gutter?",
                     "scope": "resource"
                 },
+                "bracketPairColorizer.showScopeLine": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show a vertical line on the left side of the editor representing the active bracket scope?",
+                    "scope": "resource"
+                },
+                "bracketPairColorizer.scopeLineRelativePosition": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "True: Scope Line will start from the ending bracket position. False: Scope Line will always be at column 0",
+                    "scope": "resource"
+                },
+                "bracketPairColorizer.scopeLineCSS": {
+                    "type": "array",
+                    "default": [
+                        "borderStyle : solid",
+                        "borderWidth : 1px",
+                        "borderColor : {color}; opacity: 0.5"
+                    ],
+                    "description": "CSS for the scope line. Use {color} to match the bracket color. The string types listed at https://code.visualstudio.com/docs/extensionAPI/vscode-api#DecorationRenderOptions can be used",
+                    "scope": "resource"
+                },
                 "bracketPairColorizer.consecutivePairColors": {
                     "type": "array",
                     "default": [
