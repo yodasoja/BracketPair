@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.36
+Minor fix to improve vertical scope line in situation where a line is a position 0
+
 ### 1.0.35  
 Fix `"showHorizontalScopeLine"` settings not being respected
 

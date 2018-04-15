@@ -200,8 +200,9 @@ export default class DocumentDecoration {
 
                 // Start -1 because prefer draw line at current indent level
                 for (let lineIndex = start - 1; lineIndex <= end; lineIndex++) {
-                    const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
-                    if (firstCharIndex !== 0) {
+                    const line = this.document.lineAt(lineIndex);
+                    if (!line.isEmptyOrWhitespace) {
+                        const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
                         leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
                     }
                 }
