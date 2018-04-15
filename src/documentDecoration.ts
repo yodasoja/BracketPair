@@ -172,9 +172,17 @@ export default class DocumentDecoration {
                         this.settings.scopeLineRelativePosition ?
                             Math.min(scope.close.range.start.character, scope.open.range.start.character) : 0;
 
-                    const start = scope.open.range.start.line + 1;
-                    const end = scope.close.range.start.line - 1;
                     let leftBorderIndex = position;
+
+                    const lastWhiteSpaceCharacterIndex =
+                        this.document.lineAt(scope.close.range.start).firstNonWhitespaceCharacterIndex;
+                    const lastBracketStartIndex = scope.close.range.start.character;
+                    const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
+
+                    const start = scope.open.range.start.line + 1;
+                    const end = lastBracketIsFirstCharacterOnLine ?
+                        scope.close.range.start.line - 1 : scope.close.range.start.line;
+
                     for (let lineIndex = start; lineIndex <= end; lineIndex++) {
                         const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
                         leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
@@ -191,7 +199,12 @@ export default class DocumentDecoration {
                             const leftStartPos = new vscode.Position(scope.open.range.start.line, leftBorderIndex);
                             const leftEndPos = new vscode.Position(scope.close.range.start.line, leftBorderIndex);
                             underlineLineRanges.push(new vscode.Range(leftStartPos, scope.open.range.end));
-                            overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
+                            if (lastBracketIsFirstCharacterOnLine) {
+                                overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
+                            }
+                            else {
+                                underlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
+                            }
                         }
 
                         if (underlineLineRanges) {
