@@ -147,96 +147,103 @@ export default class DocumentDecoration {
         for (const scope of scopes) {
             {
                 if (this.settings.highlightActiveScope) {
-                    if (scope.open.range.start.line === scope.close.range.start.line) {
-                        const decoration = this.settings.createScopeBracketDecorations
-                            (scope.color, scope.open.character + scope.close.character);
-                        event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
-                        this.scopeDecorations.push(decoration);
-                    }
-                    else {
-                        const decorationOpen =
-                            this.settings.createScopeBracketDecorations(scope.color, scope.open.character);
-                        event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
-                        this.scopeDecorations.push(decorationOpen);
-                        const decorationClose =
-                            this.settings.createScopeBracketDecorations(scope.color, scope.close.character);
-                        event.textEditor.setDecorations(decorationClose, [scope.close.range]);
-                        this.scopeDecorations.push(decorationClose);
+                    const decoration =
+                        this.settings.createScopeBracketDecorations(scope.color);
+                    event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
+                    this.scopeDecorations.push(decoration);
+                }
+            }
+
+            if (this.settings.showBracketsInGutter) {
+                if (scope.open.range.start.line === scope.close.range.start.line) {
+                    const decoration = this.settings.createGutterBracketDecorations
+                        (scope.color, scope.open.character + scope.close.character);
+                    event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
+                    this.scopeDecorations.push(decoration);
+                }
+                else {
+                    const decorationOpen =
+                        this.settings.createGutterBracketDecorations(scope.color, scope.open.character);
+                    event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
+                    this.scopeDecorations.push(decorationOpen);
+                    const decorationClose =
+                        this.settings.createGutterBracketDecorations(scope.color, scope.close.character);
+                    event.textEditor.setDecorations(decorationClose, [scope.close.range]);
+                    this.scopeDecorations.push(decorationClose);
+                }
+            }
+
+            if (this.settings.showVerticalScopeLine) {
+                const verticalLineRanges: vscode.Range[] = [];
+
+                const position =
+                    this.settings.scopeLineRelativePosition ?
+                        Math.min(scope.close.range.start.character, scope.open.range.start.character) : 0;
+
+                let leftBorderIndex = position;
+
+                const lastWhiteSpaceCharacterIndex =
+                    this.document.lineAt(scope.close.range.start).firstNonWhitespaceCharacterIndex;
+                const lastBracketStartIndex = scope.close.range.start.character;
+                const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
+
+                const start = scope.open.range.start.line + 1;
+                const end = lastBracketIsFirstCharacterOnLine ?
+                    scope.close.range.start.line - 1 : scope.close.range.start.line;
+
+                for (let lineIndex = start; lineIndex <= end; lineIndex++) {
+                    const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
+                    if (firstCharIndex !== 0) {
+                        leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
                     }
                 }
 
                 if (this.settings.showVerticalScopeLine) {
-                    const verticalLineRanges: vscode.Range[] = [];
+                    const underlineLineRanges: vscode.Range[] = [];
+                    const overlineLineRanges: vscode.Range[] = [];
 
-                    const position =
-                        this.settings.scopeLineRelativePosition ?
-                            Math.min(scope.close.range.start.character, scope.open.range.start.character) : 0;
-
-                    let leftBorderIndex = position;
-
-                    const lastWhiteSpaceCharacterIndex =
-                        this.document.lineAt(scope.close.range.start).firstNonWhitespaceCharacterIndex;
-                    const lastBracketStartIndex = scope.close.range.start.character;
-                    const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
-
-                    const start = scope.open.range.start.line + 1;
-                    const end = lastBracketIsFirstCharacterOnLine ?
-                        scope.close.range.start.line - 1 : scope.close.range.start.line;
-
-                    for (let lineIndex = start; lineIndex <= end; lineIndex++) {
-                        const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
-                        if (firstCharIndex !== 0) {
-                            leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
-                        }
+                    if (scope.open.range.start.line === scope.close.range.start.line) {
+                        underlineLineRanges.push(new vscode.Range(scope.open.range.start, scope.close.range.end));
                     }
-
-                    if (this.settings.showVerticalScopeLine) {
-                        const underlineLineRanges: vscode.Range[] = [];
-                        const overlineLineRanges: vscode.Range[] = [];
-
-                        if (scope.open.range.start.line === scope.close.range.start.line) {
-                            underlineLineRanges.push(new vscode.Range(scope.open.range.start, scope.close.range.end));
+                    else {
+                        const leftStartPos = new vscode.Position(scope.open.range.start.line, leftBorderIndex);
+                        const leftEndPos = new vscode.Position(scope.close.range.start.line, leftBorderIndex);
+                        underlineLineRanges.push(new vscode.Range(leftStartPos, scope.open.range.end));
+                        if (lastBracketIsFirstCharacterOnLine) {
+                            overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
                         }
                         else {
-                            const leftStartPos = new vscode.Position(scope.open.range.start.line, leftBorderIndex);
-                            const leftEndPos = new vscode.Position(scope.close.range.start.line, leftBorderIndex);
-                            underlineLineRanges.push(new vscode.Range(leftStartPos, scope.open.range.end));
-                            if (lastBracketIsFirstCharacterOnLine) {
-                                overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
-                            }
-                            else {
-                                underlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
-                            }
-                        }
-
-                        if (underlineLineRanges) {
-                            const lineDecoration =
-                                this.settings.createScopeLineDecorations(scope.color, false, false, true, false);
-                            event.textEditor.setDecorations(lineDecoration, underlineLineRanges);
-                            this.scopeDecorations.push(lineDecoration);
-                        }
-
-                        if (overlineLineRanges) {
-                            const lineDecoration =
-                                this.settings.createScopeLineDecorations(scope.color, true, false, false, false);
-                            event.textEditor.setDecorations(lineDecoration, overlineLineRanges);
-                            this.scopeDecorations.push(lineDecoration);
+                            underlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
                         }
                     }
 
-                    for (let lineIndex = start; lineIndex <= end; lineIndex++) {
-                        if (position === 0 || !this.document.lineAt(lineIndex).isEmptyOrWhitespace) {
-                            const linePosition = new vscode.Position(lineIndex, leftBorderIndex);
-                            verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
-                        }
-                    }
-
-                    if (verticalLineRanges) {
+                    if (underlineLineRanges) {
                         const lineDecoration =
-                            this.settings.createScopeLineDecorations(scope.color);
-                        event.textEditor.setDecorations(lineDecoration, verticalLineRanges);
+                            this.settings.createScopeLineDecorations(scope.color, false, false, true, false);
+                        event.textEditor.setDecorations(lineDecoration, underlineLineRanges);
                         this.scopeDecorations.push(lineDecoration);
                     }
+
+                    if (overlineLineRanges) {
+                        const lineDecoration =
+                            this.settings.createScopeLineDecorations(scope.color, true, false, false, false);
+                        event.textEditor.setDecorations(lineDecoration, overlineLineRanges);
+                        this.scopeDecorations.push(lineDecoration);
+                    }
+                }
+
+                for (let lineIndex = start; lineIndex <= end; lineIndex++) {
+                    if (position === 0 || !this.document.lineAt(lineIndex).isEmptyOrWhitespace) {
+                        const linePosition = new vscode.Position(lineIndex, leftBorderIndex);
+                        verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
+                    }
+                }
+
+                if (verticalLineRanges) {
+                    const lineDecoration =
+                        this.settings.createScopeLineDecorations(scope.color);
+                    event.textEditor.setDecorations(lineDecoration, verticalLineRanges);
+                    this.scopeDecorations.push(lineDecoration);
                 }
             }
         }

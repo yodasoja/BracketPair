@@ -201,16 +201,17 @@ export default class Settings {
         }
     }
 
-    public createScopeBracketDecorations(color: string, bracket: string, showGutter?: boolean) {
-        if (showGutter === undefined) {
-            showGutter = this.showBracketsInGutter;
-        }
-
-        const gutterIcon = showGutter ?
-            this.gutterIcons.GetIconUri(bracket, color, this.fontFamily) : undefined;
-
+    public createGutterBracketDecorations(color: string, bracket: string, showGutter?: boolean) {
+        const gutterIcon = this.gutterIcons.GetIconUri(bracket, color, this.fontFamily);
         const decorationSettings: vscode.DecorationRenderOptions = {
             gutterIconPath: gutterIcon,
+        };
+        const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
+        return decoration;
+    }
+
+    public createScopeBracketDecorations(color: string) {
+        const decorationSettings: vscode.DecorationRenderOptions = {
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
         };
 

@@ -1,18 +1,21 @@
 ## Release Notes
 
+### 1.0.33
+Make `"showBracketsInGutter"` not depend on `"highlightActiveScope"`
+
 ### 1.0.32
 Better handling of empty lines when drawing line scope  
-Enabled `"bracketPairColorizer.showVerticalScopeLine"` by default
+Enabled `"showVerticalScopeLine"` by default
 
 ### 1.0.31
 ![Line Scope](images/extra.png "Active Line Scope Example")  
 
 New settings to show a line for the active scope:
 
->`"bracketPairColorizer.showVerticalScopeLine"`  
->`"bracketPairColorizer.showHorizontalScopeLine"` 
->`"bracketPairColorizer.scopeLineRelativePosition"`  
->`"bracketPairColorizer.scopeLineCSS"`
+>`"showVerticalScopeLine"`  
+>`"showHorizontalScopeLine"`  
+>`"scopeLineRelativePosition"`  
+>`"scopeLineCSS"`
 
 See the `README.md` for details
 
@@ -20,7 +23,7 @@ See the `README.md` for details
 Support both open/close brackets in gutter at same time
 
 ### 1.0.29
-Added gutter icon support via `bracketPairColorizer.showBracketsInGutter`  
+Added gutter icon support via `showBracketsInGutter`  
 ![Gutter](images/gutter.png "Gutter Brackets Example")  
 
 ### 1.0.28
@@ -81,20 +84,20 @@ Improved OpenSCAD support
 
 ### 1.0.7
 Replace settings  
-`"bracketPairColorizer.activeScopeBorderStyle"`  
-`"bracketPairColorizer.activeScopeBackgroundColor"`
+`"activeScopeBorderStyle"`  
+`"activeScopeBackgroundColor"`
 
-with `"bracketPairColorizer.activeScopeCSS"`
+with `"activeScopeCSS"`
 
 ### 1.0.6
-Fix `"bracketPairColorizer.highlightActiveScope"` setting not being respected
+Fix `"highlightActiveScope"` setting not being respected
 
 ### 1.0.5
 Added feature to highlight active scope  
 It can be configured with the following settings:  
-`"bracketPairColorizer.highlightActiveScope"`  
-`"bracketPairColorizer.activeScopeBorderStyle"`  
-`"bracketPairColorizer.activeScopeBackgroundColor"`  
+`"highlightActiveScope"`  
+`"activeScopeBorderStyle"`  
+`"activeScopeBackgroundColor"`  
 See [README.md](README.md) for details
 
 ### 1.0.4
@@ -211,10 +214,10 @@ Added swift support for contextual parsing
 
 ### 0.8.0
 The following settings were tightly coupled, so have been combined into one setting:
-Removed `"bracketPairColorizer.colorizeQuotes"` setting  
-Removed `"bracketPairColorizer.colorizeComments"` setting
+Removed `"colorizeQuotes"` setting  
+Removed `"colorizeComments"` setting
 
-Added `bracketPairColorizer.contextualParsing` setting
+Added `contextualParsing` setting
 
 Contextual parsing will ignore brackets in comments or strings.
 
@@ -247,7 +250,7 @@ Added backticks `` ` `` as quote modifier
 
 ### 0.7.0
 Ignore brackets in quotes by default  
-Added `"bracketPairColorizer.colorizeQuotes"` setting to toggle
+Added `"colorizeQuotes"` setting to toggle
 
 ### 0.6.2
 Performance improvements due to reduced string copying
@@ -263,7 +266,7 @@ Added support for multiline comments
 
 ### 0.5.0
 Ignore brackets in comments by default  
-Added `"bracketPairColorizer.colorizeComments"` setting to toggle
+Added `"colorizeComments"` setting to toggle
 
 ### 0.4.0
 Fix an error where editor.document can return undefined
