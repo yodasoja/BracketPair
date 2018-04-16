@@ -81,7 +81,29 @@ Choose a border style to highlight the active scope. Use `{color}` to match the 
 > A new bracket pair can be configured by adding it to the array.  
 > Note: Pair must be supported punctuation type by Prism.js
 
->### HTML Configuration
+### Commands
+
+These commands will expand/undo the cursor selection to the next scope
+
+`"bracket-pair-colorizer.expandBracketSelection"`  
+`"bracket-pair-colorizer.undoBracketSelection"`
+
+Quick-start:
+
+```
+	{
+		"key": "shift+alt+right",
+		"command": "bracket-pair-colorizer.expandBracketSelection",
+		"when": "editorTextFocus"
+	},
+	{
+		"key": "shift+alt+left",
+		"command": "bracket-pair-colorizer.undoBracketSelection",
+		"when": "editorTextFocus"
+	}
+```
+
+### HTML Configuration
 >An example configuration for HTML is:  
 ```
     "bracketPairColorizer.consecutivePairColors": [

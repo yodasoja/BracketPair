@@ -1,5 +1,25 @@
 ## Release Notes
 
+### 1.0.37
+Added following commands:  
+`"bracket-pair-colorizer.expandBracketSelection"`  
+`"bracket-pair-colorizer.undoBracketSelection"`
+
+Quick-start:
+
+```
+	{
+		"key": "shift+alt+right",
+		"command": "bracket-pair-colorizer.expandBracketSelection",
+		"when": "editorTextFocus"
+	},
+	{
+		"key": "shift+alt+left",
+		"command": "bracket-pair-colorizer.undoBracketSelection",
+		"when": "editorTextFocus"
+	}
+```
+
 ### 1.0.36
 Minor fix to improve vertical scope line in situation where a line is a position 0
 
