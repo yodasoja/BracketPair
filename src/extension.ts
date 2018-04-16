@@ -1,7 +1,19 @@
-import { ExtensionContext, window, workspace } from "vscode";
+import { commands, ExtensionContext, window, workspace } from "vscode";
 import DocumentDecorationManager from "./documentDecorationManager";
 export function activate(context: ExtensionContext) {
     const documentDecorationManager = new DocumentDecorationManager();
+
+    context.subscriptions.push(commands.registerCommand("bracket-pair-colorizer.expandBracketSelection", () => {
+        const editor = window.activeTextEditor;
+        if (!editor) { return; }
+        documentDecorationManager.expandBracketSelection(editor);
+    }));
+
+    context.subscriptions.push(commands.registerCommand("bracket-pair-colorizer.undoBracketSelection", () => {
+        const editor = window.activeTextEditor;
+        if (!editor) { return; }
+        documentDecorationManager.undoBracketSelection(editor);
+    }));
 
     context.subscriptions.push(workspace.onDidChangeConfiguration((event) => {
         if (event.affectsConfiguration("bracketPairColorizer")) {

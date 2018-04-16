@@ -1,6 +1,5 @@
 import * as prism from "prismjs";
 import * as vscode from "vscode";
-import { TextEditorDecorationType } from "vscode";
 import Bracket from "./bracket";
 import FoundBracket from "./foundBracket";
 import GutterIconManager from "./gutterIconManager";
@@ -19,7 +18,8 @@ export default class DocumentDecoration {
     private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private readonly prismJs: any;
     private readonly largeFileRange: vscode.Range;
-    private scopeDecorations: TextEditorDecorationType[] = [];
+    private scopeDecorations: vscode.TextEditorDecorationType[] = [];
+    private scopeSelectionHistory: Array<Set<Scope>> = [];
 
     // What have I created..
     private readonly stringStrategies = new Map<string,
@@ -75,6 +75,55 @@ export default class DocumentDecoration {
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
         this.updateLowestLineNumber(contentChanges);
         this.triggerUpdateDecorations();
+    }
+
+    public expandBracketSelection(editor: vscode.TextEditor) {
+        const newScopes = new Set<Scope>();
+
+        editor.selections.forEach((selection) => {
+            let scopes = new Set<Scope>();
+
+            if (this.scopeSelectionHistory.length !== 0) {
+                scopes = this.scopeSelectionHistory[this.scopeSelectionHistory.length - 1];
+            }
+
+            const existingScopesToExpand = Array.from(scopes).filter((e) => e.range.contains(selection.active));
+
+            if (existingScopesToExpand.length !== 0) {
+                existingScopesToExpand.forEach((existingScope) => {
+                    const nextScope = this.getScope(existingScope.close.range.end);
+                    if (nextScope) {
+                        newScopes.add(nextScope);
+                    }
+                });
+            }
+            else {
+                const nextScope = this.getScope(selection.active);
+                if (nextScope) {
+                    newScopes.add(nextScope);
+                }
+            }
+
+        });
+
+        if (newScopes.size > 0) {
+            this.scopeSelectionHistory.push(newScopes);
+
+            editor.selections =
+                Array.from(newScopes).map((e) => new vscode.Selection(e.open.range.end, e.close.range.start));
+        }
+    }
+
+    public undoBracketSelection(editor: vscode.TextEditor) {
+        this.scopeSelectionHistory.pop();
+
+        if (this.scopeSelectionHistory.length === 0) {
+            return;
+        }
+
+        const scopes = this.scopeSelectionHistory[this.scopeSelectionHistory.length - 1];
+        editor.selections =
+            Array.from(scopes).map((e) => new vscode.Selection(e.open.range.end, e.close.range.start));
     }
 
     // Lines are stored in an array, if line is requested outside of array bounds
@@ -201,7 +250,9 @@ export default class DocumentDecoration {
                 // Start -1 because prefer draw line at current indent level
                 for (let lineIndex = start - 1; lineIndex <= end; lineIndex++) {
                     const line = this.document.lineAt(lineIndex);
-                    if (!line.isEmptyOrWhitespace) {
+
+                    // Only allow whitespace if its up to the current border
+                    if (!line.isEmptyOrWhitespace || line.text.length >= leftBorderIndex) {
                         const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
                         leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
                     }

@@ -1,4 +1,7 @@
-import { TextDocument, TextDocumentContentChangeEvent, TextEditorSelectionChangeEvent, window } from "vscode";
+import {
+    Selection, TextDocument, TextDocumentContentChangeEvent,
+    TextEditor, TextEditorSelectionChangeEvent, window,
+} from "vscode";
 import DocumentDecoration from "./documentDecoration";
 import GutterIconManager from "./gutterIconManager";
 import Settings from "./settings";
@@ -22,6 +25,20 @@ export default class DocumentDecorationManager {
         });
         this.documents.clear();
         this.updateAllDocuments();
+    }
+
+    public expandBracketSelection(editor: TextEditor) {
+        const documentDecoration = this.getDocumentDecorations(editor.document);
+        if (documentDecoration) {
+            documentDecoration.expandBracketSelection(editor);
+        }
+    }
+
+    public undoBracketSelection(editor: TextEditor) {
+        const documentDecoration = this.getDocumentDecorations(editor.document);
+        if (documentDecoration) {
+            documentDecoration.undoBracketSelection(editor);
+        }
     }
 
     public updateDocument(document: TextDocument) {
@@ -114,6 +131,7 @@ export default class DocumentDecorationManager {
     private getPrismLanguageID(languageID: string): string[] {
         // Some VSCode language ids need to be mapped to match http://prismjs.com/#languages-list
         switch (languageID) {
+            case "apex": return ["java"];
             case "html": return ["markup", "javascript"];
             case "javascriptreact": return ["jsx"];
             case "json5": return ["javascript"];

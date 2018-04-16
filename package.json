@@ -17,6 +17,9 @@
     "keywords": [
         "bracket",
         "brackets",
+        "pair",
+        "color",
+        "colour",
         "multi-root ready"
     ],
     "galleryBanner": {
@@ -25,6 +28,16 @@
     },
     "main": "./out/src/extension",
     "contributes": {
+        "commands": [
+            {
+                "command": "bracket-pair-colorizer.expandBracketSelection",
+                "title": "Expand Bracket Selection"
+            },
+            {
+                "command": "bracket-pair-colorizer.undoBracketSelection",
+                "title": "Undo Bracket Selection"
+            }
+        ],
         "configuration": {
             "type": "object",
             "title": "BracketPair",
