@@ -1,6 +1,8 @@
 ## Release Notes
 
 ### 1.0.37
+Added support for `Apex` language
+
 Added following commands:  
 `"bracket-pair-colorizer.expandBracketSelection"`  
 `"bracket-pair-colorizer.undoBracketSelection"`
