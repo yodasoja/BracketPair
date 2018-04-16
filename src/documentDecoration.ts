@@ -251,8 +251,7 @@ export default class DocumentDecoration {
                 for (let lineIndex = start - 1; lineIndex <= end; lineIndex++) {
                     const line = this.document.lineAt(lineIndex);
 
-                    // Only allow whitespace if its up to the current border
-                    if (!line.isEmptyOrWhitespace || line.text.length >= leftBorderIndex) {
+                    if (!line.isEmptyOrWhitespace) {
                         const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
                         leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
                     }
@@ -293,13 +292,13 @@ export default class DocumentDecoration {
                 }
 
                 for (let lineIndex = start; lineIndex <= end; lineIndex++) {
-                    if (position === 0 || !this.document.lineAt(lineIndex).isEmptyOrWhitespace) {
+                    if (this.document.lineAt(lineIndex).text.length >= leftBorderIndex) {
                         const linePosition = new vscode.Position(lineIndex, leftBorderIndex);
                         verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
                     }
                 }
 
-                if (verticalLineRanges) {
+                if (verticalLineRanges.length > 0) {
                     const lineDecoration =
                         this.settings.createScopeLineDecorations(scope.color);
                     event.textEditor.setDecorations(lineDecoration, verticalLineRanges);
