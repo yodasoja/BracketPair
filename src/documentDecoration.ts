@@ -19,7 +19,7 @@ export default class DocumentDecoration {
     private readonly prismJs: any;
     private readonly largeFileRange: vscode.Range;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
-    private scopeSelectionHistory: Array<Set<Scope>> = [];
+    private scopeSelectionHistory: vscode.Selection[][] = [];
 
     // What have I created..
     private readonly stringStrategies = new Map<string,
@@ -78,38 +78,31 @@ export default class DocumentDecoration {
     }
 
     public expandBracketSelection(editor: vscode.TextEditor) {
-        const newScopes = new Set<Scope>();
+        const newSelections: vscode.Selection[] = [];
 
         editor.selections.forEach((selection) => {
-            let scopes = new Set<Scope>();
+            let selections: vscode.Selection[] = [];
 
             if (this.scopeSelectionHistory.length !== 0) {
-                scopes = this.scopeSelectionHistory[this.scopeSelectionHistory.length - 1];
-            }
-
-            const existingScopesToExpand = Array.from(scopes).filter((e) => e.range.contains(selection.active));
-
-            if (existingScopesToExpand.length !== 0) {
-                existingScopesToExpand.forEach((existingScope) => {
-                    const nextScope = this.getScope(existingScope.close.range.end);
-                    if (nextScope) {
-                        newScopes.add(nextScope);
-                    }
-                });
+                selections = this.scopeSelectionHistory[this.scopeSelectionHistory.length - 1];
             }
             else {
-                const nextScope = this.getScope(selection.active);
-                if (nextScope) {
-                    newScopes.add(nextScope);
-                }
+                this.scopeSelectionHistory.push(editor.selections);
+            }
+
+            const nextPos = this.document.validatePosition(selection.active.translate(0, 1));
+            const nextScope = this.getScope(nextPos);
+            if (nextScope) {
+                const start = this.document.validatePosition(nextScope.open.range.start.translate(0, 1));
+                const end = this.document.validatePosition(nextScope.close.range.end.translate(0, -1));
+                newSelections.push(new vscode.Selection(start, end));
             }
         });
 
-        if (newScopes.size > 0) {
-            this.scopeSelectionHistory.push(newScopes);
+        if (newSelections.length > 0) {
+            this.scopeSelectionHistory.push(newSelections);
 
-            editor.selections =
-                Array.from(newScopes).map((e) => new vscode.Selection(e.open.range.end, e.close.range.start));
+            editor.selections = newSelections;
         }
     }
 
@@ -121,8 +114,7 @@ export default class DocumentDecoration {
         }
 
         const scopes = this.scopeSelectionHistory[this.scopeSelectionHistory.length - 1];
-        editor.selections =
-            Array.from(scopes).map((e) => new vscode.Selection(e.open.range.start, e.close.range.end));
+        editor.selections = scopes;
     }
 
     // Lines are stored in an array, if line is requested outside of array bounds
