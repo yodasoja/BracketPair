@@ -103,7 +103,6 @@ export default class DocumentDecoration {
                     newScopes.add(nextScope);
                 }
             }
-
         });
 
         if (newScopes.size > 0) {
@@ -123,7 +122,7 @@ export default class DocumentDecoration {
 
         const scopes = this.scopeSelectionHistory[this.scopeSelectionHistory.length - 1];
         editor.selections =
-            Array.from(scopes).map((e) => new vscode.Selection(e.open.range.end, e.close.range.start));
+            Array.from(scopes).map((e) => new vscode.Selection(e.open.range.start, e.close.range.end));
     }
 
     // Lines are stored in an array, if line is requested outside of array bounds
