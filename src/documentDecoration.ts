@@ -7,6 +7,26 @@ import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
 
+
+export function calculateColumnFromCharIndex(lineText: string, charIndex: number, tabSize: number): number {
+    let spacing = 0;
+    for(let index = 0; index < charIndex; index++) {
+        if (lineText.charAt(index) === '\t') spacing += tabSize - spacing % tabSize;
+        else spacing++;
+    }
+    return spacing;
+}
+
+export function calculateCharIndexFromColumn(lineText: string, column: number, tabSize: number): number {
+    let spacing = 0;
+    for(let index = 0; index <= column; index++) {
+        if (spacing >= column) return index;
+        if (lineText.charAt(index) === '\t') spacing += tabSize - spacing % tabSize;
+        else spacing++;
+    }
+    return spacing;
+}
+
 export default class DocumentDecoration {
     public readonly settings: Settings;
 
@@ -238,16 +258,21 @@ export default class DocumentDecoration {
                 const end = lastBracketIsFirstCharacterOnLine ?
                     scope.close.range.start.line - 1 : scope.close.range.start.line;
 
+                const tabSize = event.textEditor.options.tabSize as number;
+                let leftBorderColumn = 999;
                 // Start -1 because prefer draw line at current indent level
                 for (let lineIndex = start - 1; lineIndex <= end; lineIndex++) {
                     const line = this.document.lineAt(lineIndex);
 
                     if (!line.isEmptyOrWhitespace) {
-                        const firstCharIndex = this.document.lineAt(lineIndex).firstNonWhitespaceCharacterIndex;
+                        const firstCharIndex = line.firstNonWhitespaceCharacterIndex;
                         leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
+                        leftBorderColumn = Math.min(leftBorderColumn, calculateColumnFromCharIndex(line.text, firstCharIndex, tabSize));
                     }
                 }
 
+                // TODO - the horizontal line scope also needs adjusting to column values
+                // optionally, we could just draw the left line always on the left edge gutter if tabs and spaces are mixed in the lines
                 if (this.settings.showHorizontalScopeLine) {
                     const underlineLineRanges: vscode.Range[] = [];
                     const overlineLineRanges: vscode.Range[] = [];
@@ -283,8 +308,9 @@ export default class DocumentDecoration {
                 }
 
                 for (let lineIndex = start; lineIndex <= end; lineIndex++) {
-                    if (this.document.lineAt(lineIndex).text.length >= leftBorderIndex) {
-                        const linePosition = new vscode.Position(lineIndex, leftBorderIndex);
+                    const line = this.document.lineAt(lineIndex)
+                    if (line.text.length >= leftBorderIndex) {
+                        const linePosition = new vscode.Position(lineIndex, calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
                         verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
                     }
                 }
