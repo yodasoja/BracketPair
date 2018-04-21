@@ -271,8 +271,6 @@ export default class DocumentDecoration {
                     }
                 }
 
-                // TODO - the horizontal line scope also needs adjusting to column values
-                // optionally, we could just draw the left line always on the left edge gutter if tabs and spaces are mixed in the lines
                 if (this.settings.showHorizontalScopeLine) {
                     const underlineLineRanges: vscode.Range[] = [];
                     const overlineLineRanges: vscode.Range[] = [];
@@ -281,8 +279,10 @@ export default class DocumentDecoration {
                         underlineLineRanges.push(new vscode.Range(scope.open.range.start, scope.close.range.end));
                     }
                     else {
-                        const leftStartPos = new vscode.Position(scope.open.range.start.line, leftBorderIndex);
-                        const leftEndPos = new vscode.Position(scope.close.range.start.line, leftBorderIndex);
+                        const startLine = this.document.lineAt(scope.open.range.start.line);
+                        const endLine   = this.document.lineAt(scope.close.range.start.line);
+                        const leftStartPos = new vscode.Position(scope.open.range.start.line, calculateCharIndexFromColumn(startLine.text, leftBorderColumn, tabSize));
+                        const leftEndPos = new vscode.Position(scope.close.range.start.line, calculateCharIndexFromColumn(endLine.text, leftBorderColumn, tabSize));
                         underlineLineRanges.push(new vscode.Range(leftStartPos, scope.open.range.end));
                         if (lastBracketIsFirstCharacterOnLine) {
                             overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
