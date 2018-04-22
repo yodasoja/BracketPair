@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.38
+Color in more documents (e.g. Git diff view)
+
 ### 1.0.37
 Added support for `Apex` language
 

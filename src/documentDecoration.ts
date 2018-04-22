@@ -7,26 +7,6 @@ import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
 
-
-export function calculateColumnFromCharIndex(lineText: string, charIndex: number, tabSize: number): number {
-    let spacing = 0;
-    for(let index = 0; index < charIndex; index++) {
-        if (lineText.charAt(index) === '\t') spacing += tabSize - spacing % tabSize;
-        else spacing++;
-    }
-    return spacing;
-}
-
-export function calculateCharIndexFromColumn(lineText: string, column: number, tabSize: number): number {
-    let spacing = 0;
-    for(let index = 0; index <= column; index++) {
-        if (spacing >= column) return index;
-        if (lineText.charAt(index) === '\t') spacing += tabSize - spacing % tabSize;
-        else spacing++;
-    }
-    return spacing;
-}
-
 export default class DocumentDecoration {
     public readonly settings: Settings;
 
@@ -267,7 +247,8 @@ export default class DocumentDecoration {
                     if (!line.isEmptyOrWhitespace) {
                         const firstCharIndex = line.firstNonWhitespaceCharacterIndex;
                         leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
-                        leftBorderColumn = Math.min(leftBorderColumn, calculateColumnFromCharIndex(line.text, firstCharIndex, tabSize));
+                        leftBorderColumn = Math.min(leftBorderColumn,
+                            this.calculateColumnFromCharIndex(line.text, firstCharIndex, tabSize));
                     }
                 }
 
@@ -280,9 +261,13 @@ export default class DocumentDecoration {
                     }
                     else {
                         const startLine = this.document.lineAt(scope.open.range.start.line);
-                        const endLine   = this.document.lineAt(scope.close.range.start.line);
-                        const leftStartPos = new vscode.Position(scope.open.range.start.line, calculateCharIndexFromColumn(startLine.text, leftBorderColumn, tabSize));
-                        const leftEndPos = new vscode.Position(scope.close.range.start.line, calculateCharIndexFromColumn(endLine.text, leftBorderColumn, tabSize));
+                        const endLine = this.document.lineAt(scope.close.range.start.line);
+
+                        const leftStartPos = new vscode.Position(scope.open.range.start.line,
+                            this.calculateCharIndexFromColumn(startLine.text, leftBorderColumn, tabSize));
+                        const leftEndPos = new vscode.Position(scope.close.range.start.line,
+                            this.calculateCharIndexFromColumn(endLine.text, leftBorderColumn, tabSize));
+
                         underlineLineRanges.push(new vscode.Range(leftStartPos, scope.open.range.end));
                         if (lastBracketIsFirstCharacterOnLine) {
                             overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
@@ -308,9 +293,10 @@ export default class DocumentDecoration {
                 }
 
                 for (let lineIndex = start; lineIndex <= end; lineIndex++) {
-                    const line = this.document.lineAt(lineIndex)
+                    const line = this.document.lineAt(lineIndex);
                     if (line.text.length >= leftBorderIndex) {
-                        const linePosition = new vscode.Position(lineIndex, calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
+                        const linePosition = new vscode.Position(lineIndex,
+                            this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
                         verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
                     }
                 }
@@ -525,5 +511,32 @@ export default class DocumentDecoration {
         }
 
         this.lineToUpdateWhenTimeoutEnds = Infinity;
+    }
+
+    private calculateColumnFromCharIndex(lineText: string, charIndex: number, tabSize: number): number {
+        let spacing = 0;
+        for (let index = 0; index < charIndex; index++) {
+            if (lineText.charAt(index) === "\t") {
+                spacing += tabSize - spacing % tabSize;
+            }
+            else {
+                spacing++;
+            }
+        }
+        return spacing;
+    }
+
+    private calculateCharIndexFromColumn(lineText: string, column: number, tabSize: number): number {
+        let spacing = 0;
+        for (let index = 0; index <= column; index++) {
+            if (spacing >= column) {
+                return index;
+            }
+            if (lineText.charAt(index) === "\t") {
+                spacing += tabSize - spacing % tabSize;
+            }
+            else { spacing++; }
+        }
+        return spacing;
     }
 }

@@ -155,6 +155,6 @@ export default class DocumentDecorationManager {
             return false;
         }
 
-        return document.uri.scheme === "file" || document.uri.scheme === "untitled" || document.uri.scheme === "vsls";
+        return true;
     }
 }
