@@ -138,6 +138,7 @@ export default class DocumentDecorationManager {
             case "jsonc": return ["javascript"];
             case "mathml": return ["markup"];
             case "nunjucks": return ["twig"];
+            case "razor": return ["markup", "javascript", "csharp", "aspnet"];
             case "scad": return ["swift"]; // workaround for unsupported language in Prism
             case "svg": return ["markup"];
             case "systemverilog": return ["verilog"];
