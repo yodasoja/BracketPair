@@ -303,7 +303,7 @@ export default class DocumentDecoration {
 
                 if (verticalLineRanges.length > 0) {
                     const lineDecoration =
-                        this.settings.createScopeLineDecorations(scope.color, false, true, false, true);
+                        this.settings.createScopeLineDecorations(scope.color, false, false, false, true);
                     event.textEditor.setDecorations(lineDecoration, verticalLineRanges);
                     this.scopeDecorations.push(lineDecoration);
                 }

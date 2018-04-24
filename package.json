@@ -5,7 +5,7 @@
     "version": "1.0.37",
     "publisher": "CoenraadS",
     "engines": {
-        "vscode": "^1.21.0"
+        "vscode": "^1.23.0"
     },
     "icon": "images/icon.png",
     "categories": [
