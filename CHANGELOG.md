@@ -1,7 +1,9 @@
 ## Release Notes
 
 ### 1.0.38
-Color in more documents (e.g. Git diff view)
+(requires VSCode 1.23+)  
+Color in more documents (e.g. Git diff view)  
+Cleaner vertical lines 
 
 ### 1.0.37
 Added support for `Apex` language
