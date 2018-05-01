@@ -17,6 +17,7 @@ export default class DocumentDecorationManager {
 
     constructor() {
         this.supportedLanguages = new Set(Object.keys(this.components.languages));
+        this.loadLanguages();
     }
 
     public reset() {
@@ -106,7 +107,6 @@ export default class DocumentDecorationManager {
                 }
 
                 const settings = new Settings(primaryLanguage, this.gutterIcons, document.uri);
-                this.loadLanguages(languages);
                 documentDecorations = new DocumentDecoration(document, this.Prism, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {

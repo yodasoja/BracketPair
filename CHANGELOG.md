@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.39
+Fix parsing `<script>` tags in HTML files
+
 ### 1.0.38
 (requires VSCode 1.23+)  
 Color in more documents (e.g. Git diff view)  
