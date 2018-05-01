@@ -222,6 +222,7 @@ export default class DocumentDecoration {
 
             if (this.settings.showVerticalScopeLine) {
                 const verticalLineRanges: vscode.Range[] = [];
+                const verticalLineOffsets: Array<{ offset: number, range: vscode.Range }> = [];
 
                 const position =
                     this.settings.scopeLineRelativePosition ?
@@ -299,6 +300,10 @@ export default class DocumentDecoration {
                             this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
                         verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
                     }
+                    else if (verticalLineRanges.length > 0) {
+                        const offset = { offset: lineIndex, range: verticalLineRanges[verticalLineRanges.length - 1] };
+                        verticalLineOffsets.push(offset);
+                    }
                 }
 
                 if (verticalLineRanges.length > 0) {
@@ -307,6 +312,14 @@ export default class DocumentDecoration {
                     event.textEditor.setDecorations(lineDecoration, verticalLineRanges);
                     this.scopeDecorations.push(lineDecoration);
                 }
+
+                verticalLineOffsets.forEach((offset) => {
+                    const lineDecoration =
+                        this.settings.createScopeLineDecorations(scope.color, true, true, true, true,
+                           19);
+                    event.textEditor.setDecorations(lineDecoration, [offset.range]);
+                    this.scopeDecorations.push(lineDecoration);
+                });
             }
         }
     }
