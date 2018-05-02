@@ -221,7 +221,7 @@ export default class DocumentDecoration {
             }
 
             if (this.settings.showVerticalScopeLine) {
-                const verticalLineInfo: Array<{ emptyLinesAbove: number, range: vscode.Range }> = [];
+                const verticalLineRanges: Array<{ range: vscode.Range, valid: boolean }> = [];
 
                 const position =
                     this.settings.scopeLineRelativePosition ?
@@ -234,7 +234,8 @@ export default class DocumentDecoration {
                 const lastBracketStartIndex = scope.close.range.start.character;
 
                 const start = scope.open.range.start.line + 1;
-                const end = scope.close.range.start.line;
+                const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
+                const end = lastBracketIsFirstCharacterOnLine ? scope.close.range.start.line - 1 : scope.close.range.start.line;
 
                 const tabSize = event.textEditor.options.tabSize as number;
                 let leftBorderColumn = Infinity;
@@ -250,28 +251,13 @@ export default class DocumentDecoration {
                     }
                 }
 
-                let emptyLinesAbove = 0;
                 for (let lineIndex = start; lineIndex <= end; lineIndex++) {
                     const line = this.document.lineAt(lineIndex);
-                    if (line.text.length >= leftBorderIndex) {
-                        const linePosition = new vscode.Position(lineIndex,
-                            this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
-                        verticalLineInfo.push({ emptyLinesAbove, range: new vscode.Range(linePosition, linePosition) });
-                        emptyLinesAbove = 0;
-                    }
-                    else {
-                        emptyLinesAbove++;
-                    }
-                }
-
-                const lastBracketIsFirstCharacterOnLine =
-                    verticalLineInfo.length > 1 &&
-                    verticalLineInfo[verticalLineInfo.length - 1].range.start.line -
-                    verticalLineInfo[verticalLineInfo.length - 2].range.start.line === 1 &&
-                    lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
-
-                if (lastBracketIsFirstCharacterOnLine) {
-                    verticalLineInfo.pop();
+                    const linePosition = new vscode.Position(lineIndex,
+                        this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
+                    const range = new vscode.Range(linePosition, linePosition);
+                    const valid = line.text.length >= leftBorderIndex;
+                    verticalLineRanges.push({ range, valid });
                 }
 
                 if (this.settings.showHorizontalScopeLine) {
@@ -299,9 +285,7 @@ export default class DocumentDecoration {
                         }
                     }
 
-                    verticalLineInfo.forEach((info) => {
-                        this.setVerticalLineDecoration(scope, info, event);
-                    });
+                    this.setVerticalLineDecoration(scope, event, verticalLineRanges, start, end);
 
                     if (underlineLineRanges) {
                         this.setUnderLineDecoration(scope, event, underlineLineRanges);
@@ -335,28 +319,58 @@ export default class DocumentDecoration {
 
     private setVerticalLineDecoration(
         scope: Scope,
-        info: { emptyLinesAbove: number; range: vscode.Range; },
-        event: vscode.TextEditorSelectionChangeEvent) {
-        const offsetDecorations: Array<{
-            decoration: vscode.TextEditorDecorationType;
-            range: vscode.Range;
-        }> = [];
+        event: vscode.TextEditorSelectionChangeEvent,
+        verticleLineRanges: Array<{ range: vscode.Range, valid: boolean }>,
+        start: number,
+        end: number) {
+        const offsets:
+            Array<{ range: vscode.Range, downOffset: number }> = [];
         const normalDecoration = this.settings.createScopeLineDecorations(scope.color, false, false, false, true);
-        const ranges: vscode.Range[] = [];
-        if (info.emptyLinesAbove > 0) {
-            for (let i = 0; i < info.emptyLinesAbove; i++) {
-                offsetDecorations.push({
-                    decoration: this.settings.createScopeLineDecorations(scope.color, false, false, false, true, i + 1),
-                    range: info.range,
-                });
+
+        if (verticleLineRanges.length === 0) {
+            return;
+        }
+
+        const normalRanges = verticleLineRanges.filter((e) => e.valid).map((e) => e.range);
+
+        // This is the position ABOVE the first starting line
+        let aboveValidRange = new vscode.Range(
+            verticleLineRanges[0].range.start.translate(-1),
+            verticleLineRanges[0].range.end.translate(-1));
+
+        // If first vertical range cannot be displayed, take from above line which always exist
+        if (!verticleLineRanges[0].valid) {
+            offsets.push({ range: aboveValidRange, downOffset: 1 });
+        }
+
+        // If last vertical range cannot be displayed, take from below line which always exists
+        if (verticleLineRanges.length > 1 && !verticleLineRanges[verticleLineRanges.length - 1].valid) {
+            const range = new vscode.Range(
+                verticleLineRanges[verticleLineRanges.length - 1].range.start.translate(1),
+                verticleLineRanges[verticleLineRanges.length - 1].range.end.translate(1));
+            offsets.push({ range, downOffset: -1 });
+        }
+
+        for (let i = 1; i < verticleLineRanges.length - 1; i++) {
+            const lineRange = verticleLineRanges[i];
+            if (lineRange.valid) {
+                aboveValidRange = lineRange.range;
+            }
+            else {
+                const offset = lineRange.range.start.line - aboveValidRange.start.line;
+                offsets.push({ range: aboveValidRange, downOffset: offset });
             }
         }
-        ranges.push(info.range);
-        event.textEditor.setDecorations(normalDecoration, ranges);
+
+        event.textEditor.setDecorations(normalDecoration, normalRanges);
         this.scopeDecorations.push(normalDecoration);
-        offsetDecorations.forEach((decorationInfo) => {
-            event.textEditor.setDecorations(decorationInfo.decoration, [decorationInfo.range]);
-            this.scopeDecorations.push(decorationInfo.decoration);
+
+        offsets.forEach((offset) => {
+            const decoration = this.settings.createScopeLineDecorations(
+                scope.color, false, false, false, true, offset.downOffset,
+            );
+            event.textEditor.setDecorations(decoration, [offset.range]);
+            this.scopeDecorations.push(decoration);
         });
     }
 
