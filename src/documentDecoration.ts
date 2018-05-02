@@ -238,7 +238,7 @@ export default class DocumentDecoration {
                 const end = lastBracketIsFirstCharacterOnLine ? scope.close.range.start.line - 1 : scope.close.range.start.line;
 
                 const tabSize = event.textEditor.options.tabSize as number;
-                let leftBorderColumn = 999;
+                let leftBorderColumn = Infinity;
                 // Start -1 because prefer draw line at current indent level
                 for (let lineIndex = start - 1; lineIndex <= end; lineIndex++) {
                     const line = this.document.lineAt(lineIndex);
