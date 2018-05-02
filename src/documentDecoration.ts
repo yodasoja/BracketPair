@@ -222,7 +222,6 @@ export default class DocumentDecoration {
 
             if (this.settings.showVerticalScopeLine) {
                 const verticalLineRanges: vscode.Range[] = [];
-                const verticalLineOffsets: Array<{ offset: number, range: vscode.Range }> = [];
 
                 const position =
                     this.settings.scopeLineRelativePosition ?
@@ -233,11 +232,9 @@ export default class DocumentDecoration {
                 const lastWhiteSpaceCharacterIndex =
                     this.document.lineAt(scope.close.range.start).firstNonWhitespaceCharacterIndex;
                 const lastBracketStartIndex = scope.close.range.start.character;
-                const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
 
                 const start = scope.open.range.start.line + 1;
-                const end = lastBracketIsFirstCharacterOnLine ?
-                    scope.close.range.start.line - 1 : scope.close.range.start.line;
+                const end = scope.close.range.start.line;
 
                 const tabSize = event.textEditor.options.tabSize as number;
                 let leftBorderColumn = 999;
@@ -270,12 +267,7 @@ export default class DocumentDecoration {
                             this.calculateCharIndexFromColumn(endLine.text, leftBorderColumn, tabSize));
 
                         underlineLineRanges.push(new vscode.Range(leftStartPos, scope.open.range.end));
-                        if (lastBracketIsFirstCharacterOnLine) {
-                            overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
-                        }
-                        else {
-                            underlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
-                        }
+                        underlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
                     }
 
                     if (underlineLineRanges) {
@@ -300,26 +292,15 @@ export default class DocumentDecoration {
                             this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
                         verticalLineRanges.push(new vscode.Range(linePosition, linePosition));
                     }
-                    else if (verticalLineRanges.length > 0) {
-                        const offset = { offset: lineIndex, range: verticalLineRanges[verticalLineRanges.length - 1] };
-                        verticalLineOffsets.push(offset);
-                    }
                 }
 
                 if (verticalLineRanges.length > 0) {
+                    const lastDecoration = verticalLineRanges[verticalLineRanges.length - 1];
                     const lineDecoration =
-                        this.settings.createScopeLineDecorations(scope.color, false, false, false, true);
-                    event.textEditor.setDecorations(lineDecoration, verticalLineRanges);
+                        this.settings.createScopeLineDecorations(scope.color, false, false, false, true, end - start + 1);
+                    event.textEditor.setDecorations(lineDecoration, [lastDecoration]);
                     this.scopeDecorations.push(lineDecoration);
                 }
-
-                verticalLineOffsets.forEach((offset) => {
-                    const lineDecoration =
-                        this.settings.createScopeLineDecorations(scope.color, true, true, true, true,
-                           19);
-                    event.textEditor.setDecorations(lineDecoration, [offset.range]);
-                    this.scopeDecorations.push(lineDecoration);
-                });
             }
         }
     }

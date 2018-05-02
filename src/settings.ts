@@ -247,7 +247,7 @@ export default class Settings {
     }
 
     public createScopeLineDecorations(
-        color: string, top = true, right = true, bottom = true, left = true, offset?: number) {
+        color: string, top = true, right = true, bottom = true, left = true, scale?: number) {
         const decorationSettings: vscode.DecorationRenderOptions = {
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
         };
@@ -264,8 +264,8 @@ export default class Settings {
 
         let borderStyle = `${topBorder} ${rightBorder} ${botBorder} ${leftBorder}`;
 
-        if (offset !== undefined) {
-            borderStyle += "; top: " + offset;
+        if (scale !== undefined) {
+            borderStyle += "; transform-origin: bottom; transform: scaleY(" + scale + "); z-index:1000;"
         }
 
         // tslint:disable-next-line:no-string-literal
