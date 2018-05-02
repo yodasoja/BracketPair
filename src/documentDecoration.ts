@@ -338,21 +338,7 @@ export default class DocumentDecoration {
             verticleLineRanges[0].range.start.translate(-1),
             verticleLineRanges[0].range.end.translate(-1));
 
-        // If first vertical range cannot be displayed, take from above line which always exist
-        if (!verticleLineRanges[0].valid) {
-            offsets.push({ range: aboveValidRange, downOffset: 1 });
-        }
-
-        // If last vertical range cannot be displayed, take from below line which always exists
-        if (verticleLineRanges.length > 1 && !verticleLineRanges[verticleLineRanges.length - 1].valid) {
-            const range = new vscode.Range(
-                verticleLineRanges[verticleLineRanges.length - 1].range.start.translate(1),
-                verticleLineRanges[verticleLineRanges.length - 1].range.end.translate(1));
-            offsets.push({ range, downOffset: -1 });
-        }
-
-        for (let i = 1; i < verticleLineRanges.length - 1; i++) {
-            const lineRange = verticleLineRanges[i];
+        for (const lineRange of verticleLineRanges) {
             if (lineRange.valid) {
                 aboveValidRange = lineRange.range;
             }
