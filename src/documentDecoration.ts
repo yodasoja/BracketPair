@@ -221,7 +221,7 @@ export default class DocumentDecoration {
             }
 
             if (this.settings.showVerticalScopeLine) {
-                const verticalLineRanges: Array<{ scale: number, range: vscode.Range }> = [];
+                const verticalLineInfo: Array<{ emptyLinesAbove: number, range: vscode.Range }> = [];
 
                 const position =
                     this.settings.scopeLineRelativePosition ?
@@ -250,29 +250,28 @@ export default class DocumentDecoration {
                     }
                 }
 
-                let scale = 1;
+                let emptyLinesAbove = 0;
                 for (let lineIndex = start; lineIndex <= end; lineIndex++) {
                     const line = this.document.lineAt(lineIndex);
                     if (line.text.length >= leftBorderIndex) {
                         const linePosition = new vscode.Position(lineIndex,
                             this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
-                        verticalLineRanges.push({ scale, range: new vscode.Range(linePosition, linePosition) });
-                        scale = 1;
+                        verticalLineInfo.push({ emptyLinesAbove, range: new vscode.Range(linePosition, linePosition) });
+                        emptyLinesAbove = 0;
                     }
                     else {
-                        scale++;
+                        emptyLinesAbove++;
                     }
                 }
 
                 const lastBracketIsFirstCharacterOnLine =
-                    verticalLineRanges.length > 1 &&
-                    verticalLineRanges[verticalLineRanges.length - 1].range.start.line -
-                    verticalLineRanges[verticalLineRanges.length - 2].range.start.line === 1 &&
+                    verticalLineInfo.length > 1 &&
+                    verticalLineInfo[verticalLineInfo.length - 1].range.start.line -
+                    verticalLineInfo[verticalLineInfo.length - 2].range.start.line === 1 &&
                     lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
 
-                if (lastBracketIsFirstCharacterOnLine)
-                {
-                    verticalLineRanges.pop();
+                if (lastBracketIsFirstCharacterOnLine) {
+                    verticalLineInfo.pop();
                 }
 
                 if (this.settings.showHorizontalScopeLine) {
@@ -300,11 +299,26 @@ export default class DocumentDecoration {
                         }
                     }
 
-                    verticalLineRanges.forEach((range) => {
-                        const lineDecoration =
-                            this.settings.createScopeLineDecorations(scope.color, false, false, false, true, range.scale);
-                        event.textEditor.setDecorations(lineDecoration, [range.range]);
-                        this.scopeDecorations.push(lineDecoration);
+                    verticalLineInfo.forEach((verticalLineInfo) => {
+                        const decorations: Array<{ decoration: vscode.TextEditorDecorationType, range: vscode.Range }> = [];
+                        if (verticalLineInfo.emptyLinesAbove > 0) {
+                            for (let i = 0; i < verticalLineInfo.emptyLinesAbove; i++) {
+                                decorations.push({
+                                    decoration: this.settings.createScopeLineDecorations(scope.color, false, false, false, true, i + 1),
+                                    range: verticalLineInfo.range
+                                });
+                            }
+                        }
+
+                        decorations.push({
+                            decoration: this.settings.createScopeLineDecorations(scope.color, false, false, false, true),
+                            range: verticalLineInfo.range
+                        });
+
+                        decorations.forEach((decorationInfo) => {
+                            event.textEditor.setDecorations(decorationInfo.decoration, [decorationInfo.range]);
+                            this.scopeDecorations.push(decorationInfo.decoration);
+                        });
                     });
 
                     if (underlineLineRanges) {
