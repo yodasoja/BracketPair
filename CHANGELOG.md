@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.43
+More efficient DOM rendering
+
 ### 1.0.42
 Don't color in documents with `vscode` scheme
 
