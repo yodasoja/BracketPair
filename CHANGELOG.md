@@ -1,6 +1,6 @@
 ## Release Notes
 
-### 1.0.45
+### 1.0.46
 (requires VSCode 1.23+)  
 
 + Don't color in documents with `vscode` scheme  
