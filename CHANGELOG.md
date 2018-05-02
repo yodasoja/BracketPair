@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.40
+Fix gaps in indent rendering for empty lines
+
 ### 1.0.39
 Fix parsing `<script>` tags in HTML files
 
