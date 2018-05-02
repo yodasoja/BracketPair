@@ -151,8 +151,7 @@ export default class DocumentDecorationManager {
     }
 
     private isValidDocument(document?: TextDocument): boolean {
-        if (document === undefined || document.lineCount === 0) {
-            console.warn("Invalid document");
+        if (document === undefined || document.lineCount === 0 || document.uri.scheme === "vscode") {
             return false;
         }
 

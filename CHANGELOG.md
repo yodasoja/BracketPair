@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.42
+Don't color in documents with `vscode` scheme
+
 ### 1.0.41
 Use different technique for rendering empty lines to prevent stretching
 
