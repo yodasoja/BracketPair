@@ -235,8 +235,7 @@ export default class DocumentDecoration {
 
                 const start = scope.open.range.start.line + 1;
                 const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
-                const end = lastBracketIsFirstCharacterOnLine ?
-                    scope.close.range.start.line - 1 : scope.close.range.start.line;
+                const end = scope.close.range.start.line;
 
                 const tabSize = event.textEditor.options.tabSize as number;
                 let leftBorderColumn = Infinity;
@@ -252,7 +251,8 @@ export default class DocumentDecoration {
                     }
                 }
 
-                for (let lineIndex = start; lineIndex <= end; lineIndex++) {
+                const endOffset = lastBracketIsFirstCharacterOnLine ? end - 1 : end;
+                for (let lineIndex = start; lineIndex <= endOffset; lineIndex++) {
                     const line = this.document.lineAt(lineIndex);
                     const linePosition = new vscode.Position(lineIndex,
                         this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
@@ -286,7 +286,7 @@ export default class DocumentDecoration {
                         }
                     }
 
-                    this.setVerticalLineDecoration(scope, event, verticalLineRanges, start, end);
+                    this.setVerticalLineDecoration(scope, event, verticalLineRanges);
 
                     if (underlineLineRanges) {
                         this.setUnderLineDecoration(scope, event, underlineLineRanges);
@@ -322,8 +322,7 @@ export default class DocumentDecoration {
         scope: Scope,
         event: vscode.TextEditorSelectionChangeEvent,
         verticleLineRanges: Array<{ range: vscode.Range, valid: boolean }>,
-        start: number,
-        end: number) {
+    ) {
         const offsets:
             Array<{ range: vscode.Range, downOffset: number }> = [];
         const normalDecoration = this.settings.createScopeLineDecorations(scope.color, false, false, false, true);
