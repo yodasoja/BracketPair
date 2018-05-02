@@ -1,24 +1,13 @@
 ## Release Notes
 
-### 1.0.43
-More efficient DOM rendering
-
-### 1.0.42
-Don't color in documents with `vscode` scheme
-
-### 1.0.41
-Use different technique for rendering empty lines to prevent stretching
-
-### 1.0.40
-Fix gaps in indent rendering for empty lines
-
-### 1.0.39
-Fix parsing `<script>` tags in HTML files
-
-### 1.0.38
+### 1.0.44
 (requires VSCode 1.23+)  
-Color in more documents (e.g. Git diff view)  
-Cleaner vertical lines 
+
++ Don't color in documents with `vscode` scheme  
++ Fix gaps in indent rendering for empty lines  
++ Fix parsing `<script>` tags in HTML files  
++ Color in more documents (e.g. Git diff view)  
++ Vertical lines now correctly render 1px
 
 ### 1.0.37
 Added support for `Apex` language

@@ -235,7 +235,8 @@ export default class DocumentDecoration {
 
                 const start = scope.open.range.start.line + 1;
                 const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
-                const end = lastBracketIsFirstCharacterOnLine ? scope.close.range.start.line - 1 : scope.close.range.start.line;
+                const end = lastBracketIsFirstCharacterOnLine ?
+                    scope.close.range.start.line - 1 : scope.close.range.start.line;
 
                 const tabSize = event.textEditor.options.tabSize as number;
                 let leftBorderColumn = Infinity;
