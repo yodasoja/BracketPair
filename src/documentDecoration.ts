@@ -299,44 +299,65 @@ export default class DocumentDecoration {
                         }
                     }
 
-                    verticalLineInfo.forEach((verticalLineInfo) => {
-                        const decorations: Array<{ decoration: vscode.TextEditorDecorationType, range: vscode.Range }> = [];
-                        if (verticalLineInfo.emptyLinesAbove > 0) {
-                            for (let i = 0; i < verticalLineInfo.emptyLinesAbove; i++) {
-                                decorations.push({
-                                    decoration: this.settings.createScopeLineDecorations(scope.color, false, false, false, true, i + 1),
-                                    range: verticalLineInfo.range
-                                });
-                            }
-                        }
-
-                        decorations.push({
-                            decoration: this.settings.createScopeLineDecorations(scope.color, false, false, false, true),
-                            range: verticalLineInfo.range
-                        });
-
-                        decorations.forEach((decorationInfo) => {
-                            event.textEditor.setDecorations(decorationInfo.decoration, [decorationInfo.range]);
-                            this.scopeDecorations.push(decorationInfo.decoration);
-                        });
+                    verticalLineInfo.forEach((info) => {
+                        this.setVerticalLineDecoration(scope, info, event);
                     });
 
                     if (underlineLineRanges) {
-                        const lineDecoration =
-                            this.settings.createScopeLineDecorations(scope.color, false, false, true, false);
-                        event.textEditor.setDecorations(lineDecoration, underlineLineRanges);
-                        this.scopeDecorations.push(lineDecoration);
+                        this.setUnderLineDecoration(scope, event, underlineLineRanges);
                     }
 
                     if (overlineLineRanges) {
-                        const lineDecoration =
-                            this.settings.createScopeLineDecorations(scope.color, true, false, false, false);
-                        event.textEditor.setDecorations(lineDecoration, overlineLineRanges);
-                        this.scopeDecorations.push(lineDecoration);
+                        this.setOverLineDecoration(scope, event, overlineLineRanges);
                     }
                 }
             }
         }
+    }
+
+    private setOverLineDecoration(
+        scope: Scope,
+        event: vscode.TextEditorSelectionChangeEvent,
+        overlineLineRanges: vscode.Range[]) {
+        const lineDecoration = this.settings.createScopeLineDecorations(scope.color, true, false, false, false);
+        event.textEditor.setDecorations(lineDecoration, overlineLineRanges);
+        this.scopeDecorations.push(lineDecoration);
+    }
+
+    private setUnderLineDecoration(
+        scope: Scope,
+        event: vscode.TextEditorSelectionChangeEvent,
+        underlineLineRanges: vscode.Range[]) {
+        const lineDecoration = this.settings.createScopeLineDecorations(scope.color, false, false, true, false);
+        event.textEditor.setDecorations(lineDecoration, underlineLineRanges);
+        this.scopeDecorations.push(lineDecoration);
+    }
+
+    private setVerticalLineDecoration(
+        scope: Scope,
+        info: { emptyLinesAbove: number; range: vscode.Range; },
+        event: vscode.TextEditorSelectionChangeEvent) {
+        const offsetDecorations: Array<{
+            decoration: vscode.TextEditorDecorationType;
+            range: vscode.Range;
+        }> = [];
+        const normalDecoration = this.settings.createScopeLineDecorations(scope.color, false, false, false, true);
+        const ranges: vscode.Range[] = [];
+        if (info.emptyLinesAbove > 0) {
+            for (let i = 0; i < info.emptyLinesAbove; i++) {
+                offsetDecorations.push({
+                    decoration: this.settings.createScopeLineDecorations(scope.color, false, false, false, true, i + 1),
+                    range: info.range,
+                });
+            }
+        }
+        ranges.push(info.range);
+        event.textEditor.setDecorations(normalDecoration, ranges);
+        this.scopeDecorations.push(normalDecoration);
+        offsetDecorations.forEach((decorationInfo) => {
+            event.textEditor.setDecorations(decorationInfo.decoration, [decorationInfo.range]);
+            this.scopeDecorations.push(decorationInfo.decoration);
+        });
     }
 
     private disposeScopeDecorations() {
