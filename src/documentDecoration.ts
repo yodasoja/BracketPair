@@ -331,34 +331,49 @@ export default class DocumentDecoration {
             return;
         }
 
-        const normalRanges = verticleLineRanges.filter((e) => e.valid).map((e) => e.range);
+        const validLinesForDecoration = verticleLineRanges.filter((e) => e.valid);
+        const normalRanges = validLinesForDecoration.map((e) => e.range);
 
-        // This is the position ABOVE the first starting line
-        let aboveValidRange = new vscode.Range(
-            verticleLineRanges[0].range.start.translate(-1),
-            verticleLineRanges[0].range.end.translate(-1));
+        const midValidRangeDefaultTop = validLinesForDecoration.length === 0 ?
+            // Draw decorations from the line above which always exists
+            new vscode.Range(
+                verticleLineRanges[0].range.start.translate(-1),
+                verticleLineRanges[0].range.end.translate(-1)
+            ) :
+            // Draw decorations from the middle which prevent lines dissapearing during scrolling
+            validLinesForDecoration[Math.floor(validLinesForDecoration.length / 2)].range;
 
-        // If first vertical range cannot be displayed, take from above line which always exist
-        if (!verticleLineRanges[0].valid) {
-            offsets.push({ range: aboveValidRange, downOffset: 1 });
-        }
+        let topValidRange = midValidRangeDefaultTop;
+        let botValidRange = midValidRangeDefaultTop;
 
-        // If last vertical range cannot be displayed, take from below line which always exists
-        if (verticleLineRanges.length > 1 && !verticleLineRanges[verticleLineRanges.length - 1].valid) {
-            const range = new vscode.Range(
-                verticleLineRanges[verticleLineRanges.length - 1].range.start.translate(1),
-                verticleLineRanges[verticleLineRanges.length - 1].range.end.translate(1));
-            offsets.push({ range, downOffset: -1 });
-        }
+        const halfLength = Math.ceil(verticleLineRanges.length / 2);
 
-        for (let i = 1; i < verticleLineRanges.length - 1; i++) {
-            const lineRange = verticleLineRanges[i];
+        // Top half should translated from closest line below, so translated decorations don't dissapear while scrolling
+        const topHalf = verticleLineRanges.splice(0, halfLength);
+
+        // Bot half should copy lines from closet line above, so translated decorations don't dissapear while scrolling
+        const botHalf = verticleLineRanges;
+
+        // Start at the middle and travel upwards
+        for (let i = topHalf.length; i-- > 0;) {
+            const lineRange = topHalf[i];
             if (lineRange.valid) {
-                aboveValidRange = lineRange.range;
+                botValidRange = lineRange.range;
             }
             else {
-                const offset = lineRange.range.start.line - aboveValidRange.start.line;
-                offsets.push({ range: aboveValidRange, downOffset: offset });
+                const offset = lineRange.range.start.line - botValidRange.start.line;
+                offsets.push({ range: botValidRange, downOffset: offset });
+            }
+        }
+
+        // Start at the middle and travel downwards
+        for (const lineRange of botHalf) {
+            if (lineRange.valid) {
+                topValidRange = lineRange.range;
+            }
+            else {
+                const offset = lineRange.range.start.line - topValidRange.start.line;
+                offsets.push({ range: topValidRange, downOffset: offset });
             }
         }
 
