@@ -265,7 +265,7 @@ export default class Settings {
         let borderStyle = `${topBorder} ${rightBorder} ${botBorder} ${leftBorder}`;
 
         if (scale !== undefined && scale !== 1) {
-            borderStyle += "; transform-origin: bottom; transform: scaleY(" + scale + "); z-index:1000;"
+            borderStyle += "; transform-origin: bottom; transform: scaleY(" + scale + "); z-index: 1;"
         }
 
         // tslint:disable-next-line:no-string-literal
