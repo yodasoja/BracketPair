@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.41
+Use different technique for rendering empty lines to prevent stretching
+
 ### 1.0.40
 Fix gaps in indent rendering for empty lines
 
