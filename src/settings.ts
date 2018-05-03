@@ -262,7 +262,7 @@ export default class Settings {
         let borderStyle = `${topBorder} ${rightBorder} ${botBorder} ${leftBorder}`;
 
         if (yOffset !== undefined && yOffset !== 0) {
-            borderStyle += "; transform: translateY(" + yOffset * 100 + "%); z-index: 1;"
+            borderStyle += "; transform: translateY(" + yOffset * 100 + "%); z-index: 1;";
         }
 
         // tslint:disable-next-line:no-string-literal

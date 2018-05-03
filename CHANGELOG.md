@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.47
+Gutter icons now resize dynamically based on computed line-height/font-size
+
 ### 1.0.46
 (requires VSCode 1.23+)  
 

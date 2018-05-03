@@ -11,7 +11,6 @@ export default class GutterIconManager {
     private fontSize: number;
     private readonly fontFamily: string;
 
-
     constructor() {
         this.fontFamily = workspace.getConfiguration("editor").fontFamily;
         this.readEditorLineHeight();
