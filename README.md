@@ -60,13 +60,6 @@ It is recommended to disable the inbuilt `editor.matchBrackets` setting if using
 >`"bracketPairColorizer.showVerticalScopeLine"`  
 Show a vertical line between the brackets?  Enabled by default   
 ![Scope Line](images/no-extra.png "Gutter Brackets Example")  
->
-> If using this setting, it is recommended to disable VSCode's inbuilt indent highlighting via:
-> ```
->"workbench.colorCustomizations": {
->    "editorIndentGuide.activeBackground": "#0000",
->},
->```
 
 >`"bracketPairColorizer.showHorizontalScopeLine"`  
 Show a horizontal line between the brackets? Enabled by default   
