@@ -24,7 +24,6 @@ export default class Settings {
     private readonly activeBracketCSSElements: string[][];
     private readonly activeScopeLineCSSElements: string[][];
     private readonly activeScopeLineCSSBorder: string;
-    private readonly fontFamily: string;
     private readonly rulerPosition: string;
 
     constructor(
@@ -34,8 +33,6 @@ export default class Settings {
     ) {
         this.gutterIcons = gutterIcons;
         this.prismLanguageID = languageID;
-
-        this.fontFamily = vscode.workspace.getConfiguration("editor", documentUri).fontFamily;
 
         const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
         const activeScopeCSS = configuration.get("activeScopeCSS") as string[];
@@ -216,7 +213,7 @@ export default class Settings {
     }
 
     public createGutterBracketDecorations(color: string, bracket: string) {
-        const gutterIcon = this.gutterIcons.GetIconUri(bracket, color, this.fontFamily);
+        const gutterIcon = this.gutterIcons.GetIconUri(bracket, color);
         const decorationSettings: vscode.DecorationRenderOptions = {
             gutterIconPath: gutterIcon,
         };

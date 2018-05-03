@@ -20,12 +20,12 @@ export default class DocumentDecorationManager {
         this.loadLanguages();
     }
 
-    public reset() {
+    public Dispose() {
         this.documents.forEach((document, key) => {
             document.dispose();
         });
-        this.documents.clear();
-        this.updateAllDocuments();
+
+        this.gutterIcons.Dispose();
     }
 
     public expandBracketSelection(editor: TextEditor) {

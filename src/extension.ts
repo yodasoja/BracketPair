@@ -1,7 +1,7 @@
 import { commands, ExtensionContext, window, workspace } from "vscode";
 import DocumentDecorationManager from "./documentDecorationManager";
 export function activate(context: ExtensionContext) {
-    const documentDecorationManager = new DocumentDecorationManager();
+    let documentDecorationManager = new DocumentDecorationManager();
 
     context.subscriptions.push(commands.registerCommand("bracket-pair-colorizer.expandBracketSelection", () => {
         const editor = window.activeTextEditor;
@@ -16,8 +16,14 @@ export function activate(context: ExtensionContext) {
     }));
 
     context.subscriptions.push(workspace.onDidChangeConfiguration((event) => {
-        if (event.affectsConfiguration("bracketPairColorizer")) {
-            documentDecorationManager.reset();
+        if (event.affectsConfiguration("bracketPairColorizer") ||
+            event.affectsConfiguration("editor.lineHeight") ||
+            event.affectsConfiguration("editor.fontSize")
+
+        ) {
+            documentDecorationManager.Dispose();
+            documentDecorationManager = new DocumentDecorationManager();
+            documentDecorationManager.updateAllDocuments();
         }
     }));
 
@@ -41,7 +47,7 @@ export function activate(context: ExtensionContext) {
         documentDecorationManager.onDidChangeSelection(event);
     }));
 
-    documentDecorationManager.reset();
+    documentDecorationManager.updateAllDocuments();
 }
 
 // tslint:disable-next-line:no-empty
