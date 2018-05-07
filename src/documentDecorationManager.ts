@@ -131,6 +131,7 @@ export default class DocumentDecorationManager {
     private getPrismLanguageID(languageID: string): string[] {
         // Some VSCode language ids need to be mapped to match http://prismjs.com/#languages-list
         switch (languageID) {
+            case "ahk": return ["autohotkey"];
             case "apex": return ["java"];
             case "html": return ["markup", "javascript"];
             case "javascriptreact": return ["jsx"];

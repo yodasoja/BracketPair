@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.48
+Fix Autohotkey support
+
 ### 1.0.47
 Gutter icons now resize dynamically based on computed line-height/font-size
 
