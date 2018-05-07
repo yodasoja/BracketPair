@@ -333,9 +333,17 @@ export default class DocumentDecoration {
 
         const normalRanges = verticleLineRanges.filter((e) => e.valid).map((e) => e.range);
 
-        // This is the position ABOVE the first starting line
+        // Get first valid range, if non fall-back to opening position
         let aboveValidRange = scope.open.range;
+        for (const lineRange of verticleLineRanges) {
+            if (lineRange.valid) {
+                aboveValidRange = lineRange.range;
+                break;
+            }
+        }
 
+        /* Keep updating last valid range to keep offset distance minimum 
+         to prevent missing decorations when scrolling */
         for (const lineRange of verticleLineRanges) {
             if (lineRange.valid) {
                 aboveValidRange = lineRange.range;
