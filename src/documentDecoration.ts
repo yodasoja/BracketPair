@@ -334,9 +334,7 @@ export default class DocumentDecoration {
         const normalRanges = verticleLineRanges.filter((e) => e.valid).map((e) => e.range);
 
         // This is the position ABOVE the first starting line
-        let aboveValidRange = new vscode.Range(
-            verticleLineRanges[0].range.start.translate(-1),
-            verticleLineRanges[0].range.end.translate(-1));
+        let aboveValidRange = scope.open.range;
 
         for (const lineRange of verticleLineRanges) {
             if (lineRange.valid) {
