@@ -1,6 +1,6 @@
 import {
-    Selection, TextDocument, TextDocumentContentChangeEvent,
-    TextEditor, TextEditorSelectionChangeEvent, window,
+    Selection, TextDocument, TextDocumentChangeEvent,
+    TextDocumentContentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, window,
 } from "vscode";
 import DocumentDecoration from "./documentDecoration";
 import GutterIconManager from "./gutterIconManager";
@@ -56,12 +56,10 @@ export default class DocumentDecorationManager {
         }
     }
 
-    public onDidChangeTextDocument(
-        document: TextDocument,
-        contentChanges: TextDocumentContentChangeEvent[]) {
-        const documentDecoration = this.getDocumentDecorations(document);
+    public onDidChangeTextDocument(event: TextDocumentChangeEvent) {
+        const documentDecoration = this.getDocumentDecorations(event.document);
         if (documentDecoration) {
-            documentDecoration.onDidChangeTextDocument(contentChanges);
+            documentDecoration.onDidChangeTextDocument(event.contentChanges);
         }
     }
 
