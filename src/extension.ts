@@ -42,7 +42,7 @@ export function activate(context: ExtensionContext) {
         }),
         window.onDidChangeTextEditorSelection((event) => {
             documentDecorationManager.onDidChangeSelection(event);
-        })
+        }),
     );
 
     documentDecorationManager.updateAllDocuments();
