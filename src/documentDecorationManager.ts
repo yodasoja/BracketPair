@@ -133,14 +133,15 @@ export default class DocumentDecorationManager {
         switch (languageID) {
             case "ahk": return ["autohotkey"];
             case "apex": return ["java"];
+            case "gradle": return ["groovy"];
             case "html": return ["markup", "javascript"];
             case "javascriptreact": return ["jsx"];
             case "json5": return ["javascript"];
             case "jsonc": return ["javascript"];
             case "mathml": return ["markup"];
             case "nunjucks": return ["twig"];
-            case "razor": return ["markup", "javascript", "csharp", "aspnet"];
-            case "scad": return ["swift"]; // workaround for unsupported language in Prism
+            case "razor": return ["markup", "javascript", "csharp", "aspnet"]; // Workaround
+            case "scad": return ["swift"]; // Workaround
             case "svg": return ["markup"];
             case "systemverilog": return ["verilog"];
             case "typescriptreact": return ["tsx"];
