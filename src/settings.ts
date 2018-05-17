@@ -129,6 +129,11 @@ export default class Settings {
             throw new Error("timeOutLength is not a number");
         }
 
+        if (this.timeOutLength <= 0)
+        {
+            this.timeOutLength = 1;
+        }
+
         if (this.colorMode === ColorMode.Consecutive) {
             const consecutiveSettings = configuration.get<[{}]>("consecutivePairColors");
 

@@ -143,56 +143,45 @@ export default class DocumentDecoration {
     }
 
     public triggerUpdateDecorations() {
-        if (this.settings.timeOutLength > 0) {
+        if (this.updateDecorationTimeout) {
+            clearTimeout(this.updateDecorationTimeout);
+        }
 
-            if (this.updateDecorationTimeout) {
-                clearTimeout(this.updateDecorationTimeout);
+        this.updateDecorationTimeout = setTimeout(() => {
+            this.updateDecorationTimeout = null;
+
+            if (this.settings.isDisposed) {
+                return;
             }
 
-            this.updateDecorationTimeout = setTimeout(() => {
-                if (this.settings.isDisposed) {
-                    return;
-                }
-
-                this.updateDecorationTimeout = null;
-                this.updateDecorations();
-                if (this.updateScopeEvent) {
-                    this.updateScopeDecorations(this.updateScopeEvent);
-                }
-            }, this.settings.timeOutLength);
-        }
-        else {
             this.updateDecorations();
-        }
+            if (this.updateScopeEvent) {
+                this.updateScopeDecorations(this.updateScopeEvent);
+            }
+        }, this.settings.timeOutLength);
     }
 
     public triggerUpdateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent | undefined) {
         this.updateScopeEvent = event;
-        if (this.settings.timeOutLength > 0) {
+        if (this.updateScopeTimeout) {
+            clearTimeout(this.updateScopeTimeout);
+        }
+
+        this.updateScopeTimeout = setTimeout(() => {
+            this.updateScopeTimeout = null;
+
+            if (this.settings.isDisposed) {
+                return;
+            }
+
             if (this.updateDecorationTimeout) {
                 return; // Scope gets updated from decoration timeout also
             }
 
-            if (this.updateScopeTimeout) {
-                clearTimeout(this.updateScopeTimeout);
-            }
-
-            this.updateScopeTimeout = setTimeout(() => {
-                if (this.settings.isDisposed) {
-                    return;
-                }
-
-                this.updateScopeTimeout = null;
-                if (this.updateScopeEvent) {
-                    this.updateScopeDecorations(this.updateScopeEvent);
-                }
-            }, this.settings.timeOutLength);
-        }
-        else {
             if (this.updateScopeEvent) {
                 this.updateScopeDecorations(this.updateScopeEvent);
             }
-        }
+        }, this.settings.timeOutLength);
     }
 
     private updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
