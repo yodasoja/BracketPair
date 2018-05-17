@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 1.0.49
+Add gradle support (mapped as groovy)  
+Respect updating timeout for scope decorations
+
 ### 1.0.48
 Fix Autohotkey support
 

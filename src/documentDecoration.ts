@@ -11,6 +11,7 @@ export default class DocumentDecoration {
     public readonly settings: Settings;
 
     private updateDecorationTimeout: NodeJS.Timer | null;
+    private updateScopeTimeout: NodeJS.Timer | null;
     // This program caches lines, and will only analyze linenumbers including or above a modified line
     private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
@@ -142,10 +143,6 @@ export default class DocumentDecoration {
     }
 
     public triggerUpdateDecorations() {
-        if (this.settings.isDisposed) {
-            return;
-        }
-
         if (this.settings.timeOutLength > 0) {
 
             if (this.updateDecorationTimeout) {
@@ -153,11 +150,14 @@ export default class DocumentDecoration {
             }
 
             this.updateDecorationTimeout = setTimeout(() => {
+                if (this.settings.isDisposed) {
+                    return;
+                }
+
                 this.updateDecorationTimeout = null;
                 this.updateDecorations();
                 if (this.updateScopeEvent) {
                     this.updateScopeDecorations(this.updateScopeEvent);
-                    this.updateScopeEvent = undefined;
                 }
             }, this.settings.timeOutLength);
         }
@@ -166,12 +166,36 @@ export default class DocumentDecoration {
         }
     }
 
-    public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
-        if (this.updateDecorationTimeout) {
-            this.updateScopeEvent = event;
-            return;
-        }
+    public triggerUpdateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent | undefined) {
+        this.updateScopeEvent = event;
+        if (this.settings.timeOutLength > 0) {
+            if (this.updateDecorationTimeout) {
+                return; // Scope gets updated from decoration timeout also
+            }
 
+            if (this.updateScopeTimeout) {
+                clearTimeout(this.updateScopeTimeout);
+            }
+
+            this.updateScopeTimeout = setTimeout(() => {
+                if (this.settings.isDisposed) {
+                    return;
+                }
+
+                this.updateScopeTimeout = null;
+                if (this.updateScopeEvent) {
+                    this.updateScopeDecorations(this.updateScopeEvent);
+                }
+            }, this.settings.timeOutLength);
+        }
+        else {
+            if (this.updateScopeEvent) {
+                this.updateScopeDecorations(this.updateScopeEvent);
+            }
+        }
+    }
+
+    private updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
         this.disposeScopeDecorations();
 
         const scopes: Set<Scope> = new Set<Scope>();

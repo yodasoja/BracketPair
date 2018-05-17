@@ -80,7 +80,7 @@ export default class DocumentDecorationManager {
             (documentDecoration.settings.highlightActiveScope ||
                 documentDecoration.settings.showBracketsInGutter ||
                 documentDecoration.settings.showVerticalScopeLine)) {
-            documentDecoration.updateScopeDecorations(event);
+            documentDecoration.triggerUpdateScopeDecorations(event);
         }
     }
 
