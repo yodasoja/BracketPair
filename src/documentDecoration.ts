@@ -21,6 +21,7 @@ export default class DocumentDecoration {
     private readonly largeFileRange: vscode.Range;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
+    private modelVersion = 0;
 
     // What have I created..
     private readonly stringStrategies = new Map<string,
@@ -149,11 +150,6 @@ export default class DocumentDecoration {
 
         this.updateDecorationTimeout = setTimeout(() => {
             this.updateDecorationTimeout = null;
-
-            if (this.settings.isDisposed) {
-                return;
-            }
-
             this.updateDecorations();
             if (this.updateScopeEvent) {
                 this.updateScopeDecorations(this.updateScopeEvent);
@@ -163,21 +159,16 @@ export default class DocumentDecoration {
 
     public triggerUpdateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent | undefined) {
         this.updateScopeEvent = event;
+
         if (this.updateScopeTimeout) {
             clearTimeout(this.updateScopeTimeout);
+        }
+        else if (this.updateScopeEvent) {
+            this.updateScopeDecorations(this.updateScopeEvent);
         }
 
         this.updateScopeTimeout = setTimeout(() => {
             this.updateScopeTimeout = null;
-
-            if (this.settings.isDisposed) {
-                return;
-            }
-
-            if (this.updateDecorationTimeout) {
-                return; // Scope gets updated from decoration timeout also
-            }
-
             if (this.updateScopeEvent) {
                 this.updateScopeDecorations(this.updateScopeEvent);
             }
@@ -185,6 +176,14 @@ export default class DocumentDecoration {
     }
 
     private updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
+        if (this.settings.isDisposed) {
+            return;
+        }
+
+        if (!this.isModelValid()) {
+            return; // Scope gets updated from decoration timeout also
+        }
+
         this.disposeScopeDecorations();
 
         const scopes: Set<Scope> = new Set<Scope>();
@@ -404,7 +403,15 @@ export default class DocumentDecoration {
         }
     }
 
+    private isModelValid() {
+        return this.modelVersion === this.document.version;
+    }
+
     private updateDecorations() {
+        if (this.settings.isDisposed) {
+            return;
+        }
+
         // One document may be shared by multiple editors (side by side view)
         const editors: vscode.TextEditor[] =
             vscode.window.visibleTextEditors.filter((e) => this.document === e.document);
@@ -444,6 +451,7 @@ export default class DocumentDecoration {
         });
 
         this.colorDecorations(editors);
+        this.modelVersion = this.document.version;
     }
 
     private parseTokenOrStringArray(
