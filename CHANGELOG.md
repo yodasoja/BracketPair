@@ -1,5 +1,13 @@
 ## Release Notes
 
+### 1.0.51
+Support multiple opacity for scope line settings
+e.g.
+```
+"borderColor : {color}; opacity: 0.5",
+"backgroundColor : {color}; opacity: 0.1"
+```
+
 ### 1.0.50
 Don't apply scope timeout to first event for more responsive feedback
 
