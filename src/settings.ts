@@ -2,6 +2,8 @@ import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
 import GutterIconManager from "./gutterIconManager";
+// tslint:disable-next-line:no-var-requires
+const Colors = require("colors.js");
 
 export default class Settings {
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
@@ -129,8 +131,7 @@ export default class Settings {
             throw new Error("timeOutLength is not a number");
         }
 
-        if (this.timeOutLength <= 0)
-        {
+        if (this.timeOutLength <= 0) {
             this.timeOutLength = 1;
         }
 
@@ -261,7 +262,23 @@ export default class Settings {
         const leftBorder = left ? this.activeScopeLineCSSBorder : none;
 
         this.activeScopeLineCSSElements.forEach((element) => {
-            decorationSettings[element[0]] = element[1].replace("{color}", color);
+            if (element[0].includes("Color")) {
+                element[1] =  element[1].replace("{color}", color)
+                if (!element[1].includes("#") && !element[1].includes("rgb") && element[1].includes("opacity")) {
+                    const colorSplit = element[1].split(";");
+                    const opacitySplit = colorSplit[1].split(":");
+                    const rgb = Colors.name2rgb(colorSplit[0]);
+                    const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]})`;
+                    console.log(rbgaString);
+                    decorationSettings[element[0]] = rbgaString;
+                }
+                else {
+                    decorationSettings[element[0]] = element[1];
+                }
+            }
+            else {
+                decorationSettings[element[0]] = element[1];
+            }
         });
 
         let borderStyle = `${topBorder} ${rightBorder} ${botBorder} ${leftBorder}`;

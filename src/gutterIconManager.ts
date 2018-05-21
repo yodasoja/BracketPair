@@ -68,7 +68,7 @@ export default class GutterIconManager {
         const MAXIMUM_LINE_HEIGHT = 150;
         const GOLDEN_LINE_HEIGHT_RATIO = (process.platform === "darwin") ? 1.5 : 1.35;
 
-        const editorConfig = workspace.getConfiguration("editor");
+        const editorConfig = workspace.getConfiguration("editor", null);
         const fontSize = editorConfig.get("fontSize") as number;
         const configuredLineHeight = editorConfig.get("lineHeight") as number;
 

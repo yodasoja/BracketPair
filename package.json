@@ -218,6 +218,7 @@
     },
     "license": "SEE LICENSE IN LICENSE.md",
     "dependencies": {
+        "colors.js": "^1.2.4",
         "escape-html": "^1.0.3",
         "prismjs": "^1.14.0",
         "vscode-uri": "^1.0.3"

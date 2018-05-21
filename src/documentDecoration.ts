@@ -298,7 +298,8 @@ export default class DocumentDecoration {
                         }
                     }
 
-                    this.setVerticalLineDecoration(scope, event, verticalLineRanges);
+                    const safeFallbackPosition = new vscode.Position(start - 1, leftBorderIndex);
+                    this.setVerticalLineDecoration(scope, event, safeFallbackPosition, verticalLineRanges);
 
                     if (underlineLineRanges) {
                         this.setUnderLineDecoration(scope, event, underlineLineRanges);
@@ -333,6 +334,7 @@ export default class DocumentDecoration {
     private setVerticalLineDecoration(
         scope: Scope,
         event: vscode.TextEditorSelectionChangeEvent,
+        fallBackPosition: vscode.Position,
         verticleLineRanges: Array<{ range: vscode.Range, valid: boolean }>,
     ) {
         const offsets:
@@ -346,7 +348,7 @@ export default class DocumentDecoration {
         const normalRanges = verticleLineRanges.filter((e) => e.valid).map((e) => e.range);
 
         // Get first valid range, if non fall-back to opening position
-        let aboveValidRange = scope.open.range;
+        let aboveValidRange = new vscode.Range(fallBackPosition, fallBackPosition.translate(0, 1));
         for (const lineRange of verticleLineRanges) {
             if (lineRange.valid) {
                 aboveValidRange = lineRange.range;
@@ -354,7 +356,7 @@ export default class DocumentDecoration {
             }
         }
 
-        /* Keep updating last valid range to keep offset distance minimum 
+        /* Keep updating last valid range to keep offset distance minimum
          to prevent missing decorations when scrolling */
         for (const lineRange of verticleLineRanges) {
             if (lineRange.valid) {
