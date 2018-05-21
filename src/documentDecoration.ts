@@ -348,7 +348,7 @@ export default class DocumentDecoration {
         const normalRanges = verticleLineRanges.filter((e) => e.valid).map((e) => e.range);
 
         // Get first valid range, if non fall-back to opening position
-        let aboveValidRange = new vscode.Range(fallBackPosition, fallBackPosition.translate(0, 1));
+        let aboveValidRange = new vscode.Range(fallBackPosition, fallBackPosition);
         for (const lineRange of verticleLineRanges) {
             if (lineRange.valid) {
                 aboveValidRange = lineRange.range;

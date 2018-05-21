@@ -269,7 +269,6 @@ export default class Settings {
                     const opacitySplit = colorSplit[1].split(":");
                     const rgb = Colors.name2rgb(colorSplit[0]);
                     const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]})`;
-                    console.log(rbgaString);
                     decorationSettings[element[0]] = rbgaString;
                 }
                 else {
