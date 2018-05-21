@@ -263,13 +263,20 @@ export default class Settings {
 
         this.activeScopeLineCSSElements.forEach((element) => {
             if (element[0].includes("Color")) {
-                const colorElement =  element[1].replace("{color}", color)
-                if (!colorElement.includes("#") && !colorElement.includes("rgb") && colorElement.includes("opacity")) {
+                const colorElement = element[1].replace("{color}", color)
+                if (!colorElement.includes("rgb") && colorElement.includes("opacity")) {
                     const colorSplit = colorElement.split(";");
                     const opacitySplit = colorSplit[1].split(":");
-                    const rgb = Colors.name2rgb(colorSplit[0]);
-                    const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]});`;
-                    decorationSettings[element[0]] = rbgaString;
+                    if (colorSplit[0].includes("#")) {
+                        const rgb = Colors.hex2rgb(colorSplit[0]);
+                        const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]});`;
+                        decorationSettings[element[0]] = rbgaString;
+                    }
+                    else { // Assume css color
+                        const rgb = Colors.name2rgb(colorSplit[0]);
+                        const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]});`;
+                        decorationSettings[element[0]] = rbgaString;
+                    }
                 }
                 else {
                     decorationSettings[element[0]] = colorElement;
