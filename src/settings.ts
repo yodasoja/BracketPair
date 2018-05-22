@@ -2,6 +2,8 @@ import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
 import GutterIconManager from "./gutterIconManager";
+// tslint:disable-next-line:no-var-requires
+const Colors = require("colors.js");
 
 export default class Settings {
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
@@ -127,6 +129,10 @@ export default class Settings {
 
         if (typeof this.timeOutLength !== "number") {
             throw new Error("timeOutLength is not a number");
+        }
+
+        if (this.timeOutLength <= 0) {
+            this.timeOutLength = 1;
         }
 
         if (this.colorMode === ColorMode.Consecutive) {
@@ -256,7 +262,29 @@ export default class Settings {
         const leftBorder = left ? this.activeScopeLineCSSBorder : none;
 
         this.activeScopeLineCSSElements.forEach((element) => {
-            decorationSettings[element[0]] = element[1].replace("{color}", color);
+            if (element[0].includes("Color")) {
+                const colorElement = element[1].replace("{color}", color)
+                if (!colorElement.includes("rgb") && colorElement.includes("opacity")) {
+                    const colorSplit = colorElement.split(";");
+                    const opacitySplit = colorSplit[1].split(":");
+                    if (colorSplit[0].includes("#")) {
+                        const rgb = Colors.hex2rgb(colorSplit[0]);
+                        const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]});`;
+                        decorationSettings[element[0]] = rbgaString;
+                    }
+                    else { // Assume css color
+                        const rgb = Colors.name2rgb(colorSplit[0]);
+                        const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]});`;
+                        decorationSettings[element[0]] = rbgaString;
+                    }
+                }
+                else {
+                    decorationSettings[element[0]] = colorElement;
+                }
+            }
+            else {
+                decorationSettings[element[0]] = element[1];
+            }
         });
 
         let borderStyle = `${topBorder} ${rightBorder} ${botBorder} ${leftBorder}`;

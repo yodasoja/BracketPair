@@ -11,6 +11,7 @@ export default class DocumentDecoration {
     public readonly settings: Settings;
 
     private updateDecorationTimeout: NodeJS.Timer | null;
+    private updateScopeTimeout: NodeJS.Timer | null;
     // This program caches lines, and will only analyze linenumbers including or above a modified line
     private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
@@ -20,6 +21,7 @@ export default class DocumentDecoration {
     private readonly largeFileRange: vscode.Range;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
+    private modelVersion = 0;
 
     // What have I created..
     private readonly stringStrategies = new Map<string,
@@ -142,34 +144,44 @@ export default class DocumentDecoration {
     }
 
     public triggerUpdateDecorations() {
+        if (this.updateDecorationTimeout) {
+            clearTimeout(this.updateDecorationTimeout);
+        }
+
+        this.updateDecorationTimeout = setTimeout(() => {
+            this.updateDecorationTimeout = null;
+            this.updateDecorations();
+            if (this.updateScopeEvent) {
+                this.updateScopeDecorations(this.updateScopeEvent);
+            }
+        }, this.settings.timeOutLength);
+    }
+
+    public triggerUpdateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent | undefined) {
+        this.updateScopeEvent = event;
+
+        if (this.updateScopeTimeout) {
+            clearTimeout(this.updateScopeTimeout);
+        }
+        else if (this.updateScopeEvent) {
+            this.updateScopeDecorations(this.updateScopeEvent);
+        }
+
+        this.updateScopeTimeout = setTimeout(() => {
+            this.updateScopeTimeout = null;
+            if (this.updateScopeEvent) {
+                this.updateScopeDecorations(this.updateScopeEvent);
+            }
+        }, this.settings.timeOutLength);
+    }
+
+    private updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
         if (this.settings.isDisposed) {
             return;
         }
 
-        if (this.settings.timeOutLength > 0) {
-
-            if (this.updateDecorationTimeout) {
-                clearTimeout(this.updateDecorationTimeout);
-            }
-
-            this.updateDecorationTimeout = setTimeout(() => {
-                this.updateDecorationTimeout = null;
-                this.updateDecorations();
-                if (this.updateScopeEvent) {
-                    this.updateScopeDecorations(this.updateScopeEvent);
-                    this.updateScopeEvent = undefined;
-                }
-            }, this.settings.timeOutLength);
-        }
-        else {
-            this.updateDecorations();
-        }
-    }
-
-    public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
-        if (this.updateDecorationTimeout) {
-            this.updateScopeEvent = event;
-            return;
+        if (!this.isModelValid()) {
+            return; // Scope gets updated from decoration timeout also
         }
 
         this.disposeScopeDecorations();
@@ -286,7 +298,8 @@ export default class DocumentDecoration {
                         }
                     }
 
-                    this.setVerticalLineDecoration(scope, event, verticalLineRanges);
+                    const safeFallbackPosition = new vscode.Position(start - 1, leftBorderIndex);
+                    this.setVerticalLineDecoration(scope, event, safeFallbackPosition, verticalLineRanges);
 
                     if (underlineLineRanges) {
                         this.setUnderLineDecoration(scope, event, underlineLineRanges);
@@ -321,6 +334,7 @@ export default class DocumentDecoration {
     private setVerticalLineDecoration(
         scope: Scope,
         event: vscode.TextEditorSelectionChangeEvent,
+        fallBackPosition: vscode.Position,
         verticleLineRanges: Array<{ range: vscode.Range, valid: boolean }>,
     ) {
         const offsets:
@@ -334,7 +348,7 @@ export default class DocumentDecoration {
         const normalRanges = verticleLineRanges.filter((e) => e.valid).map((e) => e.range);
 
         // Get first valid range, if non fall-back to opening position
-        let aboveValidRange = scope.open.range;
+        let aboveValidRange = new vscode.Range(fallBackPosition, fallBackPosition);
         for (const lineRange of verticleLineRanges) {
             if (lineRange.valid) {
                 aboveValidRange = lineRange.range;
@@ -342,7 +356,7 @@ export default class DocumentDecoration {
             }
         }
 
-        /* Keep updating last valid range to keep offset distance minimum 
+        /* Keep updating last valid range to keep offset distance minimum
          to prevent missing decorations when scrolling */
         for (const lineRange of verticleLineRanges) {
             if (lineRange.valid) {
@@ -391,7 +405,15 @@ export default class DocumentDecoration {
         }
     }
 
+    private isModelValid() {
+        return this.modelVersion === this.document.version;
+    }
+
     private updateDecorations() {
+        if (this.settings.isDisposed) {
+            return;
+        }
+
         // One document may be shared by multiple editors (side by side view)
         const editors: vscode.TextEditor[] =
             vscode.window.visibleTextEditors.filter((e) => this.document === e.document);
@@ -431,6 +453,7 @@ export default class DocumentDecoration {
         });
 
         this.colorDecorations(editors);
+        this.modelVersion = this.document.version;
     }
 
     private parseTokenOrStringArray(
