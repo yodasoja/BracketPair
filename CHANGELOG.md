@@ -1,6 +1,6 @@
 ## Release Notes
 
-### 1.0.53
+### 1.0.55
 Support multiple opacity for scope line settings
 e.g.
 ```

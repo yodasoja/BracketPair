@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
+import Colors from "./colors";
 import GutterIconManager from "./gutterIconManager";
-// tslint:disable-next-line:no-var-requires
-const Colors = require("colors.js");
 
 export default class Settings {
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
@@ -263,19 +262,23 @@ export default class Settings {
 
         this.activeScopeLineCSSElements.forEach((element) => {
             if (element[0].includes("Color")) {
-                const colorElement = element[1].replace("{color}", color)
+                const colorElement = element[1].replace("{color}", color);
                 if (!colorElement.includes("rgb") && colorElement.includes("opacity")) {
                     const colorSplit = colorElement.split(";");
                     const opacitySplit = colorSplit[1].split(":");
                     if (colorSplit[0].includes("#")) {
                         const rgb = Colors.hex2rgb(colorSplit[0]);
-                        const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]});`;
-                        decorationSettings[element[0]] = rbgaString;
+                        if (rgb) {
+                            const rbgaString = `rgba(${rgb.r},${rgb.g},${rgb.b},${opacitySplit[1]});`;
+                            decorationSettings[element[0]] = rbgaString;
+                        }
                     }
                     else { // Assume css color
                         const rgb = Colors.name2rgb(colorSplit[0]);
-                        const rbgaString = `rgba(${rgb.R},${rgb.G},${rgb.B},${opacitySplit[1]});`;
-                        decorationSettings[element[0]] = rbgaString;
+                        if (rgb) {
+                            const rbgaString = `rgba(${rgb.r},${rgb.g},${rgb.b},${opacitySplit[1]});`;
+                            decorationSettings[element[0]] = rbgaString;
+                        }
                     }
                 }
                 else {
