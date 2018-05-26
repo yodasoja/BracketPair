@@ -52,6 +52,10 @@ export default class DocumentDecoration {
             this.stringStrategies.set("namespace", basicStringMatch);
         }
 
+        if (settings.prismLanguageID === "lua") {
+            this.stringStrategies.set("keyword", basicStringMatch);
+        }
+
         if (settings.prismLanguageID === "markdown") {
             const markdownUrl = (
                 array: Array<string | prism.Token>,
