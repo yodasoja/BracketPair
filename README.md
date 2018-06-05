@@ -63,7 +63,6 @@ Show a vertical line between the brackets?  Enabled by default
 
 >`"bracketPairColorizer.showHorizontalScopeLine"`  
 Show a horizontal line between the brackets? Enabled by default   
-Dependant on `showVerticalScopeLine` being enabled  
 ![Scope Line](images/extra.png "Gutter Brackets Example")  
 
 >`"bracketPairColorizer.scopeLineRelativePosition"`  
@@ -107,15 +106,8 @@ Quick-start:
 >An example configuration for HTML is:  
 ```
     "bracketPairColorizer.consecutivePairColors": [
-        [
-            "</",
-            ">"
-        ],
-        [
-            "<",
-            "/>"
-        ],
-        "<>",
+        ["<", "</"],
+        ["<", "/>"],
         [
             "Gold",
             "Orchid",
