@@ -52,8 +52,13 @@ export default class DocumentDecoration {
             this.stringStrategies.set("namespace", basicStringMatch);
         }
 
-        if (settings.prismLanguageID === "lua" || settings.prismLanguageID === "pascal") {
-            this.stringStrategies.set("keyword", basicStringMatch);
+        switch (settings.prismLanguageID) {
+            case "abap":
+            case "lua":
+            case "pascal":
+                this.stringStrategies.set("keyword", basicStringMatch);
+                break;
+            default: break;
         }
 
         if (settings.prismLanguageID === "markdown") {

@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.57
+ABAP keyword support  
+
 ### 1.0.56
 Make horizontal/vertical scope lines able to be enabled separately  
 Pascal/Lua keyword support  
