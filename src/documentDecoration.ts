@@ -52,7 +52,7 @@ export default class DocumentDecoration {
             this.stringStrategies.set("namespace", basicStringMatch);
         }
 
-        if (settings.prismLanguageID === "lua") {
+        if (settings.prismLanguageID === "lua" || settings.prismLanguageID === "pascal") {
             this.stringStrategies.set("keyword", basicStringMatch);
         }
 

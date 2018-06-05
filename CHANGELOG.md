@@ -2,6 +2,7 @@
 
 ### 1.0.56
 Make horizontal/vertical scope lines able to be enabled separately  
+Pascal/Lua keyword support  
 
 ### 1.0.55
 Support multiple opacity for scope line settings
