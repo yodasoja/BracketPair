@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.58
+Batch file support   
+
 ### 1.0.57
 ABAP keyword support  
 
