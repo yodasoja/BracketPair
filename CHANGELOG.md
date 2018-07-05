@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.0.59
+Update to PrismJS 1.50.0
+
 ### 1.0.58
 Batch file support   
 

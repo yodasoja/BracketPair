@@ -219,7 +219,7 @@
     "license": "SEE LICENSE IN LICENSE.md",
     "dependencies": {
         "escape-html": "^1.0.3",
-        "prismjs": "^1.14.0",
+        "prismjs": "^1.15.0",
         "vscode-uri": "^1.0.3"
     }
 }
