@@ -16,12 +16,12 @@ export default class DocumentDecoration {
     private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
     private readonly document: vscode.TextDocument;
-    private updateScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
+    private nextScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
+    private previousScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private readonly prismJs: any;
     private readonly largeFileRange: vscode.Range;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
-    private modelVersion = 0;
 
     // What have I created..
     private readonly stringStrategies = new Map<string,
@@ -160,38 +160,49 @@ export default class DocumentDecoration {
         this.updateDecorationTimeout = setTimeout(() => {
             this.updateDecorationTimeout = null;
             this.updateDecorations();
-            if (this.updateScopeEvent) {
-                this.updateScopeDecorations(this.updateScopeEvent);
+            if (this.nextScopeEvent) {
+                this.updateScopeDecorations();
             }
         }, this.settings.timeOutLength);
     }
 
-    public triggerUpdateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent | undefined) {
-        this.updateScopeEvent = event;
+    public triggerUpdateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
+        this.nextScopeEvent = event;
+
+        if (this.updateDecorationTimeout) {
+            return;
+        }
 
         if (this.updateScopeTimeout) {
             clearTimeout(this.updateScopeTimeout);
         }
-        else if (this.updateScopeEvent) {
-            this.updateScopeDecorations(this.updateScopeEvent);
+        else {
+            this.updateScopeDecorations();
         }
 
         this.updateScopeTimeout = setTimeout(() => {
             this.updateScopeTimeout = null;
-            if (this.updateScopeEvent) {
-                this.updateScopeDecorations(this.updateScopeEvent);
-            }
+            this.updateScopeDecorations();
         }, this.settings.timeOutLength);
     }
 
-    private updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
+    private updateScopeDecorations() {
+        if (!this.nextScopeEvent) {
+            return;
+        }
+        const event = this.nextScopeEvent;
+        this.nextScopeEvent = undefined;
+        if (event === this.previousScopeEvent) {
+            return;
+        }
+
+        this.previousScopeEvent = event;
+
         if (this.settings.isDisposed) {
             return;
         }
 
-        if (!this.isModelValid()) {
-            return; // Scope gets updated from decoration timeout also
-        }
+        // console.time("updateScopeDecorations");
 
         this.disposeScopeDecorations();
 
@@ -321,6 +332,8 @@ export default class DocumentDecoration {
                 }
             }
         }
+
+        // console.timeEnd("updateScopeDecorations");
     }
 
     private setOverLineDecoration(
@@ -415,10 +428,6 @@ export default class DocumentDecoration {
         }
     }
 
-    private isModelValid() {
-        return this.modelVersion === this.document.version;
-    }
-
     private updateDecorations() {
         if (this.settings.isDisposed) {
             return;
@@ -433,6 +442,8 @@ export default class DocumentDecoration {
             return;
         }
 
+        // console.time("updateDecorations");
+
         const lineNumber = this.lineToUpdateWhenTimeoutEnds;
         const amountToRemove = this.lines.length - lineNumber;
 
@@ -446,6 +457,7 @@ export default class DocumentDecoration {
         try {
             tokenized = this.prismJs.tokenize(text, this.prismJs.languages[languageID]);
             if (!tokenized) {
+                console.log("Could not tokenize document: " + this.document.fileName);
                 return;
             }
         }
@@ -463,7 +475,8 @@ export default class DocumentDecoration {
         });
 
         this.colorDecorations(editors);
-        this.modelVersion = this.document.version;
+
+        // console.timeEnd("updateDecorations");
     }
 
     private parseTokenOrStringArray(
