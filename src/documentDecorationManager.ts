@@ -1,24 +1,18 @@
 import {
-    Selection, TextDocument, TextDocumentChangeEvent,
-    TextDocumentContentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, window,
+    TextDocument, TextDocumentChangeEvent,
+    TextEditor, TextEditorSelectionChangeEvent, window,
 } from "vscode";
 import DocumentDecoration from "./documentDecoration";
 import GutterIconManager from "./gutterIconManager";
 import Settings from "./settings";
+import TextMateLoader from "./textMateLoader";
 
 export default class DocumentDecorationManager {
-    private readonly Prism = require("prismjs/components/prism-core.js");
-    private readonly loadLanguages = require("prismjs/components/index.js");
     private readonly components = require("prismjs/components");
-    private readonly supportedLanguages: Set<string>;
     private readonly gutterIcons = new GutterIconManager();
     private showError = true;
     private documents = new Map<string, DocumentDecoration>();
-
-    constructor() {
-        this.supportedLanguages = new Set(Object.keys(this.components.languages));
-        this.loadLanguages();
-    }
+    private textMateLoader = new TextMateLoader();
 
     public Dispose() {
         this.documents.forEach((document, key) => {
@@ -99,14 +93,12 @@ export default class DocumentDecorationManager {
 
         if (documentDecorations === undefined) {
             try {
-                const languages = this.getPrismLanguageID(document.languageId);
-                const primaryLanguage = languages[0];
-                if (!this.supportedLanguages.has(primaryLanguage)) {
+                const tokenizer = this.tryGetTokenizer(document.languageId);
+                if (!tokenizer) {
                     return;
                 }
-
-                const settings = new Settings(primaryLanguage, this.gutterIcons, document.uri);
-                documentDecorations = new DocumentDecoration(document, this.Prism, settings);
+                const settings = new Settings(document.languageId, this.gutterIcons, document.uri);
+                documentDecorations = new DocumentDecoration(document, tokenizer, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
                 if (error instanceof Error) {
@@ -127,29 +119,8 @@ export default class DocumentDecorationManager {
         return documentDecorations;
     }
 
-    private getPrismLanguageID(languageID: string): string[] {
-        // Some VSCode language ids need to be mapped to match http://prismjs.com/#languages-list
-        switch (languageID) {
-            case "ahk": return ["autohotkey"];
-            case "bat": return ["batch"];
-            case "apex": return ["java"];
-            case "gradle": return ["groovy"];
-            case "html": return ["markup", "javascript"];
-            case "javascriptreact": return ["jsx"];
-            case "json5": return ["javascript"];
-            case "jsonc": return ["javascript"];
-            case "mathml": return ["markup"];
-            case "nunjucks": return ["twig"];
-            case "razor": return ["markup", "javascript", "csharp", "aspnet"]; // Workaround
-            case "scad": return ["swift"]; // Workaround
-            case "svg": return ["markup"];
-            case "systemverilog": return ["verilog"];
-            case "typescriptreact": return ["tsx"];
-            case "vb": return ["vbnet"];
-            case "vue": return ["markup", "javascript"];
-            case "xml": return ["markup"];
-            default: return [languageID];
-        }
+    private tryGetTokenizer(languageID: string) {
+        return this.textMateLoader.tryGetTokenizer(languageID);
     }
 
     private isValidDocument(document?: TextDocument): boolean {

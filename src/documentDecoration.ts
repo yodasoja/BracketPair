@@ -1,8 +1,6 @@
 import * as prism from "prismjs";
 import * as vscode from "vscode";
-import Bracket from "./bracket";
 import FoundBracket from "./foundBracket";
-import GutterIconManager from "./gutterIconManager";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
@@ -31,10 +29,10 @@ export default class DocumentDecoration {
         (array: Array<string | prism.Token>, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
             { lineIndex: number, charIndex: number }>();
 
-    constructor(document: vscode.TextDocument, prismJs: any, settings: Settings) {
+    constructor(document: vscode.TextDocument, textMate: any, settings: Settings) {
         this.settings = settings;
         this.document = document;
-        this.prismJs = prismJs;
+        this.prismJs = textMate;
         this.largeFileRange = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(5000, 0));
 
         const basicStringMatch = (
@@ -455,6 +453,10 @@ export default class DocumentDecoration {
         const text = this.document.getText(this.largeFileRange);
         let tokenized: Array<string | prism.Token>;
         try {
+            
+             const lineTokens = this.prismJs.tokenizeLine("function add(a,b) { return a+b; }");
+
+
             tokenized = this.prismJs.tokenize(text, this.prismJs.languages[languageID]);
             if (!tokenized) {
                 console.log("Could not tokenize document: " + this.document.fileName);
