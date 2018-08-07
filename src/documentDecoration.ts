@@ -449,32 +449,40 @@ export default class DocumentDecoration {
         this.lines.splice(lineNumber, amountToRemove);
 
         const languageID = this.settings.prismLanguageID;
-
-        const text = this.document.getText(this.largeFileRange);
         let tokenized: Array<string | prism.Token>;
         try {
-            
-             const lineTokens = this.prismJs.tokenizeLine("function add(a,b) { return a+b; }");
+            for (let i = lineNumber; this.document.lineCount; i++) {
+                const line = this.document.lineAt(i);
 
+                let previousRuleStack: any;
+                if (i > 0) {
+                    previousRuleStack = this.getLine(i - 1, this.document).getRuleStack();
+                }
 
-            tokenized = this.prismJs.tokenize(text, this.prismJs.languages[languageID]);
-            if (!tokenized) {
-                console.log("Could not tokenize document: " + this.document.fileName);
-                return;
+                const lineTokens = this.prismJs.tokenizeLine(line.text, previousRuleStack);
+                const ruleStack = lineTokens.ruleStack;
+                const tokens = lineTokens.tokens;
             }
+
+
+            // tokenized = this.prismJs.tokenize(text, this.prismJs.languages[languageID]);
+            // if (!tokenized) {
+            //     console.log("Could not tokenize document: " + this.document.fileName);
+            //     return;
+            // }
         }
         catch (err) {
             console.warn(err);
             return;
         }
 
-        const positions: FoundBracket[] = [];
-        this.parseTokenOrStringArray(tokenized, 0, 0, positions);
+        // // const positions: FoundBracket[] = [];
+        // this.parseTokenOrStringArray(tokenized, 0, 0, positions);
 
-        positions.forEach((element) => {
-            const currentLine = this.getLine(element.range.start.line, this.document);
-            currentLine.addBracket(element);
-        });
+        // positions.forEach((element) => {
+        //     const currentLine = this.getLine(element.range.start.line, this.document);
+        //     currentLine.addBracket(element);
+        // });
 
         this.colorDecorations(editors);
 

@@ -11,17 +11,23 @@ export default class TextLine {
     private lineState: LineState;
     private readonly settings: Settings;
     private readonly content: string;
+    private readonly ruleStack: any;
 
-    constructor(content: string, settings: Settings, index: number, lineState?: LineState) {
+    constructor(content: string, settings: Settings, index: number, ruleStack?: any, lineState?: LineState) {
         this.settings = settings;
         this.content = content;
         this.index = index;
+        this.ruleStack = ruleStack;
         if (lineState !== undefined) {
             this.lineState = lineState;
         }
         else {
             this.lineState = new LineState(settings);
         }
+    }
+
+    public getRuleStack(): any {
+        return this.ruleStack;
     }
 
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
