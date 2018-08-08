@@ -468,14 +468,23 @@ export default class DocumentDecoration {
                 const ruleStack = tokenized.ruleStack;
                 const tokens = tokenized.tokens;
 
-                const currentLine = this.getLine(i);
+                const currentLine = this.getLine(i, ruleStack);
+                const existingRuleStack = currentLine.getRuleStack();
 
                 tokens.forEach((token) => {
-                    token.scopes.forEach((scope) => {
-                        if (scope.includes(".begin.") || scope.includes(".end.")) {
-                            currentLine.addScope(scope, token.startIndex, token.endIndex);
+                    if (token.scopes.length > 1) {
+                        const shortId = token.scopes[token.scopes.length - 1];
+                        if (
+                            (shortId.includes(".punctuation.") &&
+                                (shortId.includes(".begin.") || shortId.includes(".end."))
+                            )
+                            ||
+                            (shortId.includes(".brace."))
+                        ) {
+                            const longId = token.scopes.join("");
+                            currentLine.addScope(shortId, longId, token.startIndex, token.endIndex);
                         }
-                    });
+                    }
                 });
             }
         }
@@ -484,7 +493,7 @@ export default class DocumentDecoration {
             return;
         }
 
-         this.colorDecorations(editors);
+        this.colorDecorations(editors);
 
         // console.timeEnd("updateDecorations");
     }

@@ -33,16 +33,16 @@ export default class TextLine {
         return this.lineState.copyMultilineContext();
     }
 
-    public addScope(type: string, beginIndex: number, endIndex: number): void {
+    public addScope(shortId: string, longId: string, beginIndex: number, endIndex: number): void {
         const range = new Range(new Position(this.index, beginIndex), new Position(this.index, endIndex));
-        const startSplitIndex = type.indexOf(".begin.");
+        const startSplitIndex = shortId.indexOf(".begin.");
         if (startSplitIndex !== -1) {
-            return this.setOpenRange(type.substring(0, startSplitIndex), range);
+            return this.setOpenRange(shortId.substring(0, startSplitIndex), range);
         }
 
-        const endSplitIndex = type.indexOf(".end.");
+        const endSplitIndex = shortId.indexOf(".end.");
         if (endSplitIndex !== -1) {
-            return this.setCloseRange(type.substring(0, endSplitIndex), range);
+            return this.setCloseRange(shortId.substring(0, endSplitIndex), range);
         }
     }
     public getScope(position: Position): Scope | undefined {
