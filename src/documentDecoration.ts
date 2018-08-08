@@ -472,32 +472,19 @@ export default class DocumentDecoration {
 
                 tokens.forEach((token) => {
                     token.scopes.forEach((scope) => {
-                        if (scope.includes("start") || scope.includes("end")) {
-                            const start = new vscode.Position(i, token.startIndex);
-                            const end = new vscode.Position(i, token.endIndex);
-                            const range = new vscode.Range(start, end);
-                            currentLine.addBracket(new FoundBracket(range, scope));
+                        if (scope.includes(".begin.") || scope.includes(".end.")) {
+                            currentLine.addScope(scope, token.startIndex, token.endIndex);
                         }
                     });
                 });
-
             }
         }
         catch (err) {
-            console.warn(err);
+            console.error(err);
             return;
         }
 
-
-        // // const positions: FoundBracket[] = [];
-        // this.parseTokenOrStringArray(tokenized, 0, 0, positions);
-
-        // positions.forEach((element) => {
-        //     const currentLine = this.getLine(element.range.start.line, this.document);
-        //     currentLine.addBracket(element);
-        // });
-
-        this.colorDecorations(editors);
+         this.colorDecorations(editors);
 
         // console.timeEnd("updateDecorations");
     }

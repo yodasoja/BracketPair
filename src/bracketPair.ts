@@ -1,14 +1,13 @@
+import { Range } from "vscode";
+
 export default class BracketPair {
+    public readonly type: string;
+    public readonly open: Range;
+    public readonly close: Range;
 
-    public readonly openCharacter: string;
-    public readonly closeCharacter: string;
-    public readonly colors: string[];
-    public readonly orphanColor: string;
-
-    constructor(firstBracket: string, lastBracket: string, colors: string[], orphanColor: string) {
-        this.openCharacter = firstBracket;
-        this.closeCharacter = lastBracket;
-        this.colors = colors;
-        this.orphanColor = orphanColor;
+    constructor(type: string, open: Range, close: Range) {
+        this.type = type;
+        this.open = open;
+        this.close = close;
     }
 }

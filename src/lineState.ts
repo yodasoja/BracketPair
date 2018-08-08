@@ -26,7 +26,7 @@ export default class LineState {
         }
         else {
             switch (settings.colorMode) {
-                case ColorMode.Consecutive: this.colorIndexes = new SingularIndex();
+                case ColorMode.Consecutive: this.colorIndexes = new SingularIndex(settings);
                     break;
                 case ColorMode.Independent: this.colorIndexes = new MultipleIndexes(settings);
                     break;
@@ -35,37 +35,37 @@ export default class LineState {
         }
     }
 
-    public getOpenBracketColor(bracketPair: BracketPair, range: Range): string {
+    public getOpenBracketColor(type: string, range: Range): string {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
-            colorIndex = (this.colorIndexes.getPreviousIndex(bracketPair) + 1) % bracketPair.colors.length;
+            colorIndex = (this.colorIndexes.getPreviousIndex(type) + 1) % this.settings.colors.length;
         }
         else {
-            colorIndex = this.colorIndexes.getCurrentLength(bracketPair) % bracketPair.colors.length;
+            colorIndex = this.colorIndexes.getCurrentLength(type) % this.settings.colors.length;
         }
 
-        let color = bracketPair.colors[colorIndex];
+        let color = this.settings.colors[colorIndex];
 
         if (this.settings.forceUniqueOpeningColor && color === this.previousBracketColor) {
-            colorIndex = (colorIndex + 1) % bracketPair.colors.length;
-            color = bracketPair.colors[colorIndex];
+            colorIndex = (colorIndex + 1) % this.settings.colors.length;
+            color = this.settings.colors[colorIndex];
         }
 
         this.previousBracketColor = color;
-        this.colorIndexes.setCurrent(bracketPair, range, colorIndex);
+        this.colorIndexes.setCurrent(type, range, colorIndex);
 
         return color;
     };
 
-    public getCloseBracketColor(bracketPair: BracketPair, range: Range): string {
-        const colorIndex = this.colorIndexes.getCurrentColorIndex(bracketPair, range);
+    public getCloseBracketColor(type: string, range: Range): string {
+        const colorIndex = this.colorIndexes.getCurrentColorIndex(type, range);
         let color: string;
         if (colorIndex !== undefined) {
-            color = bracketPair.colors[colorIndex];
+            color = this.settings.colors[colorIndex];
         }
         else {
-            color = bracketPair.orphanColor;
+            color = this.settings.orphanColor;
         }
 
         this.previousBracketColor = color;

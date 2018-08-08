@@ -6,29 +6,22 @@ import Scope from "./scope";
 import Settings from "./settings";
 
 export default class MultipleIndexes implements ColorIndexes {
-    private openBrackets: { [character: string]: Bracket[]; } = {};
-    private previousOpenBracketColorIndexes: { [character: string]: number; } = {};
+    private openBrackets = new Map<string, Bracket[]>();
+    private previousOpenBracketColorIndexes = new Map<string, number[]>();
     private bracketScopes: Scope[] = [];
     private readonly settings: Settings;
 
     constructor(
         settings: Settings,
         previousState?: {
-            currentOpenBracketColorIndexes: { [character: string]: Bracket[]; },
-            previousOpenBracketColorIndexes: { [character: string]: number; },
+            currentOpenBracketColorIndexes: Map<string, Bracket[]>,
+            previousOpenBracketColorIndexes: Map<string, number[]>,
         }) {
         this.settings = settings;
 
         if (previousState !== undefined) {
             this.openBrackets = previousState.currentOpenBracketColorIndexes;
             this.previousOpenBracketColorIndexes = previousState.previousOpenBracketColorIndexes;
-
-        }
-        else {
-            settings.bracketPairs.forEach((bracketPair) => {
-                this.openBrackets[bracketPair.openCharacter] = [];
-                this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = -1;
-            });
         }
     }
 
@@ -43,29 +36,37 @@ export default class MultipleIndexes implements ColorIndexes {
         return brackets;
     }
 
-    public getPreviousIndex(bracketPair: BracketPair): number {
-        return this.previousOpenBracketColorIndexes[bracketPair.openCharacter];
+    public getPreviousIndex(type: string): number {
+        return this.previousOpenBracketColorIndexes[type];
     }
 
-    public setCurrent(bracketPair: BracketPair, range: Range, colorIndex: number) {
-        this.openBrackets[bracketPair.openCharacter].push(new Bracket(bracketPair.openCharacter, range, colorIndex));
-        this.previousOpenBracketColorIndexes[bracketPair.openCharacter] = colorIndex;
+    public setCurrent(type: string, range: Range, colorIndex: number) {
+        this.openBrackets[type].push(new Bracket(type, range, colorIndex));
+        this.previousOpenBracketColorIndexes[type] = colorIndex;
     }
 
-    public getCurrentLength(bracketPair: BracketPair): number {
-        return this.openBrackets[bracketPair.openCharacter].length;
+    public getCurrentLength(type: string): number {
+        return this.openBrackets[type].length;
     }
 
-    public getCurrentColorIndex(bracketPair: BracketPair, range: Range): number | undefined {
-        const openBracket = this.openBrackets[bracketPair.openCharacter].pop();
-        if (openBracket) {
-            const closeBracket = new Bracket(bracketPair.closeCharacter, range, openBracket.colorIndex);
-            const scopeRange = new Range(openBracket.range.start, range.end);
-            this.bracketScopes.push(
-                new Scope(scopeRange, bracketPair.colors[openBracket.colorIndex], openBracket, closeBracket),
-            );
-            return openBracket.colorIndex;
+    public getCurrentColorIndex(type: string, range: Range): number | undefined {
+        const openStack = this.openBrackets.get(type);
+
+        if (!openStack) {
+            return;
         }
+        const openBracket = openStack.pop();
+
+        if (!openBracket) {
+            return;
+        }
+
+        const closeBracket = new Bracket(type, range, openBracket.colorIndex);
+        const scopeRange = new Range(openBracket.range.start, range.end);
+        this.bracketScopes.push(
+            new Scope(scopeRange, this.settings.colors[openBracket.colorIndex], openBracket, closeBracket),
+        );
+        return openBracket.colorIndex;
     }
 
     public getScope(position: Position): Scope | undefined {
@@ -77,23 +78,11 @@ export default class MultipleIndexes implements ColorIndexes {
     }
 
     public clone(): ColorIndexes {
-        const bracketColorIndexesCopy: { [character: string]: Bracket[]; } = {};
-
-        Object.keys(this.openBrackets).forEach((key) => {
-            bracketColorIndexesCopy[key] = this.openBrackets[key].slice();
-        });
-
-        const previousOpenBracketIndexesCopy: { [character: string]: number; } = {};
-
-        Object.keys(this.previousOpenBracketColorIndexes).forEach((key) => {
-            previousOpenBracketIndexesCopy[key] = this.previousOpenBracketColorIndexes[key];
-        });
-
         return new MultipleIndexes(
             this.settings,
             {
-                currentOpenBracketColorIndexes: bracketColorIndexesCopy,
-                previousOpenBracketColorIndexes: previousOpenBracketIndexesCopy,
+                currentOpenBracketColorIndexes: new Map(this.openBrackets),
+                previousOpenBracketColorIndexes: new Map(this.previousOpenBracketColorIndexes),
             });
     }
 }

@@ -20,6 +20,8 @@ export default class Settings {
     public readonly showBracketsInGutter: boolean;
     public readonly showBracketsInRuler: boolean;
     public readonly scopeLineRelativePosition: boolean;
+    public colors: string[];
+    public orphanColor: string;
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
     private readonly activeBracketCSSElements: string[][];
@@ -146,27 +148,15 @@ export default class Settings {
                     + consecutiveSettings.length);
             }
 
-            const orphanColor = consecutiveSettings[consecutiveSettings.length - 1] as string;
-            if (typeof orphanColor !== "string") {
+            this.orphanColor = consecutiveSettings[consecutiveSettings.length - 1] as string;
+            if (typeof this.orphanColor !== "string") {
                 throw new Error("consecutivePairColors[" + (consecutiveSettings.length - 1) + "] is not a string");
             }
 
-            const colors = consecutiveSettings[consecutiveSettings.length - 2] as string[];
-            if (!Array.isArray(colors)) {
+            this.colors = consecutiveSettings[consecutiveSettings.length - 2] as string[];
+            if (!Array.isArray(this.colors)) {
                 throw new Error("consecutivePairColors[" + (consecutiveSettings.length - 2) + "] is not a string[]");
             }
-
-            consecutiveSettings.slice(0, consecutiveSettings.length - 2).forEach((brackets, index) => {
-                if (typeof brackets === "string" || Array.isArray(brackets)) {
-                    if (brackets.length !== 2) {
-                        throw new Error("consecutivePairColors[" + index + "] requires 2 element, e.g. ['(',')']");
-                    }
-                    this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
-                    return;
-                }
-
-                throw new Error("consecutivePairColors[ " + index + "] should be a string or an array of strings");
-            });
         }
         else {
             const independentSettings = configuration.get<[[{}]]>("independentPairColors");
@@ -189,21 +179,18 @@ export default class Settings {
                     throw new Error("independentSettings[" + index + "][0] needs at least 2 elements");
                 }
 
-                const colors = innerArray[1] as string[];
-                if (!Array.isArray(colors)) {
+                this.colors = innerArray[1] as string[];
+                if (!Array.isArray(this.colors)) {
                     throw new Error("independentSettings[" + index + "][1] is not string[]");
                 }
 
-                const orphanColor = innerArray[2] as string;
-                if (typeof orphanColor !== "string") {
+                this.orphanColor = innerArray[2] as string;
+                if (typeof this.orphanColor !== "string") {
                     throw new Error("independentSettings[" + index + "][2] is not a string");
                 }
-
-                this.bracketPairs.push(new BracketPair(brackets[0], brackets[1], colors, orphanColor));
             });
         }
 
-        this.regexNonExact = this.createRegex(this.bracketPairs, false);
         this.bracketDecorations = this.createBracketDecorations(this.bracketPairs);
     }
 
@@ -303,49 +290,21 @@ export default class Settings {
         return decoration;
     }
 
-    private createRegex(bracketPairs: BracketPair[], exact: boolean): RegExp {
-        const escape = (s: string) => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-        let regex = "";
-        const matches: string[] = [];
-        bracketPairs.forEach((bracketPair) => {
-            matches.push(bracketPair.openCharacter);
-            matches.push(bracketPair.closeCharacter);
-        });
-
-        const sortedByLengthMatches = matches.sort((a, b) => b.length - a.length);
-
-        sortedByLengthMatches.forEach((match) => {
-            if (regex !== "") {
-                regex += "|";
-            }
-
-            if (exact) {
-                regex += `${escape(match)}`;
-            }
-            else {
-                regex += `${escape(match)}`;
-            }
-        });
-        return new RegExp(regex, !exact ? "g" : undefined);;
-    }
-
     private createBracketDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
         const decorations = new Map<string, vscode.TextEditorDecorationType>();
 
-        for (const bracketPair of bracketPairs) {
-            for (const color of bracketPair.colors) {
-                const decoration = vscode.window.createTextEditorDecorationType({
-                    color, rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-                });
-                decorations.set(color, decoration);
-            }
-
-            const errorDecoration = vscode.window.createTextEditorDecorationType({
-                color: bracketPair.orphanColor,
-                rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+        for (const color of this.colors) {
+            const decoration = vscode.window.createTextEditorDecorationType({
+                color, rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
             });
-            decorations.set(bracketPair.orphanColor, errorDecoration);
+            decorations.set(color, decoration);
         }
+
+        const errorDecoration = vscode.window.createTextEditorDecorationType({
+            color: this.orphanColor,
+            rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+        });
+        decorations.set(this.orphanColor, errorDecoration);
 
         return decorations;
     }

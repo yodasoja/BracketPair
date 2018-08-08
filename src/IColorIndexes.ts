@@ -4,10 +4,10 @@ import BracketPair from "./bracketPair";
 import Scope from "./scope";;
 
 interface IColorIndex {
-    getPreviousIndex(bracketPair: BracketPair): number;
-    setCurrent(bracketPair: BracketPair, range: Range, colorIndex: number): void;
-    getCurrentLength(bracketPair: BracketPair): number;
-    getCurrentColorIndex(bracketPair: BracketPair, range: Range): number | undefined;
+    getPreviousIndex(type: string): number;
+    setCurrent(type: string, range: Range, colorIndex: number): void;
+    getCurrentLength(type: string): number;
+    getCurrentColorIndex(type: string, range: Range): number | undefined;
     getScope(position: Position): Scope | undefined;
     getOpenBrackets(): Set<string>;
     clone(): IColorIndex;

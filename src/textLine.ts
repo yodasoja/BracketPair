@@ -33,44 +33,45 @@ export default class TextLine {
         return this.lineState.copyMultilineContext();
     }
 
-    public addBracket(bracket: FoundBracket) {
-        const openBrackets = this.lineState.getOpenBrackets();
-        this.settings.bracketPairs.sort((a, b) => {
-            const x = openBrackets.has(a.openCharacter);
-            const y = openBrackets.has(b.openCharacter);
-            return x === y ? 0 : x ? -1 : 1;
-        });
+    public addScope(type: string, beginIndex: number, endIndex: number): void {
+        const range = new Range(new Position(this.index, beginIndex), new Position(this.index, endIndex));
+        const startSplitIndex = type.indexOf(".begin.");
+        if (startSplitIndex !== -1) {
+            return this.setOpenRange(type.substring(0, startSplitIndex), range);
+        }
 
-        for (const bracketPair of this.settings.bracketPairs) {
-            if (bracketPair.openCharacter === bracket.character) {
-                const color = this.lineState.getOpenBracketColor(bracketPair, bracket.range);
-
-                const colorRanges = this.colorRanges.get(color);
-
-                if (colorRanges !== undefined) {
-                    colorRanges.push(bracket.range);
-                }
-                else {
-                    this.colorRanges.set(color, [bracket.range]);
-                }
-                return;
-            }
-            else if (bracketPair.closeCharacter === bracket.character) {
-                const color = this.lineState.getCloseBracketColor(bracketPair, bracket.range);
-
-                const colorRanges = this.colorRanges.get(color);
-                if (colorRanges !== undefined) {
-                    colorRanges.push(bracket.range);
-                }
-                else {
-                    this.colorRanges.set(color, [bracket.range]);
-                }
-                return;
-            }
+        const endSplitIndex = type.indexOf(".end.");
+        if (endSplitIndex !== -1) {
+            return this.setCloseRange(type.substring(0, endSplitIndex), range);
         }
     }
-
     public getScope(position: Position): Scope | undefined {
         return this.lineState.getScope(position);
+    }
+
+    private setOpenRange(type: string, range: Range) {
+        const color = this.lineState.getOpenBracketColor(type, range);
+
+        const colorRanges = this.colorRanges.get(color);
+        if (colorRanges !== undefined) {
+            colorRanges.push(range);
+        }
+        else {
+            this.colorRanges.set(color, [range]);
+        }
+        return;
+    }
+
+    private setCloseRange(type: string, range: Range) {
+        const color = this.lineState.getCloseBracketColor(type, range);
+
+        const colorRanges = this.colorRanges.get(color);
+        if (colorRanges !== undefined) {
+            colorRanges.push(range);
+        }
+        else {
+            this.colorRanges.set(color, [range]);
+        }
+        return;
     }
 }
