@@ -10,12 +10,10 @@ export default class TextLine {
     public readonly index: number;
     private lineState: LineState;
     private readonly settings: Settings;
-    private readonly content: string;
     private readonly ruleStack: any;
 
-    constructor(content: string, settings: Settings, index: number, ruleStack?: any, lineState?: LineState) {
+    constructor(settings: Settings, index: number, ruleStack?: any, lineState?: LineState) {
         this.settings = settings;
-        this.content = content;
         this.index = index;
         this.ruleStack = ruleStack;
         if (lineState !== undefined) {

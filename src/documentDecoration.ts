@@ -4,6 +4,7 @@ import FoundBracket from "./foundBracket";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
+import { ITokenizeLineResult, IStackElement } from "./grammarInterfaces";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
@@ -16,8 +17,7 @@ export default class DocumentDecoration {
     private readonly document: vscode.TextDocument;
     private nextScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private previousScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
-    private readonly prismJs: any;
-    private readonly largeFileRange: vscode.Range;
+    private readonly tokenizer: any;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
 
@@ -32,8 +32,7 @@ export default class DocumentDecoration {
     constructor(document: vscode.TextDocument, textMate: any, settings: Settings) {
         this.settings = settings;
         this.document = document;
-        this.prismJs = textMate;
-        this.largeFileRange = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(5000, 0));
+        this.tokenizer = textMate;
 
         const basicStringMatch = (
             content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
@@ -128,19 +127,19 @@ export default class DocumentDecoration {
 
     // Lines are stored in an array, if line is requested outside of array bounds
     // add emptys lines until array is correctly sized
-    public getLine(index: number, document: vscode.TextDocument): TextLine {
+    public getLine(index: number, ruleStack?: IStackElement): TextLine {
         if (index < this.lines.length) {
             return this.lines[index];
         }
         else {
             if (this.lines.length === 0) {
-                this.lines.push(new TextLine(document.lineAt(0).text, this.settings, 0));
+                this.lines.push(new TextLine(this.settings, 0, ruleStack));
             }
 
             for (let i = this.lines.length; i <= index; i++) {
                 const previousLine = this.lines[this.lines.length - 1];
                 const newLine =
-                    new TextLine(document.lineAt(i).text, this.settings, i, previousLine.copyMultilineContext());
+                    new TextLine(this.settings, i, previousLine.getRuleStack(), previousLine.copyMultilineContext());
 
                 this.lines.push(newLine);
             }
@@ -449,32 +448,46 @@ export default class DocumentDecoration {
         this.lines.splice(lineNumber, amountToRemove);
 
         const languageID = this.settings.prismLanguageID;
-        let tokenized: Array<string | prism.Token>;
+        let tokenized: ITokenizeLineResult;
         try {
-            for (let i = lineNumber; this.document.lineCount; i++) {
+            let previousRuleStack: undefined | IStackElement;
+            for (let i = lineNumber; i < this.document.lineCount; i++) {
                 const line = this.document.lineAt(i);
 
-                let previousRuleStack: any;
                 if (i > 0) {
-                    previousRuleStack = this.getLine(i - 1, this.document).getRuleStack();
+                    previousRuleStack = this.getLine(i - 1).getRuleStack();
                 }
 
-                const lineTokens = this.prismJs.tokenizeLine(line.text, previousRuleStack);
-                const ruleStack = lineTokens.ruleStack;
-                const tokens = lineTokens.tokens;
+                tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack) as ITokenizeLineResult;
+
+                if (!tokenized) {
+                    console.log("Could not tokenize document: " + this.document.fileName);
+                    return;
+                }
+
+                const ruleStack = tokenized.ruleStack;
+                const tokens = tokenized.tokens;
+
+                const currentLine = this.getLine(i);
+
+                tokens.forEach((token) => {
+                    token.scopes.forEach((scope) => {
+                        if (scope.includes("start") || scope.includes("end")) {
+                            const start = new vscode.Position(i, token.startIndex);
+                            const end = new vscode.Position(i, token.endIndex);
+                            const range = new vscode.Range(start, end);
+                            currentLine.addBracket(new FoundBracket(range, scope));
+                        }
+                    });
+                });
+
             }
-
-
-            // tokenized = this.prismJs.tokenize(text, this.prismJs.languages[languageID]);
-            // if (!tokenized) {
-            //     console.log("Could not tokenize document: " + this.document.fileName);
-            //     return;
-            // }
         }
         catch (err) {
             console.warn(err);
             return;
         }
+
 
         // // const positions: FoundBracket[] = [];
         // this.parseTokenOrStringArray(tokenized, 0, 0, positions);
@@ -495,7 +508,7 @@ export default class DocumentDecoration {
         charIndex: number,
         positions: FoundBracket[]) {
         tokenized.forEach((token) => {
-            if (token instanceof this.prismJs.Token) {
+            if (token instanceof this.tokenizer.Token) {
                 const result = this.parseToken(token, lineIndex, charIndex, positions);
                 charIndex = result.charIndex;
                 lineIndex = result.lineIndex;

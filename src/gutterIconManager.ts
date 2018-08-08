@@ -1,5 +1,5 @@
 import { workspace } from "vscode";
-import Uri from "vscode-uri";
+import Uri from "vscode-uri/lib/umd";
 
 export default class GutterIconManager {
     private fs = require("fs");
