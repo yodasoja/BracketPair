@@ -82,14 +82,14 @@ export default class DocumentDecoration {
 
     // Lines are stored in an array, if line is requested outside of array bounds
     // add emptys lines until array is correctly sized
-    public getLine(index: number, ruleStack?: IStackElement): TextLine {
+    public getLine(index: number, ruleStack: IStackElement): TextLine {
         if (index < this.lines.length) {
             return this.lines[index];
         }
         else {
             if (this.lines.length === 0) {
                 this.lines.push(
-                    new TextLine(0, undefined, new LineState(this.settings)),
+                    new TextLine(0, ruleStack, new LineState(this.settings)),
                 );
             }
 
@@ -409,7 +409,12 @@ export default class DocumentDecoration {
         this.lines.splice(lineNumber, amountToRemove);
 
         try {
+            const previousLineNumber = lineNumber - 1;
             let previousRuleStack: undefined | IStackElement;
+            if (previousLineNumber >= 0 && previousLineNumber < this.lines.length) {
+                previousRuleStack = this.lines[previousLineNumber].getRuleStack();
+            }
+
             for (let i = lineNumber; i < this.document.lineCount; i++) {
                 const line = this.document.lineAt(i);
 

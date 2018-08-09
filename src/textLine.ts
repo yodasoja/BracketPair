@@ -14,6 +14,7 @@ export default class TextLine {
         lineState: LineState) {
         this.index = index;
         this.lineState = lineState;
+        this.ruleStack = ruleStack;
     }
 
     public getRuleStack(): any {
