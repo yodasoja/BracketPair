@@ -1,36 +1,32 @@
 import { Position, Range } from "vscode";
-import FoundBracket from "./foundBracket";
 import LineState from "./lineState";
-import ModifierPair from "./modifierPair";
 import Scope from "./scope";
-import Settings from "./settings";
 
 export default class TextLine {
     public colorRanges = new Map<string, Range[]>();
     public readonly index: number;
     private lineState: LineState;
-    private readonly settings: Settings;
     private readonly ruleStack: any;
 
-    constructor(settings: Settings, index: number, ruleStack?: any, lineState?: LineState) {
-        this.settings = settings;
+    constructor(
+        index: number,
+        ruleStack: any,
+        lineState: LineState) {
         this.index = index;
-        this.ruleStack = ruleStack;
-        if (lineState !== undefined) {
-            this.lineState = lineState;
-        }
-        else {
-            this.lineState = new LineState(settings);
-        }
+        this.lineState = lineState;
     }
 
     public getRuleStack(): any {
         return this.ruleStack;
     }
 
+    public getCharStack() {
+        return this.lineState.getCharStack();
+    }
+
     // Return a copy of the line while mantaining bracket state. colorRanges is not mantained.
-    public copyMultilineContext() {
-        return this.lineState.copyMultilineContext();
+    public cloneState() {
+        return this.lineState.cloneState();
     }
 
     public addScope(type: string | undefined, depth: number, beginIndex: number, endIndex: number): void {

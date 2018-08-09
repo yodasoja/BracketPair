@@ -1,7 +1,6 @@
-import * as prism from "prismjs";
 import * as vscode from "vscode";
-import FoundBracket from "./foundBracket";
 import { IStackElement, IToken, ITokenizeLineResult } from "./grammarInterfaces";
+import LineState from "./lineState";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
@@ -89,19 +88,25 @@ export default class DocumentDecoration {
         }
         else {
             if (this.lines.length === 0) {
-                this.lines.push(new TextLine(this.settings, 0, ruleStack));
+                this.lines.push(
+                    new TextLine(0, undefined, new LineState(this.settings)),
+                );
             }
 
-            for (let i = this.lines.length; i <= index; i++) {
+            if (index < this.lines.length) {
+                return this.lines[index];
+            }
+
+            if (index === this.lines.length) {
                 const previousLine = this.lines[this.lines.length - 1];
                 const newLine =
-                    new TextLine(this.settings, i, previousLine.getRuleStack(), previousLine.copyMultilineContext());
+                    new TextLine(index, previousLine.getRuleStack(), previousLine.cloneState());
 
                 this.lines.push(newLine);
+                return newLine;
             }
 
-            const lineToReturn = this.lines[this.lines.length - 1];
-            return lineToReturn;
+            throw new Error("Cannot look more than one line ahead");
         }
     }
 
@@ -403,22 +408,19 @@ export default class DocumentDecoration {
         // Remove cached lines that need to be updated
         this.lines.splice(lineNumber, amountToRemove);
 
-        const languageID = this.settings.languageID;
-        let tokenized: ITokenizeLineResult;
         try {
             let previousRuleStack: undefined | IStackElement;
             for (let i = lineNumber; i < this.document.lineCount; i++) {
                 const line = this.document.lineAt(i);
 
-                tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack) as ITokenizeLineResult;
+                const tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack) as ITokenizeLineResult;
 
                 const ruleStack = tokenized.ruleStack;
                 const tokens = tokenized.tokens;
 
                 const currentLine = this.getLine(i, ruleStack);
-                const existingRuleStack = currentLine.getRuleStack();
 
-                this.parseTokensJavascript(tokens, currentLine, line);
+                this.parseTokens(tokens, currentLine, line);
 
                 previousRuleStack = ruleStack;
             }
@@ -433,12 +435,12 @@ export default class DocumentDecoration {
         // console.timeEnd("updateDecorations");
     }
 
-    private parseTokensJavascript(tokens: IToken[], currentLine: TextLine, line: vscode.TextLine) {
-        const stack = new Map<string, string[]>();
+    private parseTokens(tokens: IToken[], currentLine: TextLine, line: vscode.TextLine) {
+        const stack = currentLine.getCharStack();
         tokens.forEach((token) => {
             if (token.scopes.length > 1) {
                 const type = token.scopes[token.scopes.length - 1];
-                this.parseTokens(type, token, currentLine, line.text, stack);
+                this.parseTokensJavascript(type, token, currentLine, line.text, stack);
             }
             else {
                 currentLine.addScope(undefined, 0, token.startIndex, token.endIndex);
@@ -446,7 +448,7 @@ export default class DocumentDecoration {
         });
     }
 
-    private parseTokens(
+    private parseTokensJavascript(
         type: string,
         token: IToken,
         currentLine: TextLine,
@@ -507,17 +509,17 @@ export default class DocumentDecoration {
             const topStack = stack[stack.length - 1];
             if (topStack === currentChar) {
                 stack.push(currentChar);
-                currentLine.addScope(type, stack.length, token.startIndex, token.endIndex);
+                currentLine.addScope(type, stack.length + token.scopes.length, token.startIndex, token.endIndex);
             }
             else {
-                currentLine.addScope(type, stack.length, token.startIndex, token.endIndex);
+                currentLine.addScope(type, stack.length + token.scopes.length, token.startIndex, token.endIndex);
                 stack.pop();
             }
         }
         else {
             const newStack = [currentChar];
             stackMap.set(type, newStack);
-            currentLine.addScope(type, newStack.length, token.startIndex, token.endIndex);
+            currentLine.addScope(type, newStack.length + token.scopes.length, token.startIndex, token.endIndex);
         }
     }
 

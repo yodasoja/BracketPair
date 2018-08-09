@@ -9,22 +9,26 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 
 export default class LineState {
-    private colorIndexes: ColorIndexes;
+    private readonly colorIndexes: ColorIndexes;
     private previousBracketColor: string;
     private readonly settings: Settings;
+    private readonly charStack: Map<string, string[]>;
 
     constructor(settings: Settings, previousState?:
         {
-            colorIndexes: ColorIndexes;
-            previousBracketColor: string;
+            readonly colorIndexes: ColorIndexes;
+            readonly previousBracketColor: string;
+            readonly charStack: Map<string, string[]>;
         }) {
         this.settings = settings;
 
         if (previousState !== undefined) {
             this.colorIndexes = previousState.colorIndexes;
             this.previousBracketColor = previousState.previousBracketColor;
+            this.charStack = previousState.charStack;
         }
         else {
+            this.charStack = new Map<string, string[]>();
             switch (settings.colorMode) {
                 case ColorMode.Consecutive: this.colorIndexes = new SingularIndex(settings);
                     break;
@@ -35,13 +39,18 @@ export default class LineState {
         }
     }
 
+    public getCharStack() {
+        return this.charStack;
+    }
+
     public getOpenBrackets() {
         return this.colorIndexes.getOpenBrackets();
     }
 
-    public copyMultilineContext(): LineState {
+    public cloneState(): LineState {
         const clone =
         {
+            charStack: this.cloneCharStack(),
             colorIndexes: this.colorIndexes.clone(),
             previousBracketColor: this.previousBracketColor,
         };
@@ -63,6 +72,14 @@ export default class LineState {
             return this.getCloseBracketColor(type, depth, range);
         }
         return this.getOpenBracketColor(type, depth, range);
+    }
+
+    private cloneCharStack() {
+        const clone = new Map<string, string[]>();
+        this.charStack.forEach((value, key) => {
+            clone.set(key, value.slice());
+        });
+        return clone;
     }
 
     private getOpenBracketColor(type: string, depth: number, range: Range): string {
