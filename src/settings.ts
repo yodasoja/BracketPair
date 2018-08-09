@@ -11,7 +11,7 @@ export default class Settings {
     public readonly contextualParsing: boolean;
     public readonly forceIterationColorCycle: boolean;
     public readonly forceUniqueOpeningColor: boolean;
-    public readonly prismLanguageID: string;
+    public readonly languageID: string;
     public readonly regexNonExact: RegExp;
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
@@ -35,7 +35,7 @@ export default class Settings {
         documentUri?: vscode.Uri,
     ) {
         this.gutterIcons = gutterIcons;
-        this.prismLanguageID = languageID;
+        this.languageID = languageID;
 
         const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
         const activeScopeCSS = configuration.get("activeScopeCSS") as string[];

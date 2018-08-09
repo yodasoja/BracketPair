@@ -1,10 +1,10 @@
 import * as prism from "prismjs";
 import * as vscode from "vscode";
 import FoundBracket from "./foundBracket";
+import { IStackElement, IToken, ITokenizeLineResult } from "./grammarInterfaces";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
-import { ITokenizeLineResult, IStackElement } from "./grammarInterfaces";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
@@ -20,59 +20,15 @@ export default class DocumentDecoration {
     private readonly tokenizer: any;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
-
-    // What have I created..
-    private readonly stringStrategies = new Map<string,
-        (content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
-            { lineIndex: number, charIndex: number }>();
-    private readonly stringOrTokenArrayStrategies = new Map<string,
-        (array: Array<string | prism.Token>, lineIndex: number, charIndex: number, positions: FoundBracket[]) =>
-            { lineIndex: number, charIndex: number }>();
-
+    private readonly tokenEndTrimLength: number;
     constructor(document: vscode.TextDocument, textMate: any, settings: Settings) {
         this.settings = settings;
         this.document = document;
         this.tokenizer = textMate;
 
-        const basicStringMatch = (
-            content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) => {
-            return this.matchString(content as string, lineIndex, charIndex, positions);
-        };
-        // Match punctuation on all languages
-        this.stringStrategies.set("punctuation", basicStringMatch);
-
-        if (settings.prismLanguageID === "markup") {
-            this.stringStrategies.set("attr-name", basicStringMatch);
-        }
-
-        if (settings.prismLanguageID === "powershell") {
-            this.stringStrategies.set("namespace", basicStringMatch);
-        }
-
-        switch (settings.prismLanguageID) {
-            case "abap":
-            case "lua":
-            case "pascal":
-                this.stringStrategies.set("keyword", basicStringMatch);
-                break;
-            default: break;
-        }
-
-        if (settings.prismLanguageID === "markdown") {
-            const markdownUrl = (
-                array: Array<string | prism.Token>,
-                lineIndex: number,
-                charIndex: number,
-                positions: FoundBracket[]) => {
-                // Input: ![Disabled](images/forceUniqueOpeningColorDisabled.png "forceUniqueOpeningColor Disabled")
-                // [0]: ![Disabled](images/forceUniqueOpeningColorDisabled.png
-                // [1]: "forceUniqueOpeningColor Disabled"
-                // [2]: )
-                return this.matchStringOrTokenArray(
-                    new Set([0, array.length - 1]), array, lineIndex, charIndex, positions);
-            };
-            this.stringOrTokenArrayStrategies.set("url", markdownUrl);
-        }
+        const scopeName = this.tokenizer._grammar.scopeName as string;
+        const split = scopeName.split(".");
+        this.tokenEndTrimLength = split[split.length - 1].length + 1;
     }
 
     public dispose() {
@@ -447,7 +403,7 @@ export default class DocumentDecoration {
         // Remove cached lines that need to be updated
         this.lines.splice(lineNumber, amountToRemove);
 
-        const languageID = this.settings.prismLanguageID;
+        const languageID = this.settings.languageID;
         let tokenized: ITokenizeLineResult;
         try {
             let previousRuleStack: undefined | IStackElement;
@@ -462,23 +418,7 @@ export default class DocumentDecoration {
                 const currentLine = this.getLine(i, ruleStack);
                 const existingRuleStack = currentLine.getRuleStack();
 
-                tokens.forEach((token) => {
-                    if (token.scopes.length > 1) {
-                        const type = token.scopes[token.scopes.length - 1];
-                        if (
-                            ((type.includes("punctuation.") && (type.includes(".block.") ||
-                                (type.includes(".begin.") || type.includes(".end."))))
-                                ||
-                                type.includes(".brace."))
-                        ) {
-                            const depth = token.scopes.length;
-                            currentLine.addScope(type, depth, token.startIndex, token.endIndex);
-                        }
-                    }
-                    else {
-                        currentLine.addScope(undefined, 0, token.startIndex, token.endIndex);
-                    }
-                });
+                this.parseTokensJavascript(tokens, currentLine, line);
 
                 previousRuleStack = ruleStack;
             }
@@ -493,98 +433,92 @@ export default class DocumentDecoration {
         // console.timeEnd("updateDecorations");
     }
 
-    private parseTokenOrStringArray(
-        tokenized: Array<string | any>,
-        lineIndex: number,
-        charIndex: number,
-        positions: FoundBracket[]) {
-        tokenized.forEach((token) => {
-            if (token instanceof this.tokenizer.Token) {
-                const result = this.parseToken(token, lineIndex, charIndex, positions);
-                charIndex = result.charIndex;
-                lineIndex = result.lineIndex;
+    private parseTokensJavascript(tokens: IToken[], currentLine: TextLine, line: vscode.TextLine) {
+        const stack = new Map<string, string[]>();
+        tokens.forEach((token) => {
+            if (token.scopes.length > 1) {
+                const type = token.scopes[token.scopes.length - 1];
+                this.parseTokens(type, token, currentLine, line.text, stack);
             }
             else {
-                const result = this.parseString(token, lineIndex, charIndex);
-                charIndex = result.charIndex;
-                lineIndex = result.lineIndex;
+                currentLine.addScope(undefined, 0, token.startIndex, token.endIndex);
             }
         });
-        return { lineIndex, charIndex };
     }
 
-    private parseString(content: string, lineIndex: number, charIndex: number) {
-        const split = content.split("\n");
-        if (split.length > 1) {
-            lineIndex += split.length - 1;
-            charIndex = split[split.length - 1].length;
-        }
-        else {
-            charIndex += content.length;
-        }
-        return { lineIndex, charIndex };
-    }
-
-    private parseToken(
-        token: prism.Token,
-        lineIndex: number,
-        charIndex: number,
-        positions: FoundBracket[]): { lineIndex: number, charIndex: number } {
-        if (typeof token.content === "string") {
-            const strategy = this.stringStrategies.get(token.type);
-            if (strategy) {
-                return strategy(token.content, lineIndex, charIndex, positions);
-            }
-
-            return this.parseString(token.content, lineIndex, charIndex);
-        }
-        else if (Array.isArray(token.content)) {
-            const strategy = this.stringOrTokenArrayStrategies.get(token.type);
-            if (strategy) {
-                return strategy(token.content, lineIndex, charIndex, positions);
-            }
-
-            return this.parseTokenOrStringArray(token.content, lineIndex, charIndex, positions);
-        }
-        else {
-            return this.parseToken(token.content, lineIndex, charIndex, positions);
-        }
-    }
-
-    private matchString(content: string, lineIndex: number, charIndex: number, positions: FoundBracket[]) {
-        if (lineIndex < this.lineToUpdateWhenTimeoutEnds) {
-            return this.parseString(content, lineIndex, charIndex);
+    private parseTokens(
+        type: string,
+        token: IToken,
+        currentLine: TextLine,
+        text: string,
+        stackMap: Map<string, string[]>,
+    ) {
+        // Remove file extension
+        type = type.slice(0, -this.tokenEndTrimLength);
+        const beginString = ".begin.";
+        const endString = ".end.";
+        if (type.endsWith(beginString)) {
+            type = type.slice(0, -beginString.length);
+        } else if (type.endsWith(endString)) {
+            type = type.slice(0, -endString.length);
         }
 
-        this.settings.regexNonExact.lastIndex = 0;
-        let match: RegExpExecArray | null;
-        // tslint:disable-next-line:no-conditional-assignment
-        while ((match = this.settings.regexNonExact.exec(content)) !== null) {
-            const startPos = new vscode.Position(lineIndex, charIndex + match.index);
-            const endPos = startPos.translate(0, match[0].length);
-            positions.push(new FoundBracket(new vscode.Range(startPos, endPos), match[0]));
-        }
-
-        return this.parseString(content, lineIndex, charIndex);
-    }
-
-    // Array can be Token or String. Indexes are which indexes should be parsed for brackets
-    private matchStringOrTokenArray(
-        indexes: Set<number>, array: Array<string | prism.Token>,
-        lineIndex: number, charIndex: number, positions: FoundBracket[]) {
-        for (let i = 0; i < array.length; i++) {
-            const content = array[i];
-            let result: { lineIndex: number, charIndex: number };
-            if (indexes.has(i) && typeof content === "string") {
-                result = this.matchString(content, lineIndex, charIndex, positions);
+        if (type === "meta.brace.round" || type === "punctuation.definition.parameters") {
+            const openChar = "(";
+            const closeChar = ")";
+            if (text.substring(token.startIndex, token.endIndex) === openChar) {
+                this.manageTokenStack(openChar, stackMap, type, currentLine, token);
             }
             else {
-                result = this.parseTokenOrStringArray([content], lineIndex, charIndex, positions);
+                this.manageTokenStack(closeChar, stackMap, type, currentLine, token);
             }
-            lineIndex = result.lineIndex;
-            charIndex = result.charIndex;
+            return;
         }
-        return { lineIndex, charIndex };
+
+        if (type === "punctuation.definition.block") {
+            const openChar = "{";
+            const closeChar = "}";
+            if (text.substring(token.startIndex, token.endIndex) === openChar) {
+                this.manageTokenStack(openChar, stackMap, type, currentLine, token);
+            }
+            else {
+                this.manageTokenStack(closeChar, stackMap, type, currentLine, token);
+            }
+            return;
+        }
+
+        // if (((type.includes("punctuation.") && (type.includes(".block.") ||
+        //     (type.includes(".begin.") || type.includes(".end."))))
+        //     ||
+        //     type.includes(".brace."))) {
+        //     const depth = token.scopes.length;
+        //     currentLine.addScope(type, depth, token.startIndex, token.endIndex);
+        // }
+    }
+
+    private manageTokenStack(
+        currentChar: string,
+        stackMap: Map<string, string[]>,
+        type: string,
+        currentLine: TextLine,
+        token: IToken) {
+        const stack = stackMap.get(type);
+        if (stack && stack.length > 0) {
+            const topStack = stack[stack.length - 1];
+            if (topStack === currentChar) {
+                stack.push(currentChar);
+                currentLine.addScope(type, stack.length, token.startIndex, token.endIndex);
+            }
+            else {
+                currentLine.addScope(type, stack.length, token.startIndex, token.endIndex);
+                stack.pop();
+            }
+        }
+        else {
+            const newStack = [currentChar];
+            stackMap.set(type, newStack);
+            currentLine.addScope(type, newStack.length, token.startIndex, token.endIndex);
+        }
     }
 
     private colorDecorations(editors: vscode.TextEditor[]) {
