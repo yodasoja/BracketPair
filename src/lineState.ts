@@ -35,7 +35,37 @@ export default class LineState {
         }
     }
 
-    public getOpenBracketColor(type: string, range: Range): string {
+    public getOpenBrackets() {
+        return this.colorIndexes.getOpenBrackets();
+    }
+
+    public copyMultilineContext(): LineState {
+        const clone =
+        {
+            colorIndexes: this.colorIndexes.clone(),
+            previousBracketColor: this.previousBracketColor,
+        };
+
+        return new LineState(this.settings, clone);
+    }
+
+    public getScope(position: Position): Scope | undefined {
+        return this.colorIndexes.getScope(position);
+    }
+
+    public getBracketColor(type: string | undefined, depth: number, range: Range): string {
+        if (!type) {
+            this.previousBracketColor = this.settings.orphanColor;
+            return this.settings.orphanColor;
+        }
+
+        if (this.colorIndexes.isClosingPairForCurrentStack(type, depth)) {
+            return this.getCloseBracketColor(type, depth, range);
+        }
+        return this.getOpenBracketColor(type, depth, range);
+    }
+
+    private getOpenBracketColor(type: string, depth: number, range: Range): string {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
@@ -53,13 +83,13 @@ export default class LineState {
         }
 
         this.previousBracketColor = color;
-        this.colorIndexes.setCurrent(type, range, colorIndex);
+        this.colorIndexes.setCurrent(type, depth, range, colorIndex);
 
         return color;
     };
 
-    public getCloseBracketColor(type: string, range: Range): string {
-        const colorIndex = this.colorIndexes.getCurrentColorIndex(type, range);
+    private getCloseBracketColor(type: string, depth: number, range: Range): string {
+        const colorIndex = this.colorIndexes.getCurrentColorIndex(type, depth, range);
         let color: string;
         if (colorIndex !== undefined) {
             color = this.settings.colors[colorIndex];
@@ -71,23 +101,5 @@ export default class LineState {
         this.previousBracketColor = color;
 
         return color;
-    }
-
-    public getOpenBrackets() {
-        return this.colorIndexes.getOpenBrackets();
-    }
-
-    public copyMultilineContext(): LineState {
-        const clone =
-            {
-                colorIndexes: this.colorIndexes.clone(),
-                previousBracketColor: this.previousBracketColor,
-            };
-
-        return new LineState(this.settings, clone);
-    }
-
-    public getScope(position: Position): Scope | undefined {
-        return this.colorIndexes.getScope(position);
     }
 }

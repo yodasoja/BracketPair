@@ -33,8 +33,18 @@ export default class SingularIndex implements ColorIndexes {
         return this.previousOpenBracketColorIndex;
     }
 
-    public setCurrent(type: string, range: vscode.Range, colorIndex: number) {
-        this.openBrackets.push(new Bracket(type, range, colorIndex));
+    public isClosingPairForCurrentStack(type: string, depth: number): boolean {
+        if (this.openBrackets.length === 0) {
+            return false;
+        }
+
+        const topStack = this.openBrackets[this.openBrackets.length - 1];
+
+        return topStack.character === type && topStack.depth === depth;
+    }
+
+    public setCurrent(type: string, depth: number, range: vscode.Range, colorIndex: number) {
+        this.openBrackets.push(new Bracket(type, depth, range, colorIndex));
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
@@ -42,10 +52,10 @@ export default class SingularIndex implements ColorIndexes {
         return this.openBrackets.length;
     }
 
-    public getCurrentColorIndex(type: string, range: vscode.Range): number | undefined {
+    public getCurrentColorIndex(type: string, depth: number, range: vscode.Range): number | undefined {
         const openBracket = this.openBrackets.pop();
         if (openBracket) {
-            const closeBracket = new Bracket(type, range, openBracket.colorIndex);
+            const closeBracket = new Bracket(type, depth, range, openBracket.colorIndex);
             const scopeRange = new vscode.Range(openBracket.range.start, range.end);
             this.bracketScopes.push(
                 new Scope(scopeRange, this.settings.colors[openBracket.colorIndex], openBracket, closeBracket),

@@ -454,16 +454,7 @@ export default class DocumentDecoration {
             for (let i = lineNumber; i < this.document.lineCount; i++) {
                 const line = this.document.lineAt(i);
 
-                if (i > 0) {
-                    previousRuleStack = this.getLine(i - 1).getRuleStack();
-                }
-
                 tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack) as ITokenizeLineResult;
-
-                if (!tokenized) {
-                    console.log("Could not tokenize document: " + this.document.fileName);
-                    return;
-                }
 
                 const ruleStack = tokenized.ruleStack;
                 const tokens = tokenized.tokens;
@@ -473,19 +464,23 @@ export default class DocumentDecoration {
 
                 tokens.forEach((token) => {
                     if (token.scopes.length > 1) {
-                        const shortId = token.scopes[token.scopes.length - 1];
+                        const type = token.scopes[token.scopes.length - 1];
                         if (
-                            (shortId.includes(".punctuation.") &&
-                                (shortId.includes(".begin.") || shortId.includes(".end."))
-                            )
-                            ||
-                            (shortId.includes(".brace."))
+                            ((type.includes("punctuation.") && (type.includes(".block.") ||
+                                (type.includes(".begin.") || type.includes(".end."))))
+                                ||
+                                type.includes(".brace."))
                         ) {
-                            const longId = token.scopes.join("");
-                            currentLine.addScope(shortId, longId, token.startIndex, token.endIndex);
+                            const depth = token.scopes.length;
+                            currentLine.addScope(type, depth, token.startIndex, token.endIndex);
                         }
                     }
+                    else {
+                        currentLine.addScope(undefined, 0, token.startIndex, token.endIndex);
+                    }
                 });
+
+                previousRuleStack = ruleStack;
             }
         }
         catch (err) {

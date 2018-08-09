@@ -5,11 +5,12 @@ import Scope from "./scope";;
 
 interface IColorIndex {
     getPreviousIndex(type: string): number;
-    setCurrent(type: string, range: Range, colorIndex: number): void;
+    setCurrent(type: string, depth: number, range: Range, colorIndex: number): void;
     getCurrentLength(type: string): number;
-    getCurrentColorIndex(type: string, range: Range): number | undefined;
+    getCurrentColorIndex(type: string, depth: number, range: Range): number | undefined;
     getScope(position: Position): Scope | undefined;
     getOpenBrackets(): Set<string>;
+    isClosingPairForCurrentStack(type: string, depth: number): boolean;
     clone(): IColorIndex;
 }
 

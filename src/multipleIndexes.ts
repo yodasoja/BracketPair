@@ -40,8 +40,20 @@ export default class MultipleIndexes implements ColorIndexes {
         return this.previousOpenBracketColorIndexes[type];
     }
 
-    public setCurrent(type: string, range: Range, colorIndex: number) {
-        this.openBrackets[type].push(new Bracket(type, range, colorIndex));
+    public isClosingPairForCurrentStack(type: string, depth: number): boolean {
+        const bracketStack = this.openBrackets.get(type);
+
+        if (bracketStack && bracketStack.length > 0) {
+            const topStack = bracketStack[bracketStack.length - 1];
+            return topStack.depth === depth;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public setCurrent(type: string, depth: number, range: Range, colorIndex: number) {
+        this.openBrackets[type].push(new Bracket(type, depth, range, colorIndex));
         this.previousOpenBracketColorIndexes[type] = colorIndex;
     }
 
@@ -49,7 +61,7 @@ export default class MultipleIndexes implements ColorIndexes {
         return this.openBrackets[type].length;
     }
 
-    public getCurrentColorIndex(type: string, range: Range): number | undefined {
+    public getCurrentColorIndex(type: string, depth: number, range: Range): number | undefined {
         const openStack = this.openBrackets.get(type);
 
         if (!openStack) {
@@ -61,7 +73,7 @@ export default class MultipleIndexes implements ColorIndexes {
             return;
         }
 
-        const closeBracket = new Bracket(type, range, openBracket.colorIndex);
+        const closeBracket = new Bracket(type, depth, range, openBracket.colorIndex);
         const scopeRange = new Range(openBracket.range.start, range.end);
         this.bracketScopes.push(
             new Scope(scopeRange, this.settings.colors[openBracket.colorIndex], openBracket, closeBracket),

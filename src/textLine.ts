@@ -33,37 +33,30 @@ export default class TextLine {
         return this.lineState.copyMultilineContext();
     }
 
-    public addScope(shortId: string, longId: string, beginIndex: number, endIndex: number): void {
+    public addScope(type: string | undefined, depth: number, beginIndex: number, endIndex: number): void {
         const range = new Range(new Position(this.index, beginIndex), new Position(this.index, endIndex));
-        const startSplitIndex = shortId.indexOf(".begin.");
-        if (startSplitIndex !== -1) {
-            return this.setOpenRange(shortId.substring(0, startSplitIndex), range);
+
+        if (type) {
+            const startSplitIndex = type.indexOf(".begin.");
+            if (startSplitIndex !== -1) {
+                type = type.substring(0, startSplitIndex);
+            }
+            else {
+                const endSplitIndex = type.indexOf(".end.");
+                if (endSplitIndex !== -1) {
+                    type = type.substring(0, endSplitIndex);
+                }
+            }
         }
 
-        const endSplitIndex = shortId.indexOf(".end.");
-        if (endSplitIndex !== -1) {
-            return this.setCloseRange(shortId.substring(0, endSplitIndex), range);
-        }
+        return this.setColorRange(type, depth, range);
     }
     public getScope(position: Position): Scope | undefined {
         return this.lineState.getScope(position);
     }
 
-    private setOpenRange(type: string, range: Range) {
-        const color = this.lineState.getOpenBracketColor(type, range);
-
-        const colorRanges = this.colorRanges.get(color);
-        if (colorRanges !== undefined) {
-            colorRanges.push(range);
-        }
-        else {
-            this.colorRanges.set(color, [range]);
-        }
-        return;
-    }
-
-    private setCloseRange(type: string, range: Range) {
-        const color = this.lineState.getCloseBracketColor(type, range);
+    private setColorRange(type: string | undefined, depth: number, range: Range) {
+        const color = this.lineState.getBracketColor(type, depth, range);
 
         const colorRanges = this.colorRanges.get(color);
         if (colorRanges !== undefined) {
