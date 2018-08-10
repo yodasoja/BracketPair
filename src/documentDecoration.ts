@@ -563,6 +563,7 @@ export default class DocumentDecoration {
                         existingRanges.push(...ranges);
                     }
                     else {
+
                         colorMap.set(color, ranges);
                     }
                 }

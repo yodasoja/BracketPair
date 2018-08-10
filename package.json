@@ -206,7 +206,6 @@
     "devDependencies": {
         "@types/mocha": "^2.2.32",
         "@types/node": "^6.0.107",
-        "@types/prismjs": "^1.9.0",
         "mocha": "^2.3.3",
         "tslint": "^4.5.1",
         "typescript": "^2.8.3",
@@ -219,7 +218,6 @@
     "license": "SEE LICENSE IN LICENSE.md",
     "dependencies": {
         "escape-html": "^1.0.3",
-        "prismjs": "^1.15.0",
         "vscode-uri": "^1.0.3"
     }
 }

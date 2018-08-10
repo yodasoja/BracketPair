@@ -5,6 +5,7 @@ import ColorIndexes from "./IColorIndexes";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
+import Token from "./token";
 
 export default class MultipleIndexes implements ColorIndexes {
     private openBrackets = new Map<string, Bracket[]>();
@@ -26,17 +27,6 @@ export default class MultipleIndexes implements ColorIndexes {
         }
     }
 
-    public getOpenBrackets() {
-        const brackets = new Set<string>();
-        Object.keys(this.openBrackets).forEach((key) => {
-            if (this.openBrackets[key].length > 0) {
-                brackets.add(key);
-            }
-        });
-
-        return brackets;
-    }
-
     public getPreviousIndex(type: string): number {
         return this.previousOpenBracketColorIndexes[type];
     }
@@ -46,24 +36,24 @@ export default class MultipleIndexes implements ColorIndexes {
 
         if (bracketStack && bracketStack.length > 0) {
             const topStack = bracketStack[bracketStack.length - 1];
-            return topStack.depth === depth;
+            return topStack.token.depth === depth;
         }
         else {
             return false;
         }
     }
 
-    public setCurrent(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine, colorIndex: number) {
-        this.openBrackets[type].push(new Bracket(type, depth, beginIndex, endIndex, line, colorIndex));
-        this.previousOpenBracketColorIndexes[type] = colorIndex;
+    public setCurrent(token: Token, colorIndex: number) {
+        this.openBrackets[token.type].push(new Bracket(token, colorIndex));
+        this.previousOpenBracketColorIndexes[token.type] = colorIndex;
     }
 
     public getCurrentLength(type: string): number {
         return this.openBrackets[type].length;
     }
 
-    public getCurrentColorIndex(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): number | undefined {
-        const openStack = this.openBrackets.get(type);
+    public getCurrentColorIndex(token: Token): number | undefined {
+        const openStack = this.openBrackets.get(token.type);
 
         if (!openStack) {
             return;
@@ -74,7 +64,7 @@ export default class MultipleIndexes implements ColorIndexes {
             return;
         }
 
-        const closeBracket = new Bracket(type, depth, beginIndex, endIndex, line, openBracket.colorIndex);
+        const closeBracket = new Bracket(token, openBracket.colorIndex);
         openBracket.pair = closeBracket;
         closeBracket.pair = openBracket;
 

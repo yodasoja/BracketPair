@@ -1,26 +1,14 @@
 import { Range } from "vscode";
 import TextLine from "./textLine";
+import Token from "./token";
 
 export default class Bracket {
-    public readonly character: string;
-    public readonly depth: number;
-    public readonly range: Range;
-    public readonly beginIndex: number;
-    public readonly endIndex: number;
+    public readonly token: Token;
     public readonly colorIndex: number;
-    public readonly line: TextLine;
     public pair?: Bracket;
 
-    constructor(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine, colorIndex: number) {
-        this.character = type;
-        this.line = line;
-        this.depth = depth;
-        this.beginIndex = beginIndex;
-        this.endIndex = endIndex;
+    constructor(token: Token, colorIndex: number) {
+        this.token = token;
         this.colorIndex = colorIndex;
-    }
-
-    public stackMatch(bracket: Bracket) {
-        return this.character === bracket.character && this.depth === bracket.depth;
     }
 }

@@ -5,6 +5,7 @@ import ColorIndexes from "./IColorIndexes";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
+import Token from "./token";
 
 export default class SingularIndex implements ColorIndexes {
     private openBrackets: Bracket[] = [];
@@ -26,10 +27,6 @@ export default class SingularIndex implements ColorIndexes {
         }
     }
 
-    public getOpenBrackets() {
-        return new Set<string>(this.openBrackets.map((e) => e.character));
-    }
-
     public getPreviousIndex(type: string): number {
         return this.previousOpenBracketColorIndex;
     }
@@ -41,11 +38,11 @@ export default class SingularIndex implements ColorIndexes {
 
         const topStack = this.openBrackets[this.openBrackets.length - 1];
 
-        return topStack.character === type && topStack.depth === depth;
+        return topStack.token.type === type && topStack.token.depth === depth;
     }
 
-    public setCurrent(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine, colorIndex: number) {
-        this.openBrackets.push(new Bracket(type, depth, beginIndex, endIndex, line, colorIndex));
+    public setCurrent(token: Token, colorIndex: number) {
+        this.openBrackets.push(new Bracket(token, colorIndex));
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
@@ -53,10 +50,10 @@ export default class SingularIndex implements ColorIndexes {
         return this.openBrackets.length;
     }
 
-    public getCurrentColorIndex(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): number | undefined {
+    public getCurrentColorIndex(token: Token): number | undefined {
         const openBracket = this.openBrackets.pop();
         if (openBracket) {
-            const closeBracket = new Bracket(type, depth, beginIndex, endIndex, line, openBracket.colorIndex);
+            const closeBracket = new Bracket(token, openBracket.colorIndex);
             openBracket.pair = closeBracket;
             closeBracket.pair = openBracket;
 

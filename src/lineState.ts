@@ -8,6 +8,7 @@ import Scope from "./scope";
 import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 import TextLine from "./textLine";
+import Token from "./token";
 
 export default class LineState {
     private readonly colorIndexes: ColorIndexes;
@@ -44,10 +45,6 @@ export default class LineState {
         return this.charStack;
     }
 
-    public getOpenBrackets() {
-        return this.colorIndexes.getOpenBrackets();
-    }
-
     public cloneState(): LineState {
         const clone =
         {
@@ -63,16 +60,22 @@ export default class LineState {
         return this.colorIndexes.getScope(position);
     }
 
-    public getBracketColor(type: string | undefined, depth: number, beginIndex: number, endIndex: number, line: TextLine): string {
+    public getBracketColor(
+        type: string | undefined,
+        depth: number,
+        beginIndex: number,
+        endIndex: number,
+        line: TextLine,
+    ): string {
         if (!type) {
             this.previousBracketColor = this.settings.orphanColor;
             return this.settings.orphanColor;
         }
-
+        const token = new Token(type, depth, beginIndex, endIndex, line);
         if (this.colorIndexes.isClosingPairForCurrentStack(type, depth)) {
-            return this.getCloseBracketColor(type, depth, beginIndex, endIndex, line);
+            return this.getCloseBracketColor(token);
         }
-        return this.getOpenBracketColor(type, depth, beginIndex, endIndex, line);
+        return this.getOpenBracketColor(token);
     }
 
     private cloneCharStack() {
@@ -83,14 +86,14 @@ export default class LineState {
         return clone;
     }
 
-    private getOpenBracketColor(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): string {
+    private getOpenBracketColor(token: Token): string {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
-            colorIndex = (this.colorIndexes.getPreviousIndex(type) + 1) % this.settings.colors.length;
+            colorIndex = (this.colorIndexes.getPreviousIndex(token.type) + 1) % this.settings.colors.length;
         }
         else {
-            colorIndex = this.colorIndexes.getCurrentLength(type) % this.settings.colors.length;
+            colorIndex = this.colorIndexes.getCurrentLength(token.type) % this.settings.colors.length;
         }
 
         let color = this.settings.colors[colorIndex];
@@ -101,13 +104,13 @@ export default class LineState {
         }
 
         this.previousBracketColor = color;
-        this.colorIndexes.setCurrent(type, depth, beginIndex, endIndex, line, colorIndex);
+        this.colorIndexes.setCurrent(token, colorIndex);
 
         return color;
     };
 
-    private getCloseBracketColor(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): string {
-        const colorIndex = this.colorIndexes.getCurrentColorIndex(type, depth, beginIndex, endIndex, line);
+    private getCloseBracketColor(token: Token): string {
+        const colorIndex = this.colorIndexes.getCurrentColorIndex(token);
         let color: string;
         if (colorIndex !== undefined) {
             color = this.settings.colors[colorIndex];
