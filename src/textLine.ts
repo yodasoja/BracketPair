@@ -1,4 +1,5 @@
 import { Position, Range } from "vscode";
+import { IStackElement } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Scope from "./scope";
 
@@ -6,18 +7,18 @@ export default class TextLine {
     public colorRanges = new Map<string, Range[]>();
     public readonly index: number;
     private lineState: LineState;
-    private readonly ruleStack: any;
+    private readonly ruleStack: IStackElement;
 
     constructor(
         index: number,
-        ruleStack: any,
+        ruleStack: IStackElement,
         lineState: LineState) {
         this.index = index;
         this.lineState = lineState;
         this.ruleStack = ruleStack;
     }
 
-    public getRuleStack(): any {
+    public getRuleStack(): IStackElement {
         return this.ruleStack;
     }
 

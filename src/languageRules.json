@@ -1,9 +1,7 @@
 {
     "languageRules": [
         {
-            "javascript": {
-                "open"
-            }
+            "javascript": {}
         }
     ]
 }

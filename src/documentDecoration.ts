@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { IGrammar,  IStackElement, IToken } from "./IExtensionGrammar";
+import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Scope from "./scope";
 import Settings from "./settings";
@@ -44,12 +44,8 @@ export default class DocumentDecoration {
         const newSelections: vscode.Selection[] = [];
 
         editor.selections.forEach((selection) => {
-            let selections: vscode.Selection[] = [];
 
-            if (this.scopeSelectionHistory.length !== 0) {
-                selections = this.scopeSelectionHistory[this.scopeSelectionHistory.length - 1];
-            }
-            else {
+            if (this.scopeSelectionHistory.length === 0) {
                 this.scopeSelectionHistory.push(editor.selections);
             }
 
@@ -415,19 +411,20 @@ export default class DocumentDecoration {
                 previousRuleStack = this.lines[previousLineNumber].getRuleStack();
             }
 
-            for (let i = lineNumber; i < this.document.lineCount; i++) {
-                const line = this.document.lineAt(i);
+            previousRuleStack = this.parseTokensForLine(lineNumber, previousRuleStack);
+            let lineTokensUnchanged = false;
+            if (removed.length > 0) {
+                if (removed[0].getRuleStack().equals(previousRuleStack)) {
+                    removed.shift();
+                    this.lines = this.lines.concat(removed);
+                    lineTokensUnchanged = true;
+                }
+            }
 
-                const tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack);
-
-                const ruleStack = tokenized.ruleStack;
-                const tokens = tokenized.tokens;
-
-                const currentLine = this.getLine(i, ruleStack);
-
-                this.parseTokens(tokens, currentLine, line);
-
-                previousRuleStack = ruleStack;
+            if (!lineTokensUnchanged) {
+                for (let i = lineNumber + 1; i < this.document.lineCount; i++) {
+                    previousRuleStack = this.parseTokensForLine(i, previousRuleStack);
+                }
             }
         }
         catch (err) {
@@ -438,6 +435,17 @@ export default class DocumentDecoration {
         this.colorDecorations(editors);
 
         // console.timeEnd("updateDecorations");
+    }
+
+    private parseTokensForLine(i: number, previousRuleStack: IStackElement | undefined) {
+        const line = this.document.lineAt(i);
+        const tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack);
+        const ruleStack = tokenized.ruleStack;
+        const tokens = tokenized.tokens;
+        const currentLine = this.getLine(i, ruleStack);
+        this.parseTokens(tokens, currentLine, line);
+        previousRuleStack = ruleStack;
+        return previousRuleStack;
     }
 
     private parseTokens(tokens: IToken[], currentLine: TextLine, line: vscode.TextLine) {
