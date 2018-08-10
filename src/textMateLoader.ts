@@ -1,28 +1,14 @@
+import { IGrammar, IExtensionPackage } from "./IExtensionGrammar";
+
 "use strict";
 import * as path from "path";
 import * as vscode from "vscode";
 import fs = require("fs");
 
-interface IExtensionGrammar {
-    language?: string;
-    scopeName?: string;
-    path?: string;
-    // embeddedLanguages?: { [scopeName: string]: string };
-    // injectTo?: string[];
-}
-
-interface IExtensionPackage {
-    contributes?: {
-        // tslint:disable-next-line:array-type
-        languages?: { id: string, configuration: string }[],
-        grammars?: IExtensionGrammar[],
-    };
-}
-
-class TextMateLoader {
+export class TextMateLoader {
     private readonly grammarPaths: Map<string, { scopeName: string; path: string; }>;
     private readonly vsctm: any;
-    private readonly textMateRegistry = new Map<string, {}>();
+    private readonly textMateRegistry = new Map<string, IGrammar>();
     constructor() {
         this.grammarPaths = this.getGrammarPaths();
         this.vsctm = this.loadTextMate();
@@ -59,22 +45,16 @@ class TextMateLoader {
         });
 
         // Load the JavaScript grammar and any other grammars included by it async.
-        registry.loadGrammar(paths.scopeName).then((grammar: any) => {
-            this.textMateRegistry.set(languageID, grammar);
+        return (registry.loadGrammar(paths.scopeName) as Thenable<IGrammar | undefined | null>).then((grammar) => {
+            if (grammar) {
+                this.textMateRegistry.set(languageID, grammar);
+            }
             return grammar;
         });
     }
 
     private getNodeModule(moduleName: string) {
-        try {
-            console.log(`${vscode.env.appRoot}/node_modules.asar/${moduleName}`)
-            return require(`${vscode.env.appRoot}/node_modules.asar/${moduleName}`);
-        } catch (err) { }
-        try {
-            console.log(`>>> ${vscode.env.appRoot}/node_modules/${moduleName}`)
-            return require(`${vscode.env.appRoot}/node_modules/${moduleName}`);
-        } catch (err) { }
-        return null;
+        return require(`${vscode.env.appRoot}/node_modules.asar/${moduleName}`);
     }
 
     private loadTextMate(): any {

@@ -4,8 +4,9 @@ import {
 } from "vscode";
 import DocumentDecoration from "./documentDecoration";
 import GutterIconManager from "./gutterIconManager";
+import { IGrammar } from "./IExtensionGrammar";
 import Settings from "./settings";
-import TextMateLoader from "./textMateLoader";
+import { TextMateLoader } from "./textMateLoader";
 
 export default class DocumentDecorationManager {
     private readonly components = require("prismjs/components");
@@ -97,8 +98,16 @@ export default class DocumentDecorationManager {
                 if (!tokenizer) {
                     return;
                 }
+
+                if (tokenizer instanceof Promise) {
+                    tokenizer.then(() => {
+                        this.updateAllDocuments();
+                    });
+                    return;
+                }
+
                 const settings = new Settings(document.languageId, this.gutterIcons, document.uri);
-                documentDecorations = new DocumentDecoration(document, tokenizer, settings);
+                documentDecorations = new DocumentDecoration(document, tokenizer as IGrammar, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
                 if (error instanceof Error) {

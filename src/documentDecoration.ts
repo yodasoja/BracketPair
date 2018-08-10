@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { IStackElement, IToken, ITokenizeLineResult } from "./grammarInterfaces";
+import { IGrammar,  IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Scope from "./scope";
 import Settings from "./settings";
@@ -16,16 +16,16 @@ export default class DocumentDecoration {
     private readonly document: vscode.TextDocument;
     private nextScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private previousScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
-    private readonly tokenizer: any;
+    private readonly tokenizer: IGrammar;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
     private readonly tokenEndTrimLength: number;
-    constructor(document: vscode.TextDocument, textMate: any, settings: Settings) {
+    constructor(document: vscode.TextDocument, textMate: IGrammar, settings: Settings) {
         this.settings = settings;
         this.document = document;
         this.tokenizer = textMate;
 
-        const scopeName = this.tokenizer._grammar.scopeName as string;
+        const scopeName = (this.tokenizer as any)._grammar.scopeName as string;
         const split = scopeName.split(".");
         this.tokenEndTrimLength = split[split.length - 1].length + 1;
     }
@@ -418,7 +418,7 @@ export default class DocumentDecoration {
             for (let i = lineNumber; i < this.document.lineCount; i++) {
                 const line = this.document.lineAt(i);
 
-                const tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack) as ITokenizeLineResult;
+                const tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack);
 
                 const ruleStack = tokenized.ruleStack;
                 const tokens = tokenized.tokens;
