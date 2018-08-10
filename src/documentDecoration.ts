@@ -100,7 +100,7 @@ export default class DocumentDecoration {
             if (index === this.lines.length) {
                 const previousLine = this.lines[this.lines.length - 1];
                 const newLine =
-                    new TextLine(index, previousLine.getRuleStack(), previousLine.cloneState());
+                    new TextLine(index, ruleStack, previousLine.cloneState());
 
                 this.lines.push(newLine);
                 return newLine;
@@ -473,7 +473,8 @@ export default class DocumentDecoration {
         if (type === "meta.brace.round" || type === "punctuation.definition.parameters") {
             const openChar = "(";
             const closeChar = ")";
-            if (text.substring(token.startIndex, token.endIndex) === openChar) {
+            const currentMatch = text.substring(token.startIndex, token.endIndex);
+            if (currentMatch === openChar) {
                 this.manageTokenStack(openChar, stackMap, type, currentLine, token);
             }
             else {
