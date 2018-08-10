@@ -406,7 +406,7 @@ export default class DocumentDecoration {
         const amountToRemove = this.lines.length - lineNumber;
 
         // Remove cached lines that need to be updated
-        this.lines.splice(lineNumber, amountToRemove);
+        const removed = this.lines.splice(lineNumber, amountToRemove);
 
         try {
             const previousLineNumber = lineNumber - 1;
@@ -462,8 +462,8 @@ export default class DocumentDecoration {
     ) {
         // Remove file extension
         type = type.slice(0, -this.tokenEndTrimLength);
-        const beginString = ".begin.";
-        const endString = ".end.";
+        const beginString = ".begin";
+        const endString = ".end";
         if (type.endsWith(beginString)) {
             type = type.slice(0, -beginString.length);
         } else if (type.endsWith(endString)) {
