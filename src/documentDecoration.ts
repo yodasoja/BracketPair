@@ -85,7 +85,7 @@ export default class DocumentDecoration {
         else {
             if (this.lines.length === 0) {
                 this.lines.push(
-                    new TextLine(0, ruleStack, new LineState(this.settings)),
+                    new TextLine(ruleStack, new LineState(this.settings)),
                 );
             }
 
@@ -96,7 +96,7 @@ export default class DocumentDecoration {
             if (index === this.lines.length) {
                 const previousLine = this.lines[this.lines.length - 1];
                 const newLine =
-                    new TextLine(index, ruleStack, previousLine.cloneState());
+                    new TextLine(ruleStack, previousLine.cloneState());
 
                 this.lines.push(newLine);
                 return newLine;
@@ -396,7 +396,7 @@ export default class DocumentDecoration {
             return;
         }
 
-        // console.time("updateDecorations");
+        console.time("updateDecorations");
 
         const lineNumber = this.lineToUpdateWhenTimeoutEnds;
         const amountToRemove = this.lines.length - lineNumber;
@@ -434,7 +434,7 @@ export default class DocumentDecoration {
 
         this.colorDecorations(editors);
 
-        // console.timeEnd("updateDecorations");
+        console.timeEnd("updateDecorations");
     }
 
     private parseTokensForLine(i: number, previousRuleStack: IStackElement | undefined) {
@@ -491,6 +491,19 @@ export default class DocumentDecoration {
             return;
         }
 
+        if (type === "meta.brace.square") {
+            const openChar = "[";
+            const closeChar = "]";
+            const currentMatch = text.substring(token.startIndex, token.endIndex);
+            if (currentMatch === openChar) {
+                this.manageTokenStack(openChar, stackMap, type, currentLine, token);
+            }
+            else {
+                this.manageTokenStack(closeChar, stackMap, type, currentLine, token);
+            }
+            return;
+        }
+
         if (type === "punctuation.definition.block") {
             const openChar = "{";
             const closeChar = "}";
@@ -502,14 +515,6 @@ export default class DocumentDecoration {
             }
             return;
         }
-
-        // if (((type.includes("punctuation.") && (type.includes(".block.") ||
-        //     (type.includes(".begin.") || type.includes(".end."))))
-        //     ||
-        //     type.includes(".brace."))) {
-        //     const depth = token.scopes.length;
-        //     currentLine.addScope(type, depth, token.startIndex, token.endIndex);
-        // }
     }
 
     private manageTokenStack(
@@ -538,21 +543,27 @@ export default class DocumentDecoration {
     }
 
     private colorDecorations(editors: vscode.TextEditor[]) {
+        console.time("colorDecorations");
         const colorMap = new Map<string, vscode.Range[]>();
 
         // Reduce all the colors/ranges of the lines into a singular map
-        for (const line of this.lines) {
+        for (let i = 0; i < this.lines.length; i++) {
             {
-                for (const [color, ranges] of line.colorRanges) {
+                for (const [color, indexes] of this.lines[i].colorRanges) {
                     const existingRanges = colorMap.get(color);
 
+                    const ranges = indexes.map((index) => {
+                        const start = new vscode.Position(i, index.beginIndex);
+                        const end = new vscode.Position(i, index.endIndex);
+                        return new vscode.Range(start, end);
+                    });
+
                     if (existingRanges !== undefined) {
+
                         existingRanges.push(...ranges);
                     }
                     else {
-                        // Slice because we will be adding values to this array in the future,
-                        // but don't want to modify the original array which is stored per line
-                        colorMap.set(color, ranges.slice());
+                        colorMap.set(color, ranges);
                     }
                 }
             }
@@ -576,6 +587,8 @@ export default class DocumentDecoration {
         }
 
         this.lineToUpdateWhenTimeoutEnds = Infinity;
+
+        console.timeEnd("colorDecorations");
     }
 
     private calculateColumnFromCharIndex(lineText: string, charIndex: number, tabSize: number): number {

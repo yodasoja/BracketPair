@@ -4,6 +4,7 @@ import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
 import Scope from "./scope";
 import Settings from "./settings";
+import TextLine from "./textLine";
 
 export default class MultipleIndexes implements ColorIndexes {
     private openBrackets = new Map<string, Bracket[]>();
@@ -52,8 +53,8 @@ export default class MultipleIndexes implements ColorIndexes {
         }
     }
 
-    public setCurrent(type: string, depth: number, range: Range, colorIndex: number) {
-        this.openBrackets[type].push(new Bracket(type, depth, range, colorIndex));
+    public setCurrent(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine, colorIndex: number) {
+        this.openBrackets[type].push(new Bracket(type, depth, beginIndex, endIndex, line, colorIndex));
         this.previousOpenBracketColorIndexes[type] = colorIndex;
     }
 
@@ -61,7 +62,7 @@ export default class MultipleIndexes implements ColorIndexes {
         return this.openBrackets[type].length;
     }
 
-    public getCurrentColorIndex(type: string, depth: number, range: Range): number | undefined {
+    public getCurrentColorIndex(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): number | undefined {
         const openStack = this.openBrackets.get(type);
 
         if (!openStack) {
@@ -73,11 +74,10 @@ export default class MultipleIndexes implements ColorIndexes {
             return;
         }
 
-        const closeBracket = new Bracket(type, depth, range, openBracket.colorIndex);
-        const scopeRange = new Range(openBracket.range.start, range.end);
-        this.bracketScopes.push(
-            new Scope(scopeRange, this.settings.colors[openBracket.colorIndex], openBracket, closeBracket),
-        );
+        const closeBracket = new Bracket(type, depth, beginIndex, endIndex, line, openBracket.colorIndex);
+        openBracket.pair = closeBracket;
+        closeBracket.pair = openBracket;
+
         return openBracket.colorIndex;
     }
 

@@ -1,13 +1,12 @@
-import { Position, Range } from "vscode";
-import Bracket from "./bracket";
-import BracketPair from "./bracketPair";
-import Scope from "./scope";;
+import { Position, } from "vscode";
+import Scope from "./scope";import TextLine from "./textLine";
+;
 
 interface IColorIndex {
     getPreviousIndex(type: string): number;
-    setCurrent(type: string, depth: number, range: Range, colorIndex: number): void;
+    setCurrent(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine, colorIndex: number): void;
     getCurrentLength(type: string): number;
-    getCurrentColorIndex(type: string, depth: number, range: Range): number | undefined;
+    getCurrentColorIndex(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): number | undefined;
     getScope(position: Position): Scope | undefined;
     getOpenBrackets(): Set<string>;
     isClosingPairForCurrentStack(type: string, depth: number): boolean;

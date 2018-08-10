@@ -4,11 +4,12 @@ import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
 import Scope from "./scope";
 import Settings from "./settings";
+import TextLine from "./textLine";
 
 export default class SingularIndex implements ColorIndexes {
     private openBrackets: Bracket[] = [];
+    private brackets: Bracket[] = [];
     private previousOpenBracketColorIndex: number = -1;
-    private bracketScopes: Scope[] = [];
     private readonly settings: Settings;
     constructor(
         settings: Settings,
@@ -43,8 +44,8 @@ export default class SingularIndex implements ColorIndexes {
         return topStack.character === type && topStack.depth === depth;
     }
 
-    public setCurrent(type: string, depth: number, range: vscode.Range, colorIndex: number) {
-        this.openBrackets.push(new Bracket(type, depth, range, colorIndex));
+    public setCurrent(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine, colorIndex: number) {
+        this.openBrackets.push(new Bracket(type, depth, beginIndex, endIndex, line, colorIndex));
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
@@ -52,24 +53,24 @@ export default class SingularIndex implements ColorIndexes {
         return this.openBrackets.length;
     }
 
-    public getCurrentColorIndex(type: string, depth: number, range: vscode.Range): number | undefined {
+    public getCurrentColorIndex(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): number | undefined {
         const openBracket = this.openBrackets.pop();
         if (openBracket) {
-            const closeBracket = new Bracket(type, depth, range, openBracket.colorIndex);
-            const scopeRange = new vscode.Range(openBracket.range.start, range.end);
-            this.bracketScopes.push(
-                new Scope(scopeRange, this.settings.colors[openBracket.colorIndex], openBracket, closeBracket),
-            );
+            const closeBracket = new Bracket(type, depth, beginIndex, endIndex, line, openBracket.colorIndex);
+            openBracket.pair = closeBracket;
+            closeBracket.pair = openBracket;
+
             return openBracket.colorIndex;
         }
     }
 
     public getScope(position: vscode.Position): Scope | undefined {
-        for (const scope of this.bracketScopes) {
-            if (scope.range.contains(position)) {
-                return scope;
-            }
-        }
+        // for (const scope of this.bracketScopes) {
+        //     if (scope.range.contains(position)) {
+        //         return scope;
+        //     }
+        // }
+        return;
     }
 
     public clone() {

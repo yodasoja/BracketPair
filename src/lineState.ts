@@ -7,6 +7,7 @@ import MultipleIndexes from "./multipleIndexes";
 import Scope from "./scope";
 import Settings from "./settings";
 import SingularIndex from "./singularIndex";
+import TextLine from "./textLine";
 
 export default class LineState {
     private readonly colorIndexes: ColorIndexes;
@@ -62,16 +63,16 @@ export default class LineState {
         return this.colorIndexes.getScope(position);
     }
 
-    public getBracketColor(type: string | undefined, depth: number, range: Range): string {
+    public getBracketColor(type: string | undefined, depth: number, beginIndex: number, endIndex: number, line: TextLine): string {
         if (!type) {
             this.previousBracketColor = this.settings.orphanColor;
             return this.settings.orphanColor;
         }
 
         if (this.colorIndexes.isClosingPairForCurrentStack(type, depth)) {
-            return this.getCloseBracketColor(type, depth, range);
+            return this.getCloseBracketColor(type, depth, beginIndex, endIndex, line);
         }
-        return this.getOpenBracketColor(type, depth, range);
+        return this.getOpenBracketColor(type, depth, beginIndex, endIndex, line);
     }
 
     private cloneCharStack() {
@@ -82,7 +83,7 @@ export default class LineState {
         return clone;
     }
 
-    private getOpenBracketColor(type: string, depth: number, range: Range): string {
+    private getOpenBracketColor(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): string {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
@@ -100,13 +101,13 @@ export default class LineState {
         }
 
         this.previousBracketColor = color;
-        this.colorIndexes.setCurrent(type, depth, range, colorIndex);
+        this.colorIndexes.setCurrent(type, depth, beginIndex, endIndex, line, colorIndex);
 
         return color;
     };
 
-    private getCloseBracketColor(type: string, depth: number, range: Range): string {
-        const colorIndex = this.colorIndexes.getCurrentColorIndex(type, depth, range);
+    private getCloseBracketColor(type: string, depth: number, beginIndex: number, endIndex: number, line: TextLine): string {
+        const colorIndex = this.colorIndexes.getCurrentColorIndex(type, depth, beginIndex, endIndex, line);
         let color: string;
         if (colorIndex !== undefined) {
             color = this.settings.colors[colorIndex];
