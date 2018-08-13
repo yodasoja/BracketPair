@@ -1,19 +1,21 @@
-import { Position, Range } from "vscode";
+import { Position } from "vscode";
+import Bracket from "./bracket";
 import { IStackElement } from "./IExtensionGrammar";
 import LineState from "./lineState";
-import Scope from "./scope";
-import Bracket from "./bracket";
 
 export default class TextLine {
     public colorRanges = new Map<string, Array<{ beginIndex: number, endIndex: number }>>();
+    public index: number;
     private lineState: LineState;
     private readonly ruleStack: IStackElement;
 
     constructor(
         ruleStack: IStackElement,
-        lineState: LineState) {
+        lineState: LineState,
+        index: number) {
         this.lineState = lineState;
         this.ruleStack = ruleStack;
+        this.index = index;
     }
 
     public getRuleStack(): IStackElement {
@@ -45,8 +47,8 @@ export default class TextLine {
 
         return this.setColorRange(type, character, depth, beginIndex, endIndex);
     }
-    public getEndScopeBracket(charIndex: number): Bracket | undefined {
-        return this.lineState.getEndScopeBracket(charIndex);
+    public getEndScopeBracket(position: Position): Bracket | undefined {
+        return this.lineState.getEndScopeBracket(position);
     }
 
     private setColorRange(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number) {

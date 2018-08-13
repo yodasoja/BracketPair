@@ -7,7 +7,7 @@ interface IColorIndex {
     setCurrent(token: Token, colorIndex: number): void;
     getCurrentLength(type: string): number;
     getCurrentColorIndex(token: Token): number | undefined;
-    getEndScopeBracket(charIndex: number): Bracket | undefined;
+    getEndScopeBracket(position: Position): Bracket | undefined;
     isClosingPairForCurrentStack(type: string, depth: number): boolean;
     clone(): IColorIndex;
 }

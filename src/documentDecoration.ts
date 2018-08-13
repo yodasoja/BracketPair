@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
+import Bracket from "./bracket";
 import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
-import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
-import Bracket from "./bracket";
+import Token from "./token";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
@@ -50,19 +50,13 @@ export default class DocumentDecoration {
             }
 
             const nextPos = this.document.validatePosition(selection.active.translate(0, 1));
-            const searchResult = this.searchScopeForwards(nextPos);
-            if (!searchResult) {
+            const endBracket = this.searchScopeForwards(nextPos);
+            if (!endBracket) {
                 return;
             }
-            const endBracket = searchResult.endBracket;
             const startBracket = endBracket.pair!;
-            const endLineIndex = searchResult.endScopeLineIndex;
-            const startLineIndex = this.searchForTextLineBackwards(nextPos.line, endBracket.pair!.token.line);
-
-            if (!startLineIndex) {
-                throw new Error("@Dev: Could not find matching line even though one should exist, " +
-                    "did you implement refreshing brackets when a line is deleted...? ");
-            }
+            const endLineIndex = endBracket.token.line.index;
+            const startLineIndex = startBracket.token.line.index;
 
             const startPos = new vscode.Position(startLineIndex, startBracket.token.endIndex + 1);
             const endPos = new vscode.Position(endLineIndex, endBracket.token.endIndex - 1);
@@ -98,7 +92,7 @@ export default class DocumentDecoration {
         else {
             if (this.lines.length === 0) {
                 this.lines.push(
-                    new TextLine(ruleStack, new LineState(this.settings)),
+                    new TextLine(ruleStack, new LineState(this.settings), 0),
                 );
             }
 
@@ -109,7 +103,7 @@ export default class DocumentDecoration {
             if (index === this.lines.length) {
                 const previousLine = this.lines[this.lines.length - 1];
                 const newLine =
-                    new TextLine(ruleStack, previousLine.cloneState());
+                    new TextLine(ruleStack, previousLine.cloneState(), index);
 
                 this.lines.push(newLine);
                 return newLine;
@@ -177,19 +171,13 @@ export default class DocumentDecoration {
         // Simply wrap in foreach selection for multicursor, maybe put it behind an option?
         const selection = event.textEditor.selection;
 
-        const searchResult = this.searchScopeForwards(selection.active);
-        if (!searchResult) {
+        const endBracket = this.searchScopeForwards(selection.active);
+        if (!endBracket) {
             return;
         }
-        const endBracket = searchResult.endBracket;
         const startBracket = endBracket.pair!;
-        const endLineIndex = searchResult.endScopeLineIndex;
-        const startLineIndex = this.searchForTextLineBackwards(selection.active.line, endBracket.pair!.token.line);
-
-        if (!startLineIndex) {
-            throw new Error("@Dev: Could not find matching line even though one should exist, " +
-                "did you implement refreshing brackets when a line is deleted...? ");
-        }
+        const endLineIndex = endBracket.token.line.index;
+        const startLineIndex = startBracket.token.line.index;
 
         const beginRange = new vscode.Range(
             new vscode.Position(startLineIndex, startBracket.token.beginIndex),
@@ -208,17 +196,17 @@ export default class DocumentDecoration {
         if (this.settings.showBracketsInGutter) {
             if (startLineIndex === endLineIndex) {
                 const decoration = this.settings.createGutterBracketDecorations
-                    (endBracket.color, endBracket.open.token.character + endBracket.close.token.character);
+                    (endBracket.color, endBracket.token.character + endBracket.token.character);
                 event.textEditor.setDecorations(decoration, [beginRange, endRange]);
                 this.scopeDecorations.push(decoration);
             }
             else {
                 const decorationOpen =
-                    this.settings.createGutterBracketDecorations(endBracket.color, endBracket.open.token.character);
+                    this.settings.createGutterBracketDecorations(endBracket.color, endBracket.token.character);
                 event.textEditor.setDecorations(decorationOpen, [beginRange]);
                 this.scopeDecorations.push(decorationOpen);
                 const decorationClose =
-                    this.settings.createGutterBracketDecorations(endBracket.color, endBracket.close.token.character);
+                    this.settings.createGutterBracketDecorations(endBracket.color, endBracket.token.character);
                 event.textEditor.setDecorations(decorationClose, [endRange]);
                 this.scopeDecorations.push(decorationClose);
             }
@@ -315,19 +303,19 @@ export default class DocumentDecoration {
     }
 
     private setOverLineDecoration(
-        scope: Scope,
+        bracket: Bracket,
         event: vscode.TextEditorSelectionChangeEvent,
         overlineLineRanges: vscode.Range[]) {
-        const lineDecoration = this.settings.createScopeLineDecorations(scope.color, true, false, false, false);
+        const lineDecoration = this.settings.createScopeLineDecorations(bracket.color, true, false, false, false);
         event.textEditor.setDecorations(lineDecoration, overlineLineRanges);
         this.scopeDecorations.push(lineDecoration);
     }
 
     private setUnderLineDecoration(
-        scope: Scope,
+        bracket: Bracket,
         event: vscode.TextEditorSelectionChangeEvent,
         underlineLineRanges: vscode.Range[]) {
-        const lineDecoration = this.settings.createScopeLineDecorations(scope.color, false, false, true, false);
+        const lineDecoration = this.settings.createScopeLineDecorations(bracket.color, false, false, true, false);
         event.textEditor.setDecorations(lineDecoration, underlineLineRanges);
         this.scopeDecorations.push(lineDecoration);
     }
@@ -390,36 +378,11 @@ export default class DocumentDecoration {
     }
 
     private searchScopeForwards(position: vscode.Position) {
-        const startLine = position.line;
-        let charIndex = position.character;
-        if (startLine < this.lines.length) {
-            const endBracket = this.lines[startLine].getEndScopeBracket(charIndex);
+        for (let i = position.line; i < this.lines.length; i++) {
+            const endBracket = this.lines[i].getEndScopeBracket(position);
 
             if (endBracket) {
-                return { endBracket, endScopeLineIndex: startLine };
-            }
-        }
-
-        // If we go to next line, we search from start of line
-        charIndex = 0;
-
-        for (let i = startLine + 1; i < this.lines.length; i++) {
-            const endBracket = this.lines[i].getEndScopeBracket(charIndex);
-
-            if (endBracket) {
-                return { endBracket, endScopeLineIndex: i };
-            }
-        }
-    }
-
-    private searchForTextLineBackwards(startLine: number, line: TextLine) {
-        if (startLine >= this.lines.length) {
-            return;
-        }
-
-        for (let i = startLine; i-- > 0; i++) {
-            if (this.lines[i] === line) {
-                return i;
+                return endBracket;
             }
         }
     }

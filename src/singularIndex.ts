@@ -1,14 +1,11 @@
-import * as vscode from "vscode";
+import { Position } from "vscode";
 import Bracket from "./bracket";
-import BracketPair from "./bracketPair";
 import ColorIndexes from "./IColorIndexes";
-import Scope from "./scope";
 import Settings from "./settings";
-import TextLine from "./textLine";
 import Token from "./token";
 
 export default class SingularIndex implements ColorIndexes {
-    private openBrackets: Bracket[] = [];
+    private openBracketStack: Bracket[] = [];
     private closedBrackets: Bracket[] = [];
     private previousOpenBracketColorIndex: number = -1;
     private readonly settings: Settings;
@@ -22,7 +19,7 @@ export default class SingularIndex implements ColorIndexes {
         this.settings = settings;
 
         if (previousState !== undefined) {
-            this.openBrackets = previousState.currentOpenBracketColorIndexes;
+            this.openBracketStack = previousState.currentOpenBracketColorIndexes;
             this.previousOpenBracketColorIndex = previousState.previousOpenBracketColorIndex;
         }
     }
@@ -32,28 +29,28 @@ export default class SingularIndex implements ColorIndexes {
     }
 
     public isClosingPairForCurrentStack(type: string, depth: number): boolean {
-        if (this.openBrackets.length === 0) {
+        if (this.openBracketStack.length === 0) {
             return false;
         }
 
-        const topStack = this.openBrackets[this.openBrackets.length - 1];
+        const topStack = this.openBracketStack[this.openBracketStack.length - 1];
 
         return topStack.token.type === type && topStack.token.depth === depth;
     }
 
     public setCurrent(token: Token, colorIndex: number) {
-        this.openBrackets.push(new Bracket(token, colorIndex));
+        this.openBracketStack.push(new Bracket(token, colorIndex, this.settings[colorIndex]));
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
     public getCurrentLength(type: string): number {
-        return this.openBrackets.length;
+        return this.openBracketStack.length;
     }
 
     public getCurrentColorIndex(token: Token): number | undefined {
-        const openBracket = this.openBrackets.pop();
+        const openBracket = this.openBracketStack.pop();
         if (openBracket) {
-            const closeBracket = new Bracket(token, openBracket.colorIndex);
+            const closeBracket = new Bracket(token, openBracket.colorIndex, openBracket.color);
             openBracket.pair = closeBracket;
             closeBracket.pair = openBracket;
             this.closedBrackets.push(closeBracket);
@@ -62,29 +59,26 @@ export default class SingularIndex implements ColorIndexes {
         }
     }
 
-    public getEndScopeBracket(charIndex: number): Bracket | undefined {
-        let previousBracket: Bracket | undefined;
+    public getEndScopeBracket(position: Position): Bracket | undefined {
         for (const bracket of this.closedBrackets) {
             // If closing bracket is after index
-            if (bracket.token.beginIndex > charIndex) {
+            if (bracket.token.line.index > position.line ||
+                bracket.token.beginIndex >= position.character) {
+                const openBracket = bracket.pair!;
                 // And opening bracket is before index
-                if (bracket.pair!.token.endIndex < charIndex) {
-                    previousBracket = bracket;
+                if (openBracket.token.line.index < position.line ||
+                    openBracket.token.endIndex <= position.character) {
+                    return bracket;
                 }
             }
-            else {
-                break;
-            }
         }
-
-        return previousBracket;
     }
 
     public clone() {
         return new SingularIndex(
             this.settings,
             {
-                currentOpenBracketColorIndexes: this.openBrackets.slice(),
+                currentOpenBracketColorIndexes: this.openBracketStack.slice(),
                 previousOpenBracketColorIndex: this.previousOpenBracketColorIndex,
             });
     }

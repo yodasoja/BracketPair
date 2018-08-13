@@ -1,12 +1,10 @@
 import * as vscode from "vscode";
-import BracketPair from "./bracketPair";
 import ColorMode from "./colorMode";
 import Colors from "./colors";
 import GutterIconManager from "./gutterIconManager";
 
 export default class Settings {
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
-    public readonly bracketPairs: BracketPair[] = [];
     public readonly colorMode: ColorMode;
     public readonly contextualParsing: boolean;
     public readonly forceIterationColorCycle: boolean;
@@ -191,7 +189,7 @@ export default class Settings {
             });
         }
 
-        this.bracketDecorations = this.createBracketDecorations(this.bracketPairs);
+        this.bracketDecorations = this.createBracketDecorations();
     }
 
     public dispose() {
@@ -290,7 +288,7 @@ export default class Settings {
         return decoration;
     }
 
-    private createBracketDecorations(bracketPairs: BracketPair[]): Map<string, vscode.TextEditorDecorationType> {
+    private createBracketDecorations(): Map<string, vscode.TextEditorDecorationType> {
         const decorations = new Map<string, vscode.TextEditorDecorationType>();
 
         for (const color of this.colors) {

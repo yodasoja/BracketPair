@@ -120,7 +120,6 @@ export default class DocumentDecorationManager {
                         }, 3000);
                     }
                 }
-                return;
             }
         }
 

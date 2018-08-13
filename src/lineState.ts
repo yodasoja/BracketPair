@@ -1,15 +1,12 @@
-import { Position, Range } from "vscode";
-import BracketPair from "./bracketPair";
+import { Position } from "vscode";
+import Bracket from "./bracket";
 import ColorMode from "./colorMode";
 import ColorIndexes from "./IColorIndexes";
-import ModifierPair from "./modifierPair";
 import MultipleIndexes from "./multipleIndexes";
-import Scope from "./scope";
 import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 import TextLine from "./textLine";
 import Token from "./token";
-import Bracket from "./bracket";
 
 export default class LineState {
     private readonly colorIndexes: ColorIndexes;
@@ -57,8 +54,8 @@ export default class LineState {
         return new LineState(this.settings, clone);
     }
 
-    public getEndScopeBracket(charIndex: number): Bracket | undefined {
-        return this.colorIndexes.getEndScopeBracket(charIndex);
+    public getEndScopeBracket(position: Position): Bracket | undefined {
+        return this.colorIndexes.getEndScopeBracket(position);
     }
 
     public getBracketColor(
