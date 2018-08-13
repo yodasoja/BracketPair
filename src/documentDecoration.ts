@@ -58,8 +58,8 @@ export default class DocumentDecoration {
             const endLineIndex = endBracket.token.line.index;
             const startLineIndex = startBracket.token.line.index;
 
-            const startPos = new vscode.Position(startLineIndex, startBracket.token.endIndex + 1);
-            const endPos = new vscode.Position(endLineIndex, endBracket.token.endIndex - 1);
+            const startPos = new vscode.Position(startLineIndex, startBracket.token.endIndex);
+            const endPos = new vscode.Position(endLineIndex, endBracket.token.beginIndex);
             const start = this.document.validatePosition(startPos);
             const end = this.document.validatePosition(endPos);
             newSelections.push(new vscode.Selection(start, end));
@@ -370,9 +370,9 @@ export default class DocumentDecoration {
     }
 
     private disposeScopeDecorations() {
-        this.scopeDecorations.forEach((decoration) => {
+        for (const decoration of this.scopeDecorations) {
             decoration.dispose();
-        });
+        }
 
         this.scopeDecorations = [];
     }
@@ -462,7 +462,7 @@ export default class DocumentDecoration {
 
     private parseTokens(tokens: IToken[], currentLine: TextLine, line: vscode.TextLine) {
         const stack = currentLine.getCharStack();
-        tokens.forEach((token) => {
+        for (const token of tokens) {
             const character = line.text.substr(token.startIndex, token.endIndex);
             if (token.scopes.length > 1) {
                 const type = token.scopes[token.scopes.length - 1];
@@ -471,7 +471,7 @@ export default class DocumentDecoration {
             else {
                 currentLine.addScope(undefined, character, 0, token.startIndex, token.endIndex);
             }
-        });
+        }
     }
 
     private parseTokensJavascript(

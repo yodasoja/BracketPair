@@ -245,7 +245,7 @@ export default class Settings {
         const botBorder = bottom ? this.activeScopeLineCSSBorder : none;
         const leftBorder = left ? this.activeScopeLineCSSBorder : none;
 
-        this.activeScopeLineCSSElements.forEach((element) => {
+        for (const element of this.activeScopeLineCSSElements) {
             if (element[0].includes("Color")) {
                 const colorElement = element[1].replace("{color}", color);
                 if (!colorElement.includes("rgb") && colorElement.includes("opacity")) {
@@ -273,7 +273,7 @@ export default class Settings {
             else {
                 decorationSettings[element[0]] = element[1];
             }
-        });
+        }
 
         let borderStyle = `${topBorder} ${rightBorder} ${botBorder} ${leftBorder}`;
 
