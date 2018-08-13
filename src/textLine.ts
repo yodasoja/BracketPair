@@ -2,6 +2,7 @@ import { Position, Range } from "vscode";
 import { IStackElement } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Scope from "./scope";
+import Bracket from "./bracket";
 
 export default class TextLine {
     public colorRanges = new Map<string, Array<{ beginIndex: number, endIndex: number }>>();
@@ -28,7 +29,7 @@ export default class TextLine {
         return this.lineState.cloneState();
     }
 
-    public addScope(type: string | undefined, depth: number, beginIndex: number, endIndex: number): void {
+    public addScope(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number): void {
         if (type) {
             const startSplitIndex = type.indexOf(".begin.");
             if (startSplitIndex !== -1) {
@@ -42,14 +43,14 @@ export default class TextLine {
             }
         }
 
-        return this.setColorRange(type, depth, beginIndex, endIndex);
+        return this.setColorRange(type, character, depth, beginIndex, endIndex);
     }
-    public getScope(position: Position): Scope | undefined {
-        return this.lineState.getScope(position);
+    public getEndScopeBracket(charIndex: number): Bracket | undefined {
+        return this.lineState.getEndScopeBracket(charIndex);
     }
 
-    private setColorRange(type: string | undefined, depth: number, beginIndex: number, endIndex: number) {
-        const color = this.lineState.getBracketColor(type, depth, beginIndex, endIndex, this);
+    private setColorRange(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number) {
+        const color = this.lineState.getBracketColor(type, character, depth, beginIndex, endIndex, this);
 
         const colorRanges = this.colorRanges.get(color);
         if (colorRanges !== undefined) {

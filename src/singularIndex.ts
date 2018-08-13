@@ -9,7 +9,7 @@ import Token from "./token";
 
 export default class SingularIndex implements ColorIndexes {
     private openBrackets: Bracket[] = [];
-    private brackets: Bracket[] = [];
+    private closedBrackets: Bracket[] = [];
     private previousOpenBracketColorIndex: number = -1;
     private readonly settings: Settings;
     constructor(
@@ -56,18 +56,28 @@ export default class SingularIndex implements ColorIndexes {
             const closeBracket = new Bracket(token, openBracket.colorIndex);
             openBracket.pair = closeBracket;
             closeBracket.pair = openBracket;
+            this.closedBrackets.push(closeBracket);
 
             return openBracket.colorIndex;
         }
     }
 
-    public getScope(position: vscode.Position): Scope | undefined {
-        // for (const scope of this.bracketScopes) {
-        //     if (scope.range.contains(position)) {
-        //         return scope;
-        //     }
-        // }
-        return;
+    public getEndScopeBracket(charIndex: number): Bracket | undefined {
+        let previousBracket: Bracket | undefined;
+        for (const bracket of this.closedBrackets) {
+            // If closing bracket is after index
+            if (bracket.token.beginIndex > charIndex) {
+                // And opening bracket is before index
+                if (bracket.pair!.token.endIndex < charIndex) {
+                    previousBracket = bracket;
+                }
+            }
+            else {
+                break;
+            }
+        }
+
+        return previousBracket;
     }
 
     public clone() {

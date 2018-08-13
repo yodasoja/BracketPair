@@ -4,6 +4,7 @@ import LineState from "./lineState";
 import Scope from "./scope";
 import Settings from "./settings";
 import TextLine from "./textLine";
+import Bracket from "./bracket";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
@@ -44,18 +45,30 @@ export default class DocumentDecoration {
         const newSelections: vscode.Selection[] = [];
 
         editor.selections.forEach((selection) => {
-
             if (this.scopeSelectionHistory.length === 0) {
                 this.scopeSelectionHistory.push(editor.selections);
             }
 
             const nextPos = this.document.validatePosition(selection.active.translate(0, 1));
-            const nextScope = this.getScope(nextPos);
-            if (nextScope) {
-                const start = this.document.validatePosition(nextScope.open.range.start.translate(0, 1));
-                const end = this.document.validatePosition(nextScope.close.range.end.translate(0, -1));
-                newSelections.push(new vscode.Selection(start, end));
+            const searchResult = this.searchScopeForwards(nextPos);
+            if (!searchResult) {
+                return;
             }
+            const endBracket = searchResult.endBracket;
+            const startBracket = endBracket.pair!;
+            const endLineIndex = searchResult.endScopeLineIndex;
+            const startLineIndex = this.searchForTextLineBackwards(nextPos.line, endBracket.pair!.token.line);
+
+            if (!startLineIndex) {
+                throw new Error("@Dev: Could not find matching line even though one should exist, " +
+                    "did you implement refreshing brackets when a line is deleted...? ");
+            }
+
+            const startPos = new vscode.Position(startLineIndex, startBracket.token.endIndex + 1);
+            const endPos = new vscode.Position(endLineIndex, endBracket.token.endIndex - 1);
+            const start = this.document.validatePosition(startPos);
+            const end = this.document.validatePosition(endPos);
+            newSelections.push(new vscode.Selection(start, end));
         });
 
         if (newSelections.length > 0) {
@@ -160,130 +173,141 @@ export default class DocumentDecoration {
 
         this.disposeScopeDecorations();
 
-        const scopes: Set<Scope> = new Set<Scope>();
+        // For performance reasons we only do one selection for now.
+        // Simply wrap in foreach selection for multicursor, maybe put it behind an option?
+        const selection = event.textEditor.selection;
 
-        event.selections.forEach((selection) => {
-            const scope = this.getScope(selection.active);
+        const searchResult = this.searchScopeForwards(selection.active);
+        if (!searchResult) {
+            return;
+        }
+        const endBracket = searchResult.endBracket;
+        const startBracket = endBracket.pair!;
+        const endLineIndex = searchResult.endScopeLineIndex;
+        const startLineIndex = this.searchForTextLineBackwards(selection.active.line, endBracket.pair!.token.line);
 
-            if (scope) {
-                scopes.add(scope);
-            }
-        });
+        if (!startLineIndex) {
+            throw new Error("@Dev: Could not find matching line even though one should exist, " +
+                "did you implement refreshing brackets when a line is deleted...? ");
+        }
 
-        for (const scope of scopes) {
-            {
-                if (this.settings.highlightActiveScope) {
-                    const decoration =
-                        this.settings.createScopeBracketDecorations(scope.color);
-                    event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
-                    this.scopeDecorations.push(decoration);
-                }
-            }
+        const beginRange = new vscode.Range(
+            new vscode.Position(startLineIndex, startBracket.token.beginIndex),
+            new vscode.Position(startLineIndex, startBracket.token.endIndex));
+        const endRange = new vscode.Range(
+            new vscode.Position(endLineIndex, endBracket.token.beginIndex),
+            new vscode.Position(endLineIndex, endBracket.token.endIndex));
 
-            if (this.settings.showBracketsInGutter) {
-                if (scope.open.range.start.line === scope.close.range.start.line) {
-                    const decoration = this.settings.createGutterBracketDecorations
-                        (scope.color, scope.open.character + scope.close.character);
-                    event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
-                    this.scopeDecorations.push(decoration);
-                }
-                else {
-                    const decorationOpen =
-                        this.settings.createGutterBracketDecorations(scope.color, scope.open.character);
-                    event.textEditor.setDecorations(decorationOpen, [scope.open.range]);
-                    this.scopeDecorations.push(decorationOpen);
-                    const decorationClose =
-                        this.settings.createGutterBracketDecorations(scope.color, scope.close.character);
-                    event.textEditor.setDecorations(decorationClose, [scope.close.range]);
-                    this.scopeDecorations.push(decorationClose);
-                }
-            }
+        if (this.settings.highlightActiveScope) {
+            const decoration =
+                this.settings.createScopeBracketDecorations(endBracket.color);
+            event.textEditor.setDecorations(decoration, [beginRange, endRange]);
+            this.scopeDecorations.push(decoration);
+        }
 
-            if (this.settings.showBracketsInRuler) {
-                const decoration =
-                    this.settings.createRulerBracketDecorations(scope.color);
-                event.textEditor.setDecorations(decoration, [scope.open.range, scope.close.range]);
+        if (this.settings.showBracketsInGutter) {
+            if (startLineIndex === endLineIndex) {
+                const decoration = this.settings.createGutterBracketDecorations
+                    (endBracket.color, endBracket.open.token.character + endBracket.close.token.character);
+                event.textEditor.setDecorations(decoration, [beginRange, endRange]);
                 this.scopeDecorations.push(decoration);
             }
+            else {
+                const decorationOpen =
+                    this.settings.createGutterBracketDecorations(endBracket.color, endBracket.open.token.character);
+                event.textEditor.setDecorations(decorationOpen, [beginRange]);
+                this.scopeDecorations.push(decorationOpen);
+                const decorationClose =
+                    this.settings.createGutterBracketDecorations(endBracket.color, endBracket.close.token.character);
+                event.textEditor.setDecorations(decorationClose, [endRange]);
+                this.scopeDecorations.push(decorationClose);
+            }
+        }
 
-            const lastWhiteSpaceCharacterIndex =
-                this.document.lineAt(scope.close.range.start).firstNonWhitespaceCharacterIndex;
-            const lastBracketStartIndex = scope.close.range.start.character;
-            const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
-            let leftBorderColumn = Infinity;
+        if (this.settings.showBracketsInRuler) {
+            const decoration =
+                this.settings.createRulerBracketDecorations(endBracket.color);
+            event.textEditor.setDecorations(decoration, [beginRange, endRange]);
+            this.scopeDecorations.push(decoration);
+        }
 
-            const tabSize = event.textEditor.options.tabSize as number;
+        const lastWhiteSpaceCharacterIndex =
+            this.document.lineAt(endRange.start).firstNonWhitespaceCharacterIndex;
+        const lastBracketStartIndex = endRange.start.character;
+        const lastBracketIsFirstCharacterOnLine = lastWhiteSpaceCharacterIndex === lastBracketStartIndex;
+        let leftBorderColumn = Infinity;
 
-            const position =
-                this.settings.scopeLineRelativePosition ?
-                    Math.min(scope.close.range.start.character, scope.open.range.start.character) : 0;
+        const tabSize = event.textEditor.options.tabSize as number;
 
-            let leftBorderIndex = position;
+        const position =
+            this.settings.scopeLineRelativePosition ?
+                Math.min(endRange.start.character, beginRange.start.character) : 0;
 
-            const start = scope.open.range.start.line + 1;
-            const end = scope.close.range.start.line;
+        let leftBorderIndex = position;
 
-            // Start -1 because prefer draw line at current indent level
-            for (let lineIndex = start - 1; lineIndex <= end; lineIndex++) {
+        const start = beginRange.start.line + 1;
+        const end = endRange.start.line;
+
+        // Start -1 because prefer draw line at current indent level
+        for (let lineIndex = start - 1; lineIndex <= end; lineIndex++) {
+            const line = this.document.lineAt(lineIndex);
+
+            if (!line.isEmptyOrWhitespace) {
+                const firstCharIndex = line.firstNonWhitespaceCharacterIndex;
+                leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
+                leftBorderColumn = Math.min(leftBorderColumn,
+                    this.calculateColumnFromCharIndex(line.text, firstCharIndex, tabSize));
+            }
+        }
+
+        if (this.settings.showVerticalScopeLine) {
+            const verticalLineRanges: Array<{ range: vscode.Range, valid: boolean }> = [];
+
+            const endOffset = lastBracketIsFirstCharacterOnLine ? end - 1 : end;
+            for (let lineIndex = start; lineIndex <= endOffset; lineIndex++) {
                 const line = this.document.lineAt(lineIndex);
-
-                if (!line.isEmptyOrWhitespace) {
-                    const firstCharIndex = line.firstNonWhitespaceCharacterIndex;
-                    leftBorderIndex = Math.min(leftBorderIndex, firstCharIndex);
-                    leftBorderColumn = Math.min(leftBorderColumn,
-                        this.calculateColumnFromCharIndex(line.text, firstCharIndex, tabSize));
-                }
+                const linePosition = new vscode.Position(lineIndex,
+                    this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
+                const range = new vscode.Range(linePosition, linePosition);
+                const valid = line.text.length >= leftBorderIndex;
+                verticalLineRanges.push({ range, valid });
             }
 
-            if (this.settings.showVerticalScopeLine) {
-                const verticalLineRanges: Array<{ range: vscode.Range, valid: boolean }> = [];
+            const safeFallbackPosition = new vscode.Position(start - 1, leftBorderIndex);
+            this.setVerticalLineDecoration(endBracket, event, safeFallbackPosition, verticalLineRanges);
+        }
 
-                const endOffset = lastBracketIsFirstCharacterOnLine ? end - 1 : end;
-                for (let lineIndex = start; lineIndex <= endOffset; lineIndex++) {
-                    const line = this.document.lineAt(lineIndex);
-                    const linePosition = new vscode.Position(lineIndex,
-                        this.calculateCharIndexFromColumn(line.text, leftBorderColumn, tabSize));
-                    const range = new vscode.Range(linePosition, linePosition);
-                    const valid = line.text.length >= leftBorderIndex;
-                    verticalLineRanges.push({ range, valid });
-                }
+        if (this.settings.showHorizontalScopeLine) {
+            const underlineLineRanges: vscode.Range[] = [];
+            const overlineLineRanges: vscode.Range[] = [];
 
-                const safeFallbackPosition = new vscode.Position(start - 1, leftBorderIndex);
-                this.setVerticalLineDecoration(scope, event, safeFallbackPosition, verticalLineRanges);
+            if (startLineIndex === endLineIndex) {
+                underlineLineRanges.push(new vscode.Range(beginRange.start, endRange.end));
             }
+            else {
+                const startTextLine = this.document.lineAt(startLineIndex);
+                const endTextLine = this.document.lineAt(endLineIndex);
 
-            if (this.settings.showHorizontalScopeLine) {
-                const underlineLineRanges: vscode.Range[] = [];
-                const overlineLineRanges: vscode.Range[] = [];
+                const leftStartPos = new vscode.Position(beginRange.start.line,
+                    this.calculateCharIndexFromColumn(startTextLine.text, leftBorderColumn, tabSize));
+                const leftEndPos = new vscode.Position(endRange.start.line,
+                    this.calculateCharIndexFromColumn(endTextLine.text, leftBorderColumn, tabSize));
 
-                if (scope.open.range.start.line === scope.close.range.start.line) {
-                    underlineLineRanges.push(new vscode.Range(scope.open.range.start, scope.close.range.end));
+                underlineLineRanges.push(new vscode.Range(leftStartPos, beginRange.end));
+                if (lastBracketIsFirstCharacterOnLine) {
+                    overlineLineRanges.push(new vscode.Range(leftEndPos, endRange.end));
                 }
                 else {
-                    const startLine = this.document.lineAt(scope.open.range.start.line);
-                    const endLine = this.document.lineAt(scope.close.range.start.line);
-
-                    const leftStartPos = new vscode.Position(scope.open.range.start.line,
-                        this.calculateCharIndexFromColumn(startLine.text, leftBorderColumn, tabSize));
-                    const leftEndPos = new vscode.Position(scope.close.range.start.line,
-                        this.calculateCharIndexFromColumn(endLine.text, leftBorderColumn, tabSize));
-
-                    underlineLineRanges.push(new vscode.Range(leftStartPos, scope.open.range.end));
-                    if (lastBracketIsFirstCharacterOnLine) {
-                        overlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
-                    }
-                    else {
-                        underlineLineRanges.push(new vscode.Range(leftEndPos, scope.close.range.end));
-                    }
+                    underlineLineRanges.push(new vscode.Range(leftEndPos, endRange.end));
                 }
+            }
 
-                if (underlineLineRanges) {
-                    this.setUnderLineDecoration(scope, event, underlineLineRanges);
-                }
+            if (underlineLineRanges) {
+                this.setUnderLineDecoration(endBracket, event, underlineLineRanges);
+            }
 
-                if (overlineLineRanges) {
-                    this.setOverLineDecoration(scope, event, overlineLineRanges);
-                }
+            if (overlineLineRanges) {
+                this.setOverLineDecoration(endBracket, event, overlineLineRanges);
             }
         }
 
@@ -309,14 +333,14 @@ export default class DocumentDecoration {
     }
 
     private setVerticalLineDecoration(
-        scope: Scope,
+        bracket: Bracket,
         event: vscode.TextEditorSelectionChangeEvent,
         fallBackPosition: vscode.Position,
         verticleLineRanges: Array<{ range: vscode.Range, valid: boolean }>,
     ) {
         const offsets:
             Array<{ range: vscode.Range, downOffset: number }> = [];
-        const normalDecoration = this.settings.createScopeLineDecorations(scope.color, false, false, false, true);
+        const normalDecoration = this.settings.createScopeLineDecorations(bracket.color, false, false, false, true);
 
         if (verticleLineRanges.length === 0) {
             return;
@@ -350,7 +374,7 @@ export default class DocumentDecoration {
 
         offsets.forEach((offset) => {
             const decoration = this.settings.createScopeLineDecorations(
-                scope.color, false, false, false, true, offset.downOffset,
+                bracket.color, false, false, false, true, offset.downOffset,
             );
             event.textEditor.setDecorations(decoration, [offset.range]);
             this.scopeDecorations.push(decoration);
@@ -365,12 +389,37 @@ export default class DocumentDecoration {
         this.scopeDecorations = [];
     }
 
-    private getScope(position: vscode.Position): Scope | undefined {
-        for (let i = position.line; i < this.lines.length; i++) {
-            const scope = this.lines[i].getScope(position);
+    private searchScopeForwards(position: vscode.Position) {
+        const startLine = position.line;
+        let charIndex = position.character;
+        if (startLine < this.lines.length) {
+            const endBracket = this.lines[startLine].getEndScopeBracket(charIndex);
 
-            if (scope) {
-                return scope;
+            if (endBracket) {
+                return { endBracket, endScopeLineIndex: startLine };
+            }
+        }
+
+        // If we go to next line, we search from start of line
+        charIndex = 0;
+
+        for (let i = startLine + 1; i < this.lines.length; i++) {
+            const endBracket = this.lines[i].getEndScopeBracket(charIndex);
+
+            if (endBracket) {
+                return { endBracket, endScopeLineIndex: i };
+            }
+        }
+    }
+
+    private searchForTextLineBackwards(startLine: number, line: TextLine) {
+        if (startLine >= this.lines.length) {
+            return;
+        }
+
+        for (let i = startLine; i-- > 0; i++) {
+            if (this.lines[i] === line) {
+                return i;
             }
         }
     }
@@ -451,18 +500,20 @@ export default class DocumentDecoration {
     private parseTokens(tokens: IToken[], currentLine: TextLine, line: vscode.TextLine) {
         const stack = currentLine.getCharStack();
         tokens.forEach((token) => {
+            const character = line.text.substr(token.startIndex, token.endIndex);
             if (token.scopes.length > 1) {
                 const type = token.scopes[token.scopes.length - 1];
-                this.parseTokensJavascript(type, token, currentLine, line.text, stack);
+                this.parseTokensJavascript(type, character, token, currentLine, line.text, stack);
             }
             else {
-                currentLine.addScope(undefined, 0, token.startIndex, token.endIndex);
+                currentLine.addScope(undefined, character, 0, token.startIndex, token.endIndex);
             }
         });
     }
 
     private parseTokensJavascript(
         type: string,
+        character: string,
         token: IToken,
         currentLine: TextLine,
         text: string,
@@ -528,17 +579,17 @@ export default class DocumentDecoration {
             const topStack = stack[stack.length - 1];
             if (topStack === currentChar) {
                 stack.push(currentChar);
-                currentLine.addScope(type, stack.length + token.scopes.length, token.startIndex, token.endIndex);
+                currentLine.addScope(type, currentChar, stack.length + token.scopes.length, token.startIndex, token.endIndex);
             }
             else {
-                currentLine.addScope(type, stack.length + token.scopes.length, token.startIndex, token.endIndex);
+                currentLine.addScope(type, currentChar, stack.length + token.scopes.length, token.startIndex, token.endIndex);
                 stack.pop();
             }
         }
         else {
             const newStack = [currentChar];
             stackMap.set(type, newStack);
-            currentLine.addScope(type, newStack.length + token.scopes.length, token.startIndex, token.endIndex);
+            currentLine.addScope(type, currentChar, newStack.length + token.scopes.length, token.startIndex, token.endIndex);
         }
     }
 

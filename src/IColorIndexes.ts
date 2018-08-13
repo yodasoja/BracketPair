@@ -1,5 +1,5 @@
 import { Position } from "vscode";
-import Scope from "./scope"; import TextLine from "./textLine";
+import Bracket from "./bracket";
 import Token from "./token";
 
 interface IColorIndex {
@@ -7,7 +7,7 @@ interface IColorIndex {
     setCurrent(token: Token, colorIndex: number): void;
     getCurrentLength(type: string): number;
     getCurrentColorIndex(token: Token): number | undefined;
-    getScope(position: Position): Scope | undefined;
+    getEndScopeBracket(charIndex: number): Bracket | undefined;
     isClosingPairForCurrentStack(type: string, depth: number): boolean;
     clone(): IColorIndex;
 }

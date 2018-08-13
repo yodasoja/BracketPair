@@ -9,6 +9,7 @@ import Settings from "./settings";
 import SingularIndex from "./singularIndex";
 import TextLine from "./textLine";
 import Token from "./token";
+import Bracket from "./bracket";
 
 export default class LineState {
     private readonly colorIndexes: ColorIndexes;
@@ -56,12 +57,13 @@ export default class LineState {
         return new LineState(this.settings, clone);
     }
 
-    public getScope(position: Position): Scope | undefined {
-        return this.colorIndexes.getScope(position);
+    public getEndScopeBracket(charIndex: number): Bracket | undefined {
+        return this.colorIndexes.getEndScopeBracket(charIndex);
     }
 
     public getBracketColor(
         type: string | undefined,
+        character: string,
         depth: number,
         beginIndex: number,
         endIndex: number,
@@ -71,7 +73,7 @@ export default class LineState {
             this.previousBracketColor = this.settings.orphanColor;
             return this.settings.orphanColor;
         }
-        const token = new Token(type, depth, beginIndex, endIndex, line);
+        const token = new Token(type, character, depth, beginIndex, endIndex, line);
         if (this.colorIndexes.isClosingPairForCurrentStack(type, depth)) {
             return this.getCloseBracketColor(token);
         }

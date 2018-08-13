@@ -9,8 +9,8 @@ import Token from "./token";
 
 export default class MultipleIndexes implements ColorIndexes {
     private openBrackets = new Map<string, Bracket[]>();
+    private closedBrackets: Bracket[] = [];
     private previousOpenBracketColorIndexes = new Map<string, number[]>();
-    private bracketScopes: Scope[] = [];
     private readonly settings: Settings;
 
     constructor(
@@ -44,7 +44,8 @@ export default class MultipleIndexes implements ColorIndexes {
     }
 
     public setCurrent(token: Token, colorIndex: number) {
-        this.openBrackets[token.type].push(new Bracket(token, colorIndex));
+        const openBracket = new Bracket(token, colorIndex);
+        this.openBrackets[token.type].push(openBracket);
         this.previousOpenBracketColorIndexes[token.type] = colorIndex;
     }
 
@@ -65,18 +66,29 @@ export default class MultipleIndexes implements ColorIndexes {
         }
 
         const closeBracket = new Bracket(token, openBracket.colorIndex);
+        this.closedBrackets.push(closeBracket);
         openBracket.pair = closeBracket;
         closeBracket.pair = openBracket;
 
         return openBracket.colorIndex;
     }
 
-    public getScope(position: Position): Scope | undefined {
-        for (const scope of this.bracketScopes) {
-            if (scope.range.contains(position)) {
-                return scope;
+    public getEndScopeBracket(charIndex: number): Bracket | undefined {
+        let previousBracket: Bracket | undefined;
+        for (const bracket of this.closedBrackets) {
+            // If closing bracket is after index
+            if (bracket.token.beginIndex > charIndex) {
+                // And opening bracket is before index
+                if (bracket.pair!.token.endIndex < charIndex) {
+                    previousBracket = bracket;
+                }
+            }
+            else {
+                break;
             }
         }
+
+        return previousBracket;
     }
 
     public clone(): ColorIndexes {

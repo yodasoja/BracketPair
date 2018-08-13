@@ -9,7 +9,6 @@ import Settings from "./settings";
 import { TextMateLoader } from "./textMateLoader";
 
 export default class DocumentDecorationManager {
-    private readonly components = require("prismjs/components");
     private readonly gutterIcons = new GutterIconManager();
     private showError = true;
     private documents = new Map<string, DocumentDecoration>();
