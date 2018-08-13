@@ -1,4 +1,4 @@
-import { Position } from "vscode";
+import { Position, Range } from "vscode";
 import Bracket from "./bracket";
 import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
@@ -39,7 +39,7 @@ export default class SingularIndex implements ColorIndexes {
     }
 
     public setCurrent(token: Token, colorIndex: number) {
-        this.openBracketStack.push(new Bracket(token, colorIndex, this.settings[colorIndex]));
+        this.openBracketStack.push(new Bracket(token, colorIndex, this.settings.colors[colorIndex]));
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
@@ -60,16 +60,14 @@ export default class SingularIndex implements ColorIndexes {
     }
 
     public getEndScopeBracket(position: Position): Bracket | undefined {
-        for (const bracket of this.closedBrackets) {
-            // If closing bracket is after index
-            if (bracket.token.line.index > position.line ||
-                bracket.token.beginIndex >= position.character) {
-                const openBracket = bracket.pair!;
-                // And opening bracket is before index
-                if (openBracket.token.line.index < position.line ||
-                    openBracket.token.endIndex <= position.character) {
-                    return bracket;
-                }
+        for (const closeBracket of this.closedBrackets) {
+            const openBracket = closeBracket.pair!;
+            const startPosition = new Position(openBracket.token.line.index, openBracket.token.endIndex);
+            const endPosition = new Position(closeBracket.token.line.index, closeBracket.token.beginIndex);
+            const range = new Range(startPosition, endPosition);
+
+            if (range.contains(position)) {
+                return closeBracket;
             }
         }
     }

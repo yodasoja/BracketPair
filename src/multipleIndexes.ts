@@ -1,4 +1,4 @@
-import {Position} from "vscode";
+import { Position, Range } from "vscode";
 import Bracket from "./bracket";
 import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
@@ -71,20 +71,17 @@ export default class MultipleIndexes implements ColorIndexes {
     }
 
     public getEndScopeBracket(position: Position): Bracket | undefined {
-        for (const bracket of this.closedBrackets) {
-            // If closing bracket is after index
-            if (bracket.token.line.index > position.line ||
-                bracket.token.beginIndex >= position.character) {
-                const openBracket = bracket.pair!;
-                // And opening bracket is before index
-                if (openBracket.token.line.index < position.line ||
-                    openBracket.token.endIndex <= position.character) {
-                    return bracket;
-                }
+        for (const closeBracket of this.closedBrackets) {
+            const openBracket = closeBracket.pair!;
+            const startPosition = new Position(openBracket.token.line.index, openBracket.token.endIndex);
+            const endPosition = new Position(closeBracket.token.line.index, closeBracket.token.beginIndex);
+            const range = new Range(startPosition, endPosition);
+
+            if (range.contains(position)) {
+                return closeBracket;
             }
         }
     }
-
 
     public clone(): ColorIndexes {
         return new MultipleIndexes(
