@@ -32,7 +32,9 @@ export function activate(context: ExtensionContext) {
             documentDecorationManager.updateAllDocuments();
         }),
         workspace.onDidChangeTextDocument((event) => {
-            documentDecorationManager.onDidChangeTextDocument(event);
+            if (event.contentChanges.length > 0) {
+                documentDecorationManager.onDidChangeTextDocument(event);
+            }
         }),
         workspace.onDidCloseTextDocument((event) => {
             documentDecorationManager.onDidCloseTextDocument(event);

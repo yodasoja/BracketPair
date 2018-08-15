@@ -1,5 +1,6 @@
 import { Position } from "vscode";
 import Bracket from "./bracket";
+import ClosingBracket from "./closingBracket";
 import ColorMode from "./colorMode";
 import ColorIndexes from "./IColorIndexes";
 import MultipleIndexes from "./multipleIndexes";
@@ -39,6 +40,11 @@ export default class LineState {
         }
     }
 
+    public getOpenBracketStack()
+    {
+        return this.colorIndexes.getOpenBracketStack();
+    }
+
     public getCharStack() {
         return this.charStack;
     }
@@ -54,8 +60,8 @@ export default class LineState {
         return new LineState(this.settings, clone);
     }
 
-    public getEndScopeBracket(position: Position): Bracket | undefined {
-        return this.colorIndexes.getEndScopeBracket(position);
+    public getClosingBracket(position: Position): ClosingBracket | undefined {
+        return this.colorIndexes.getClosingBracket(position);
     }
 
     public getBracketColor(
@@ -70,7 +76,7 @@ export default class LineState {
             this.previousBracketColor = this.settings.orphanColor;
             return this.settings.orphanColor;
         }
-        const token = new Token(type, character, depth, beginIndex, endIndex, line);
+        const token = new Token(type, character, depth, beginIndex, line);
         if (this.colorIndexes.isClosingPairForCurrentStack(type, depth)) {
             return this.getCloseBracketColor(token);
         }

@@ -1,26 +1,24 @@
 import * as vscode from "vscode";
+import { EndOfLine } from "vscode";
 import Bracket from "./bracket";
+import ClosingBracket from "./closingBracket";
 import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Settings from "./settings";
 import TextLine from "./textLine";
-import Token from "./token";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
 
-    private updateDecorationTimeout: NodeJS.Timer | null;
-    private updateScopeTimeout: NodeJS.Timer | null;
     // This program caches lines, and will only analyze linenumbers including or above a modified line
     private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
     private readonly document: vscode.TextDocument;
-    private nextScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
-    private previousScopeEvent: vscode.TextEditorSelectionChangeEvent | undefined;
     private readonly tokenizer: IGrammar;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
     private readonly tokenEndTrimLength: number;
+    private readonly eol: string;
     constructor(document: vscode.TextDocument, textMate: IGrammar, settings: Settings) {
         this.settings = settings;
         this.document = document;
@@ -29,6 +27,13 @@ export default class DocumentDecoration {
         const scopeName = (this.tokenizer as any)._grammar.scopeName as string;
         const split = scopeName.split(".");
         this.tokenEndTrimLength = split[split.length - 1].length + 1;
+
+        if (this.document.eol === EndOfLine.LF) {
+            this.eol = "\n";
+        }
+        else {
+            this.eol = "\r\n";
+        }
     }
 
     public dispose() {
@@ -37,8 +42,121 @@ export default class DocumentDecoration {
     }
 
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
+        this.lineToUpdateWhenTimeoutEnds = Infinity;
+
+        for (const change of contentChanges) {
+            const amountOfLinesDeleted = change.range.end.line - change.range.start.line;
+
+            const changedLines = change.text.split(this.eol);
+            const amountOfLinesAdded = changedLines.length - 1;
+            const offset = amountOfLinesAdded - amountOfLinesDeleted;
+
+            let removedTextLines: TextLine[] = [];
+            if (amountOfLinesDeleted > 0) {
+                removedTextLines = this.lines.splice(change.range.start.line, amountOfLinesDeleted);
+            }
+            // Array size unchanged
+            else if (offset === 0 && changedLines.length > 0) {
+                let tokenStackInvalidated = false;
+                for (let i = 0; i < changedLines.length; i++) {
+                    const index = change.range.start.line + i;
+                    const newText = this.document.lineAt(index).text;
+
+                    const previousLineRuleStack = index > 0 ?
+                        this.lines[index - 1].getRuleStack() :
+                        undefined;
+                    const tokenized = this.tokenizer.tokenizeLine(newText, previousLineRuleStack);
+
+                    const ruleStack = tokenized.ruleStack;
+                    const tokens = tokenized.tokens;
+
+                    const previousLineState = index > 0 ?
+                        this.lines[index - 1].cloneState() :
+                        new LineState(this.settings);
+                    const newLine = new TextLine(ruleStack, previousLineState, index);
+
+                    this.parseTokens(tokens, newLine, newText);
+                    const oldRuleStack = this.lines[index].getRuleStack();
+
+                    if (!tokenStackInvalidated) {
+                        // TODO Check what happens with wierd stacks like meta.brace '('
+                        tokenStackInvalidated = !oldRuleStack.equals(ruleStack);
+
+                        if (!tokenStackInvalidated) {
+                            const oldOpenBrackets = this.lines[index].getOpenBracketStack();
+                            const newOpenBrackets = newLine.getOpenBracketStack();
+
+                            if (oldOpenBrackets instanceof Map && newOpenBrackets instanceof Map) {
+                                tokenStackInvalidated = oldOpenBrackets.size !== newOpenBrackets.size;
+
+                                if (!tokenStackInvalidated) {
+                                    for (const key of oldOpenBrackets.keys()) {
+                                        const oldArray = oldOpenBrackets[key] as Bracket[];
+                                        const newArray = newOpenBrackets[key] as Bracket[];
+
+                                        tokenStackInvalidated = oldArray.length !== newArray.length;
+                                        if (!tokenStackInvalidated) {
+                                            for (let bracketIndex = 0; bracketIndex < oldArray.length; bracketIndex++) {
+                                                // If the open brackets are the same, I want to replace them with the old open brackets (after updating position)
+                                                // So existing forward references don't break
+                                                const oldOpenBracket = oldArray[bracketIndex];
+                                                const newOpenBracket = newArray[bracketIndex];
+
+                                                oldOpenBracket.token.beginIndex = newOpenBracket.token.beginIndex;
+                                                oldOpenBracket.token.line = newOpenBracket.token.line;
+                                                newArray[bracketIndex] = oldOpenBracket;
+                                            }
+                                        }
+                                        else {
+                                            console.warn("Bracket Stacks invalidated! Map value lengths do not match!");
+                                        }
+                                    }
+                                }
+                                else {
+                                    console.warn("Bracket Stacks invalidated! Map sizes do not match!");
+                                }
+                            }
+                            else if (oldOpenBrackets instanceof Array && newOpenBrackets instanceof Array) {
+                                tokenStackInvalidated = oldOpenBrackets.length !== newOpenBrackets.length;
+                            }
+                        }
+
+                        if (tokenStackInvalidated) {
+                            this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, index + 1);
+                        }
+                    }
+
+                    this.lines[index] = newLine;
+                }
+            }
+
+            // const insertedTextLines: TextLine[] = [];
+            // const previousLineNumber = change.range.start.line - 1;
+
+            // let previousRuleStack = previousLineNumber >= 0 ?
+            //     this.lines[previousLineNumber].getRuleStack() :
+            //     undefined;
+
+            // for (const insertedLine of changedLines) {
+
+            // }
+
+            // this.lines.
+
+            //     if(offset !== 0) {
+            //     for (let i = change.range.start.line + 1; i < this.lines.length; i++) {
+            //         this.lines[i].index = i;
+            //     }
+            // }
+
+            // if (removedTextLines.length > 0) {
+            //     const oldRuleStack = removedTextLines[removedTextLines.length - 1].getRuleStack();
+
+            //     const newRuleStack this.lines
+            // }
+        }
         this.updateLowestLineNumber(contentChanges);
-        this.triggerUpdateDecorations();
+        this.updateDecorations();
     }
 
     public expandBracketSelection(editor: vscode.TextEditor) {
@@ -54,11 +172,12 @@ export default class DocumentDecoration {
             if (!endBracket) {
                 return;
             }
-            const startBracket = endBracket.pair!;
+            const startBracket = endBracket.openBracket;
             const endLineIndex = endBracket.token.line.index;
             const startLineIndex = startBracket.token.line.index;
 
-            const startPos = new vscode.Position(startLineIndex, startBracket.token.endIndex);
+            const startPos = new vscode.Position(startLineIndex,
+                startBracket.token.beginIndex + startBracket.token.character.length);
             const endPos = new vscode.Position(endLineIndex, endBracket.token.beginIndex);
             const start = this.document.validatePosition(startPos);
             const end = this.document.validatePosition(endPos);
@@ -113,51 +232,62 @@ export default class DocumentDecoration {
         }
     }
 
-    public triggerUpdateDecorations() {
-        if (this.updateDecorationTimeout) {
-            clearTimeout(this.updateDecorationTimeout);
+    public updateDecorations() {
+        if (this.settings.isDisposed) {
+            return;
         }
 
-        this.updateDecorationTimeout = setTimeout(() => {
-            this.updateDecorationTimeout = null;
-            this.updateDecorations();
-            if (this.nextScopeEvent) {
-                this.updateScopeDecorations();
+        // One document may be shared by multiple editors (side by side view)
+        const editors: vscode.TextEditor[] =
+            vscode.window.visibleTextEditors.filter((e) => this.document === e.document);
+
+        if (editors.length === 0) {
+            console.warn("No editors associated with document: " + this.document.fileName);
+            return;
+        }
+
+        // console.time("updateDecorations");
+
+        const lineNumber = this.lineToUpdateWhenTimeoutEnds;
+        const amountToRemove = this.lines.length - lineNumber;
+
+        // Remove cached lines that need to be updated
+        const removed = this.lines.splice(lineNumber, amountToRemove);
+
+        try {
+            const previousLineNumber = lineNumber - 1;
+            let previousRuleStack: undefined | IStackElement;
+            if (previousLineNumber >= 0 && previousLineNumber < this.lines.length) {
+                previousRuleStack = this.lines[previousLineNumber].getRuleStack();
             }
-        }, this.settings.timeOutLength);
+
+            previousRuleStack = this.parseTokensForLine(lineNumber, previousRuleStack);
+            let lineTokensUnchanged = false;
+            if (removed.length > 0) {
+                if (removed[0].getRuleStack().equals(previousRuleStack)) {
+                    removed.shift();
+                    this.lines = this.lines.concat(removed);
+                    lineTokensUnchanged = true;
+                }
+            }
+
+            if (!lineTokensUnchanged) {
+                for (let i = lineNumber + 1; i < this.document.lineCount; i++) {
+                    previousRuleStack = this.parseTokensForLine(i, previousRuleStack);
+                }
+            }
+        }
+        catch (err) {
+            console.error(err);
+            return;
+        }
+
+        this.colorDecorations(editors);
+
+        // console.timeEnd("updateDecorations");
     }
 
-    public triggerUpdateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
-        this.nextScopeEvent = event;
-
-        if (this.updateDecorationTimeout) {
-            return;
-        }
-
-        if (this.updateScopeTimeout) {
-            clearTimeout(this.updateScopeTimeout);
-        }
-        else {
-            this.updateScopeDecorations();
-        }
-
-        this.updateScopeTimeout = setTimeout(() => {
-            this.updateScopeTimeout = null;
-            this.updateScopeDecorations();
-        }, this.settings.timeOutLength);
-    }
-
-    private updateScopeDecorations() {
-        if (!this.nextScopeEvent) {
-            return;
-        }
-        const event = this.nextScopeEvent;
-        this.nextScopeEvent = undefined;
-        if (event === this.previousScopeEvent) {
-            return;
-        }
-
-        this.previousScopeEvent = event;
+    public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
 
         if (this.settings.isDisposed) {
             return;
@@ -175,16 +305,16 @@ export default class DocumentDecoration {
         if (!endBracket) {
             return;
         }
-        const startBracket = endBracket.pair!;
+        const startBracket = endBracket.openBracket;
         const endLineIndex = endBracket.token.line.index;
         const startLineIndex = startBracket.token.line.index;
 
         const beginRange = new vscode.Range(
             new vscode.Position(startLineIndex, startBracket.token.beginIndex),
-            new vscode.Position(startLineIndex, startBracket.token.endIndex));
+            new vscode.Position(startLineIndex, startBracket.token.beginIndex + startBracket.token.character.length));
         const endRange = new vscode.Range(
             new vscode.Position(endLineIndex, endBracket.token.beginIndex),
-            new vscode.Position(endLineIndex, endBracket.token.endIndex));
+            new vscode.Position(endLineIndex, endBracket.token.beginIndex + endBracket.token.character.length));
 
         if (this.settings.highlightActiveScope) {
             const decoration =
@@ -377,9 +507,9 @@ export default class DocumentDecoration {
         this.scopeDecorations = [];
     }
 
-    private searchScopeForwards(position: vscode.Position) {
+    private searchScopeForwards(position: vscode.Position): ClosingBracket | undefined {
         for (let i = position.line; i < this.lines.length; i++) {
-            const endBracket = this.lines[i].getEndScopeBracket(position);
+            const endBracket = this.lines[i].getClosingBracket(position);
 
             if (endBracket) {
                 return endBracket;
@@ -394,82 +524,27 @@ export default class DocumentDecoration {
         }
     }
 
-    private updateDecorations() {
-        if (this.settings.isDisposed) {
-            return;
-        }
-
-        // One document may be shared by multiple editors (side by side view)
-        const editors: vscode.TextEditor[] =
-            vscode.window.visibleTextEditors.filter((e) => this.document === e.document);
-
-        if (editors.length === 0) {
-            console.warn("No editors associated with document: " + this.document.fileName);
-            return;
-        }
-
-        console.time("updateDecorations");
-
-        const lineNumber = this.lineToUpdateWhenTimeoutEnds;
-        const amountToRemove = this.lines.length - lineNumber;
-
-        // Remove cached lines that need to be updated
-        const removed = this.lines.splice(lineNumber, amountToRemove);
-
-        try {
-            const previousLineNumber = lineNumber - 1;
-            let previousRuleStack: undefined | IStackElement;
-            if (previousLineNumber >= 0 && previousLineNumber < this.lines.length) {
-                previousRuleStack = this.lines[previousLineNumber].getRuleStack();
-            }
-
-            previousRuleStack = this.parseTokensForLine(lineNumber, previousRuleStack);
-            let lineTokensUnchanged = false;
-            if (removed.length > 0) {
-                if (removed[0].getRuleStack().equals(previousRuleStack)) {
-                    removed.shift();
-                    this.lines = this.lines.concat(removed);
-                    lineTokensUnchanged = true;
-                }
-            }
-
-            if (!lineTokensUnchanged) {
-                for (let i = lineNumber + 1; i < this.document.lineCount; i++) {
-                    previousRuleStack = this.parseTokensForLine(i, previousRuleStack);
-                }
-            }
-        }
-        catch (err) {
-            console.error(err);
-            return;
-        }
-
-        this.colorDecorations(editors);
-
-        console.timeEnd("updateDecorations");
-    }
-
     private parseTokensForLine(i: number, previousRuleStack: IStackElement | undefined) {
         const line = this.document.lineAt(i);
         const tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack);
         const ruleStack = tokenized.ruleStack;
         const tokens = tokenized.tokens;
         const currentLine = this.getLine(i, ruleStack);
-        this.parseTokens(tokens, currentLine, line);
+        this.parseTokens(tokens, currentLine, line.text);
         previousRuleStack = ruleStack;
         return previousRuleStack;
     }
 
-    private parseTokens(tokens: IToken[], currentLine: TextLine, line: vscode.TextLine) {
+    private parseTokens(tokens: IToken[], currentLine: TextLine, text: string) {
         const stack = currentLine.getCharStack();
         for (const token of tokens) {
-            const character = line.text.substr(token.startIndex, token.endIndex);
+            const character = text.substr(token.startIndex, token.endIndex);
             if (token.scopes.length > 1) {
                 const type = token.scopes[token.scopes.length - 1];
-                this.parseTokensJavascript(type, character, token, currentLine, line.text, stack);
+                this.parseTokensJavascript(type, character, token, currentLine, text, stack);
             }
             else {
-                currentLine.addScope(undefined, character, 0, token.startIndex, token.endIndex);
+                currentLine.addScopeByCommonType(undefined, character, 0, token.startIndex, token.endIndex);
             }
         }
     }
@@ -542,22 +617,22 @@ export default class DocumentDecoration {
             const topStack = stack[stack.length - 1];
             if (topStack === currentChar) {
                 stack.push(currentChar);
-                currentLine.addScope(type, currentChar, stack.length + token.scopes.length, token.startIndex, token.endIndex);
+                currentLine.addScopeByCommonType(type, currentChar, stack.length + token.scopes.length, token.startIndex, token.endIndex);
             }
             else {
-                currentLine.addScope(type, currentChar, stack.length + token.scopes.length, token.startIndex, token.endIndex);
+                currentLine.addScopeByCommonType(type, currentChar, stack.length + token.scopes.length, token.startIndex, token.endIndex);
                 stack.pop();
             }
         }
         else {
             const newStack = [currentChar];
             stackMap.set(type, newStack);
-            currentLine.addScope(type, currentChar, newStack.length + token.scopes.length, token.startIndex, token.endIndex);
+            currentLine.addScopeByCommonType(type, currentChar, newStack.length + token.scopes.length, token.startIndex, token.endIndex);
         }
     }
 
     private colorDecorations(editors: vscode.TextEditor[]) {
-        console.time("colorDecorations");
+        // console.time("colorDecorations");
         const colorMap = new Map<string, vscode.Range[]>();
 
         // Reduce all the colors/ranges of the lines into a singular map
@@ -601,9 +676,7 @@ export default class DocumentDecoration {
             });
         }
 
-        this.lineToUpdateWhenTimeoutEnds = Infinity;
-
-        console.timeEnd("colorDecorations");
+        // console.timeEnd("colorDecorations");
     }
 
     private calculateColumnFromCharIndex(lineText: string, charIndex: number, tabSize: number): number {

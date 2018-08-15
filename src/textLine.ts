@@ -1,5 +1,6 @@
 import { Position } from "vscode";
 import Bracket from "./bracket";
+import ClosingBracket from "./closingBracket";
 import { IStackElement } from "./IExtensionGrammar";
 import LineState from "./lineState";
 
@@ -18,6 +19,10 @@ export default class TextLine {
         this.index = index;
     }
 
+    public getOpenBracketStack() {
+        return this.lineState.getOpenBracketStack();
+    }
+
     public getRuleStack(): IStackElement {
         return this.ruleStack;
     }
@@ -31,7 +36,7 @@ export default class TextLine {
         return this.lineState.cloneState();
     }
 
-    public addScope(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number): void {
+    public addScopeByCommonType(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number): void {
         if (type) {
             const startSplitIndex = type.indexOf(".begin.");
             if (startSplitIndex !== -1) {
@@ -47,8 +52,9 @@ export default class TextLine {
 
         return this.setColorRange(type, character, depth, beginIndex, endIndex);
     }
-    public getEndScopeBracket(position: Position): Bracket | undefined {
-        return this.lineState.getEndScopeBracket(position);
+
+    public getClosingBracket(position: Position): ClosingBracket | undefined {
+        return this.lineState.getClosingBracket(position);
     }
 
     private setColorRange(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number) {

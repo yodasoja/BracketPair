@@ -1,12 +1,13 @@
 import { Position, Range } from "vscode";
 import Bracket from "./bracket";
+import ClosingBracket from "./closingBracket";
 import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
 import Token from "./token";
 
 export default class SingularIndex implements ColorIndexes {
     private openBracketStack: Bracket[] = [];
-    private closedBrackets: Bracket[] = [];
+    private closedBrackets: ClosingBracket[] = [];
     private previousOpenBracketColorIndex: number = -1;
     private readonly settings: Settings;
     constructor(
@@ -22,6 +23,10 @@ export default class SingularIndex implements ColorIndexes {
             this.openBracketStack = previousState.currentOpenBracketColorIndexes;
             this.previousOpenBracketColorIndex = previousState.previousOpenBracketColorIndex;
         }
+    }
+
+    public getOpenBracketStack() {
+        return this.openBracketStack;
     }
 
     public getPreviousIndex(type: string): number {
@@ -50,19 +55,18 @@ export default class SingularIndex implements ColorIndexes {
     public getCurrentColorIndex(token: Token): number | undefined {
         const openBracket = this.openBracketStack.pop();
         if (openBracket) {
-            const closeBracket = new Bracket(token, openBracket.colorIndex, openBracket.color);
-            openBracket.pair = closeBracket;
-            closeBracket.pair = openBracket;
+            const closeBracket = new ClosingBracket(token, openBracket);
             this.closedBrackets.push(closeBracket);
 
             return openBracket.colorIndex;
         }
     }
 
-    public getEndScopeBracket(position: Position): Bracket | undefined {
+    public getClosingBracket(position: Position): ClosingBracket | undefined {
         for (const closeBracket of this.closedBrackets) {
-            const openBracket = closeBracket.pair!;
-            const startPosition = new Position(openBracket.token.line.index, openBracket.token.endIndex);
+            const openBracket = closeBracket.openBracket;
+            const startPosition = new Position(openBracket.token.line.index,
+                openBracket.token.beginIndex + openBracket.token.character.length);
             const endPosition = new Position(closeBracket.token.line.index, closeBracket.token.beginIndex);
             const range = new Range(startPosition, endPosition);
 

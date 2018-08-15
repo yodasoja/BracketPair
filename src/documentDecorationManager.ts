@@ -39,14 +39,14 @@ export default class DocumentDecorationManager {
     public updateDocument(document: TextDocument) {
         const documentDecoration = this.getDocumentDecorations(document);
         if (documentDecoration) {
-            documentDecoration.triggerUpdateDecorations();
+            documentDecoration.updateDecorations();
         }
     }
 
     public onDidOpenTextDocument(document: TextDocument) {
         const documentDecoration = this.getDocumentDecorations(document);
         if (documentDecoration) {
-            documentDecoration.triggerUpdateDecorations();
+            documentDecoration.updateDecorations();
         }
     }
 
@@ -73,7 +73,7 @@ export default class DocumentDecorationManager {
                 documentDecoration.settings.showBracketsInGutter ||
                 documentDecoration.settings.showVerticalScopeLine ||
                 documentDecoration.settings.showHorizontalScopeLine)) {
-            documentDecoration.triggerUpdateScopeDecorations(event);
+            documentDecoration.updateScopeDecorations(event);
         }
     }
 
