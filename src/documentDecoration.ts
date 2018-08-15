@@ -6,12 +6,12 @@ import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Settings from "./settings";
 import TextLine from "./textLine";
+import BracketPointer from "./bracketPointer";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
 
     // This program caches lines, and will only analyze linenumbers including or above a modified line
-    private lineToUpdateWhenTimeoutEnds = 0;
     private lines: TextLine[] = [];
     private readonly document: vscode.TextDocument;
     private readonly tokenizer: IGrammar;
@@ -42,8 +42,6 @@ export default class DocumentDecoration {
     }
 
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        this.lineToUpdateWhenTimeoutEnds = Infinity;
-
         for (const change of contentChanges) {
             const amountOfLinesDeleted = change.range.end.line - change.range.start.line;
 
@@ -57,7 +55,7 @@ export default class DocumentDecoration {
             }
             // Array size unchanged
             else if (offset === 0 && changedLines.length > 0) {
-                let tokenStackInvalidated = false;
+                let tokenStackValid = true;
                 for (let i = 0; i < changedLines.length; i++) {
                     const index = change.range.start.line + i;
                     const newText = this.document.lineAt(index).text;
@@ -78,33 +76,28 @@ export default class DocumentDecoration {
                     this.parseTokens(tokens, newLine, newText);
                     const oldRuleStack = this.lines[index].getRuleStack();
 
-                    if (!tokenStackInvalidated) {
+                    if (tokenStackValid) {
                         // TODO Check what happens with wierd stacks like meta.brace '('
-                        tokenStackInvalidated = !oldRuleStack.equals(ruleStack);
+                        tokenStackValid = oldRuleStack.equals(ruleStack);
 
-                        if (!tokenStackInvalidated) {
+                        if (tokenStackValid) {
                             const oldOpenBrackets = this.lines[index].getOpenBracketStack();
                             const newOpenBrackets = newLine.getOpenBracketStack();
 
                             if (oldOpenBrackets instanceof Map && newOpenBrackets instanceof Map) {
-                                tokenStackInvalidated = oldOpenBrackets.size !== newOpenBrackets.size;
+                                tokenStackValid = oldOpenBrackets.size === newOpenBrackets.size;
 
-                                if (!tokenStackInvalidated) {
+                                if (tokenStackValid) {
                                     for (const key of oldOpenBrackets.keys()) {
-                                        const oldArray = oldOpenBrackets[key] as Bracket[];
-                                        const newArray = newOpenBrackets[key] as Bracket[];
+                                        const oldArray = oldOpenBrackets[key] as BracketPointer[];
+                                        const newArray = newOpenBrackets[key] as BracketPointer[];
 
-                                        tokenStackInvalidated = oldArray.length !== newArray.length;
-                                        if (!tokenStackInvalidated) {
+                                        tokenStackValid = oldArray.length === newArray.length;
+                                        if (tokenStackValid) {
                                             for (let bracketIndex = 0; bracketIndex < oldArray.length; bracketIndex++) {
-                                                // If the open brackets are the same, I want to replace them with the old open brackets (after updating position)
-                                                // So existing forward references don't break
-                                                const oldOpenBracket = oldArray[bracketIndex];
-                                                const newOpenBracket = newArray[bracketIndex];
-
-                                                oldOpenBracket.token.beginIndex = newOpenBracket.token.beginIndex;
-                                                oldOpenBracket.token.line = newOpenBracket.token.line;
-                                                newArray[bracketIndex] = oldOpenBracket;
+                                                // If the open brackets are the same, I want to replace them with the old 
+                                                // open brackets (after updating position) so existing forward references don't break
+                                                this.replaceOpenBrackets(oldArray, newArray);
                                             }
                                         }
                                         else {
@@ -117,16 +110,24 @@ export default class DocumentDecoration {
                                 }
                             }
                             else if (oldOpenBrackets instanceof Array && newOpenBrackets instanceof Array) {
-                                tokenStackInvalidated = oldOpenBrackets.length !== newOpenBrackets.length;
-                            }
-                        }
+                                tokenStackValid = oldOpenBrackets.length === newOpenBrackets.length;
 
-                        if (tokenStackInvalidated) {
-                            this.lineToUpdateWhenTimeoutEnds = Math.min(this.lineToUpdateWhenTimeoutEnds, index + 1);
+                                if (tokenStackValid) {
+                                    this.replaceOpenBrackets(oldOpenBrackets, newOpenBrackets);
+                                }
+                                else {
+                                    console.warn("Bracket Stacks invalidated! Array lengths do not match!");
+                                }
+                            }
                         }
                     }
 
                     this.lines[index] = newLine;
+                }
+
+                if (!tokenStackValid) {
+                    this.lines.splice(change.range.start.line + changedLines.length);
+                    this.updateDecorations();
                 }
             }
 
@@ -155,8 +156,6 @@ export default class DocumentDecoration {
             //     const newRuleStack this.lines
             // }
         }
-        this.updateLowestLineNumber(contentChanges);
-        this.updateDecorations();
     }
 
     public expandBracketSelection(editor: vscode.TextEditor) {
@@ -248,38 +247,16 @@ export default class DocumentDecoration {
 
         // console.time("updateDecorations");
 
-        const lineNumber = this.lineToUpdateWhenTimeoutEnds;
-        const amountToRemove = this.lines.length - lineNumber;
+        const lineIndex = this.lines.length === 0 ? 0 : this.lines.length - 1;
 
-        // Remove cached lines that need to be updated
-        const removed = this.lines.splice(lineNumber, amountToRemove);
-
-        try {
-            const previousLineNumber = lineNumber - 1;
-            let previousRuleStack: undefined | IStackElement;
-            if (previousLineNumber >= 0 && previousLineNumber < this.lines.length) {
-                previousRuleStack = this.lines[previousLineNumber].getRuleStack();
-            }
-
-            previousRuleStack = this.parseTokensForLine(lineNumber, previousRuleStack);
-            let lineTokensUnchanged = false;
-            if (removed.length > 0) {
-                if (removed[0].getRuleStack().equals(previousRuleStack)) {
-                    removed.shift();
-                    this.lines = this.lines.concat(removed);
-                    lineTokensUnchanged = true;
-                }
-            }
-
-            if (!lineTokensUnchanged) {
-                for (let i = lineNumber + 1; i < this.document.lineCount; i++) {
-                    previousRuleStack = this.parseTokensForLine(i, previousRuleStack);
-                }
-            }
+        const previousLineNumber = lineIndex - 1;
+        let previousRuleStack: undefined | IStackElement;
+        if (previousLineNumber >= 0 && previousLineNumber < this.lines.length) {
+            previousRuleStack = this.lines[previousLineNumber].getRuleStack();
         }
-        catch (err) {
-            console.error(err);
-            return;
+
+        for (let i = lineIndex; i < this.document.lineCount; i++) {
+            previousRuleStack = this.parseTokensForLine(i, previousRuleStack);
         }
 
         this.colorDecorations(editors);
@@ -517,13 +494,6 @@ export default class DocumentDecoration {
         }
     }
 
-    private updateLowestLineNumber(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        for (const contentChange of contentChanges) {
-            this.lineToUpdateWhenTimeoutEnds =
-                Math.min(this.lineToUpdateWhenTimeoutEnds, contentChange.range.start.line);
-        }
-    }
-
     private parseTokensForLine(i: number, previousRuleStack: IStackElement | undefined) {
         const line = this.document.lineAt(i);
         const tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack);
@@ -704,5 +674,16 @@ export default class DocumentDecoration {
             else { spacing++; }
         }
         return spacing;
+    }
+
+    private replaceOpenBrackets(oldArray: BracketPointer[], newArray: BracketPointer[]) {
+        for (let bracketIndex = 0; bracketIndex < oldArray.length; bracketIndex++) {
+            const oldPointer = oldArray[bracketIndex];
+            const newPointer = newArray[bracketIndex];
+
+            oldPointer.bracket.token.line = newPointer.bracket.token.line;
+            oldPointer.bracket.token.beginIndex = newPointer.bracket.token.beginIndex;
+            newPointer.bracket = oldPointer.bracket;
+        }
     }
 }

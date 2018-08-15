@@ -1,19 +1,20 @@
 import { Position, Range } from "vscode";
 import Bracket from "./bracket";
+import BracketPointer from "./bracketPointer";
 import ClosingBracket from "./closingBracket";
 import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
 import Token from "./token";
 
 export default class SingularIndex implements ColorIndexes {
-    private openBracketStack: Bracket[] = [];
+    private openBracketStack: BracketPointer[] = [];
     private closedBrackets: ClosingBracket[] = [];
     private previousOpenBracketColorIndex: number = -1;
     private readonly settings: Settings;
     constructor(
         settings: Settings,
         previousState?: {
-            currentOpenBracketColorIndexes: Bracket[],
+            currentOpenBracketColorIndexes: BracketPointer[],
             previousOpenBracketColorIndex: number,
         }) {
 
@@ -76,7 +77,7 @@ export default class SingularIndex implements ColorIndexes {
         }
     }
 
-    public clone() {
+    public copyCumulativeState() {
         return new SingularIndex(
             this.settings,
             {

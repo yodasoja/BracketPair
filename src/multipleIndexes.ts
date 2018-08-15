@@ -1,12 +1,13 @@
 import { Position, Range } from "vscode";
 import Bracket from "./bracket";
+import BracketPointer from "./bracketPointer";
 import ClosingBracket from "./closingBracket";
 import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
 import Token from "./token";
 
 export default class MultipleIndexes implements ColorIndexes {
-    private openBracketStack = new Map<string, Bracket[]>();
+    private openBracketStack = new Map<string, BracketPointer[]>();
     private closedBrackets: ClosingBracket[] = [];
     private previousOpenBracketColorIndexes = new Map<string, number[]>();
     private readonly settings: Settings;
@@ -14,7 +15,7 @@ export default class MultipleIndexes implements ColorIndexes {
     constructor(
         settings: Settings,
         previousState?: {
-            currentOpenBracketColorIndexes: Map<string, Bracket[]>,
+            currentOpenBracketColorIndexes: Map<string, BracketPointer[]>,
             previousOpenBracketColorIndexes: Map<string, number[]>,
         }) {
         this.settings = settings;
@@ -37,7 +38,7 @@ export default class MultipleIndexes implements ColorIndexes {
         const bracketStack = this.openBracketStack.get(type);
 
         if (bracketStack && bracketStack.length > 0) {
-            const topStack = bracketStack[bracketStack.length - 1];
+            const topStack = bracketStack[bracketStack.length - 1].bracket;
             return topStack.token.depth === depth;
         }
         else {
@@ -61,21 +62,21 @@ export default class MultipleIndexes implements ColorIndexes {
         if (!openStack) {
             return;
         }
-        const openBracket = openStack.pop();
+        const openBracketPointer = openStack.pop();
 
-        if (!openBracket) {
+        if (!openBracketPointer) {
             return;
         }
 
-        const closeBracket = new ClosingBracket(token, openBracket);
+        const closeBracket = new ClosingBracket(token, openBracketPointer);
         this.closedBrackets.push(closeBracket);
 
-        return openBracket.colorIndex;
+        return openBracketPointer.bracket.colorIndex;
     }
 
     public getClosingBracket(position: Position): ClosingBracket | undefined {
         for (const closeBracket of this.closedBrackets) {
-            const openBracket = closeBracket.openBracket;
+            const openBracket = closeBracket.openBracket.bracket;
             const startPosition = new Position(openBracket.token.line.index,
                 openBracket.token.beginIndex + openBracket.token.character.length);
             const endPosition = new Position(closeBracket.token.line.index, closeBracket.token.beginIndex);
@@ -87,7 +88,7 @@ export default class MultipleIndexes implements ColorIndexes {
         }
     }
 
-    public clone(): ColorIndexes {
+    public copyCumulativeState(): ColorIndexes {
         return new MultipleIndexes(
             this.settings,
             {

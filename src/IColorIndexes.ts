@@ -1,5 +1,5 @@
 import { Position } from "vscode";
-import Bracket from "./bracket";
+import BracketPointer from "./bracketPointer";
 import ClosingBracket from "./closingBracket";
 import Token from "./token";
 
@@ -9,9 +9,9 @@ interface IColorIndex {
     getCurrentLength(type: string): number;
     getCurrentColorIndex(token: Token): number | undefined;
     getClosingBracket(position: Position): ClosingBracket | undefined;
-    getOpenBracketStack(): Map<string, Bracket[]> | Bracket[];
+    getOpenBracketStack(): Map<string, BracketPointer[]> | BracketPointer[];
     isClosingPairForCurrentStack(type: string, depth: number): boolean;
-    clone(): IColorIndex;
+    copyCumulativeState(): IColorIndex;
 }
 
 export default IColorIndex;

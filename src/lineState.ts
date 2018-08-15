@@ -53,7 +53,7 @@ export default class LineState {
         const clone =
         {
             charStack: this.cloneCharStack(),
-            colorIndexes: this.colorIndexes.clone(),
+            colorIndexes: this.colorIndexes.copyCumulativeState(),
             previousBracketColor: this.previousBracketColor,
         };
 
