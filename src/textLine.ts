@@ -19,10 +19,6 @@ export default class TextLine {
         this.index = index;
     }
 
-    public getOpenBracketStack() {
-        return this.lineState.getOpenBracketStack();
-    }
-
     public getRuleStack(): IStackElement {
         return this.ruleStack;
     }
@@ -57,8 +53,13 @@ export default class TextLine {
         return this.lineState.getClosingBracket(position);
     }
 
+    public getOpeningBracketsWhereClosingBracketsAreNotOnSameLine()
+    {
+        return this.lineState.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
+    }
+
     private setColorRange(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number) {
-        const color = this.lineState.getBracketColor(type, character, depth, beginIndex, endIndex, this);
+        const color = this.lineState.getBracketColor(type, character, depth, beginIndex, this);
 
         const colorRanges = this.colorRanges.get(color);
         if (colorRanges !== undefined) {

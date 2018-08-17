@@ -2,11 +2,11 @@ import * as vscode from "vscode";
 import { EndOfLine } from "vscode";
 import Bracket from "./bracket";
 import BracketClose from "./bracketClose";
+import BracketPointer from "./bracketPointer";
 import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Settings from "./settings";
 import TextLine from "./textLine";
-import BracketPointer from "./bracketPointer";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
@@ -50,12 +50,12 @@ export default class DocumentDecoration {
             const offset = amountOfLinesAdded - amountOfLinesDeleted;
 
             let removedTextLines: TextLine[] = [];
-            if (amountOfLinesDeleted > 0) {
+            if (offset > 0) {
+                // Lines added
                 removedTextLines = this.lines.splice(change.range.start.line, amountOfLinesDeleted);
             }
-            // Array size unchanged
-            else if (offset === 0 && changedLines.length > 0) {
-                let tokenStackValid = true;
+            else if (offset === 0) {
+                // Array size unchanged
                 for (let i = 0; i < changedLines.length; i++) {
                     const index = change.range.start.line + i;
                     const newText = this.document.lineAt(index).text;
@@ -63,73 +63,70 @@ export default class DocumentDecoration {
                     const previousLineRuleStack = index > 0 ?
                         this.lines[index - 1].getRuleStack() :
                         undefined;
+
+                    const previousLineState = index > 0 ?
+                        this.lines[index - 1].cloneState() :
+                        new LineState(this.settings);
+
+                    const lineBeingReplaced = this.lines[index];
+
                     const tokenized = this.tokenizer.tokenizeLine(newText, previousLineRuleStack);
 
                     const ruleStack = tokenized.ruleStack;
                     const tokens = tokenized.tokens;
 
-                    const previousLineState = index > 0 ?
-                        this.lines[index - 1].cloneState() :
-                        new LineState(this.settings);
                     const newLine = new TextLine(ruleStack, previousLineState, index);
-
                     this.parseTokens(tokens, newLine, newText);
-                    const oldRuleStack = this.lines[index].getRuleStack();
+                    this.lines[index] = newLine;
+                    const lineBeingReplacedRuleStack = lineBeingReplaced.getRuleStack();
+                    if (!lineBeingReplacedRuleStack.equals(ruleStack)) {
+                        console.log("Content change triggered full reparse from line: " + (index + 1));
+                        this.lines.splice(index + 1);
+                        this.updateDecorations();
+                        return;
+                    }
 
-                    if (tokenStackValid) {
-                        // TODO Check what happens with wierd stacks like meta.brace '('
-                        tokenStackValid = oldRuleStack.equals(ruleStack);
+                    const oldOpenBracketPointers = lineBeingReplaced.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
+                    const currentOpenBracketPointers = newLine.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
 
-                        if (tokenStackValid) {
-                            const oldOpenBrackets = this.lines[index].getOpenBracketStack();
-                            const newOpenBrackets = newLine.getOpenBracketStack();
+                    let swap = true;
+                    if (oldOpenBracketPointers.size === currentOpenBracketPointers.size) {
+                        const oldIterator = oldOpenBracketPointers.values();
+                        const currentIterator = currentOpenBracketPointers.values();
+                        for (let iterator = 0; iterator < oldOpenBracketPointers.size; iterator++) {
+                            const old = oldIterator.next();
+                            const current = currentIterator.next();
 
-                            if (oldOpenBrackets instanceof Map && newOpenBrackets instanceof Map) {
-                                tokenStackValid = oldOpenBrackets.size === newOpenBrackets.size;
-
-                                if (tokenStackValid) {
-                                    for (const key of oldOpenBrackets.keys()) {
-                                        const oldArray = oldOpenBrackets[key] as BracketPointer[];
-                                        const newArray = newOpenBrackets[key] as BracketPointer[];
-
-                                        tokenStackValid = oldArray.length === newArray.length;
-                                        if (tokenStackValid) {
-                                            for (let bracketIndex = 0; bracketIndex < oldArray.length; bracketIndex++) {
-                                                // If the open brackets are the same, I want to replace them with the old 
-                                                // open brackets (after updating position) so existing forward references don't break
-                                                this.replaceOpenBrackets(oldArray, newArray);
-                                            }
-                                        }
-                                        else {
-                                            console.warn("Bracket Stacks invalidated! Map value lengths do not match!");
-                                        }
-                                    }
-                                }
-                                else {
-                                    console.warn("Bracket Stacks invalidated! Map sizes do not match!");
-                                }
-                            }
-                            else if (oldOpenBrackets instanceof Array && newOpenBrackets instanceof Array) {
-                                tokenStackValid = oldOpenBrackets.length === newOpenBrackets.length;
-
-                                if (tokenStackValid) {
-                                    this.replaceOpenBrackets(oldOpenBrackets, newOpenBrackets);
-                                }
-                                else {
-                                    console.warn("Bracket Stacks invalidated! Array lengths do not match!");
-                                }
+                            if (old.value.bracket.token.type !== current.value.bracket.token.type) {
+                                swap = false;
+                                break;
                             }
                         }
                     }
 
-                    this.lines[index] = newLine;
-                }
+                    if (swap) {
+                        const oldIterator = oldOpenBracketPointers.values();
+                        const currentIterator = currentOpenBracketPointers.values();
+                        for (let iterator = 0; iterator < oldOpenBracketPointers.size; iterator++) {
+                            const old = oldIterator.next();
+                            const current = currentIterator.next();
 
-                if (!tokenStackValid) {
-                    this.lines.splice(change.range.start.line + changedLines.length);
-                    this.updateDecorations();
+                            const currentBeginIndex = current.value.bracket.token.beginIndex;
+                            const currentLine = current.value.bracket.token.line;
+                            current.value.bracket = old.value.bracket;
+                            current.value.bracket.token.line = currentLine;
+                            current.value.bracket.token.beginIndex = currentBeginIndex;
+                        }
+                    }
                 }
             }
+            else {
+                // Lines Removed
+            }
+            // If lines inserted
+            // for (let i = change.range.start.line + 1; i < this.lines.length; i++) {
+            //     this.lines[i].index = i;
+            // }
 
             // const insertedTextLines: TextLine[] = [];
             // const previousLineNumber = change.range.start.line - 1;
@@ -143,12 +140,6 @@ export default class DocumentDecoration {
             // }
 
             // this.lines.
-
-            //     if(offset !== 0) {
-            //     for (let i = change.range.start.line + 1; i < this.lines.length; i++) {
-            //         this.lines[i].index = i;
-            //     }
-            // }
 
             // if (removedTextLines.length > 0) {
             //     const oldRuleStack = removedTextLines[removedTextLines.length - 1].getRuleStack();

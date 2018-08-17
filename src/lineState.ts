@@ -1,48 +1,46 @@
 import { Position } from "vscode";
-import Bracket from "./bracket";
 import BracketClose from "./bracketClose";
 import ColorMode from "./colorMode";
-import ColorIndexes from "./IColorIndexes";
-import MultipleIndexes from "./multipleIndexes";
+import IBracketManager from "./IBracketManager";
+import MultipleBracketGroups from "./multipleIndexes";
 import Settings from "./settings";
-import SingularIndex from "./singularIndex";
+import SingularBracketGroup from "./singularIndex";
 import TextLine from "./textLine";
 import Token from "./token";
 
 export default class LineState {
-    private readonly colorIndexes: ColorIndexes;
+    private readonly bracketManager: IBracketManager;
     private previousBracketColor: string;
     private readonly settings: Settings;
     private readonly charStack: Map<string, string[]>;
 
     constructor(settings: Settings, previousState?:
         {
-            readonly colorIndexes: ColorIndexes;
+            readonly colorIndexes: IBracketManager;
             readonly previousBracketColor: string;
             readonly charStack: Map<string, string[]>;
         }) {
         this.settings = settings;
 
         if (previousState !== undefined) {
-            this.colorIndexes = previousState.colorIndexes;
+            this.bracketManager = previousState.colorIndexes;
             this.previousBracketColor = previousState.previousBracketColor;
             this.charStack = previousState.charStack;
         }
         else {
             this.charStack = new Map<string, string[]>();
             switch (settings.colorMode) {
-                case ColorMode.Consecutive: this.colorIndexes = new SingularIndex(settings);
+                case ColorMode.Consecutive: this.bracketManager = new SingularBracketGroup(settings);
                     break;
-                case ColorMode.Independent: this.colorIndexes = new MultipleIndexes(settings);
+                case ColorMode.Independent: this.bracketManager = new MultipleBracketGroups(settings);
                     break;
                 default: throw new RangeError("Not implemented enum value");
             }
         }
     }
 
-    public getOpenBracketStack()
-    {
-        return this.colorIndexes.getOpenBracketStack();
+    public getOpeningBracketsWhereClosingBracketsAreNotOnSameLine() {
+        return this.bracketManager.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
     }
 
     public getCharStack() {
@@ -53,7 +51,7 @@ export default class LineState {
         const clone =
         {
             charStack: this.cloneCharStack(),
-            colorIndexes: this.colorIndexes.copyCumulativeState(),
+            colorIndexes: this.bracketManager.copyCumulativeState(),
             previousBracketColor: this.previousBracketColor,
         };
 
@@ -61,7 +59,7 @@ export default class LineState {
     }
 
     public getClosingBracket(position: Position): BracketClose | undefined {
-        return this.colorIndexes.getClosingBracket(position);
+        return this.bracketManager.getClosingBracket(position);
     }
 
     public getBracketColor(
@@ -69,7 +67,6 @@ export default class LineState {
         character: string,
         depth: number,
         beginIndex: number,
-        endIndex: number,
         line: TextLine,
     ): string {
         if (!type) {
@@ -77,7 +74,7 @@ export default class LineState {
             return this.settings.orphanColor;
         }
         const token = new Token(type, character, depth, beginIndex, line);
-        if (this.colorIndexes.isClosingPairForCurrentStack(type, depth)) {
+        if (this.bracketManager.isClosingPairForCurrentStack(type, depth)) {
             return this.getCloseBracketColor(token);
         }
         return this.getOpenBracketColor(token);
@@ -95,10 +92,10 @@ export default class LineState {
         let colorIndex: number;
 
         if (this.settings.forceIterationColorCycle) {
-            colorIndex = (this.colorIndexes.getPreviousIndex(token.type) + 1) % this.settings.colors.length;
+            colorIndex = (this.bracketManager.getPreviousIndex(token.type) + 1) % this.settings.colors.length;
         }
         else {
-            colorIndex = this.colorIndexes.getCurrentLength(token.type) % this.settings.colors.length;
+            colorIndex = this.bracketManager.getCurrentLength(token.type) % this.settings.colors.length;
         }
 
         let color = this.settings.colors[colorIndex];
@@ -109,13 +106,13 @@ export default class LineState {
         }
 
         this.previousBracketColor = color;
-        this.colorIndexes.setCurrent(token, colorIndex);
+        this.bracketManager.setCurrent(token, colorIndex);
 
         return color;
     };
 
     private getCloseBracketColor(token: Token): string {
-        const colorIndex = this.colorIndexes.getCurrentColorIndex(token);
+        const colorIndex = this.bracketManager.getCurrentColorIndex(token);
         let color: string;
         if (colorIndex !== undefined) {
             color = this.settings.colors[colorIndex];

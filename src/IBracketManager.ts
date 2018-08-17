@@ -1,17 +1,17 @@
 import { Position } from "vscode";
-import BracketPointer from "./bracketPointer";
 import BracketClose from "./bracketClose";
+import BracketPointer from "./bracketPointer";
 import Token from "./token";
 
-interface IColorIndex {
+interface IBracketManager {
     getPreviousIndex(type: string): number;
     setCurrent(token: Token, colorIndex: number): void;
     getCurrentLength(type: string): number;
     getCurrentColorIndex(token: Token): number | undefined;
     getClosingBracket(position: Position): BracketClose | undefined;
-    getOpenBracketStack(): Map<string, BracketPointer[]> | BracketPointer[];
     isClosingPairForCurrentStack(type: string, depth: number): boolean;
-    copyCumulativeState(): IColorIndex;
+    copyCumulativeState(): IBracketManager;
+    getOpeningBracketsWhereClosingBracketsAreNotOnSameLine(): Set<BracketPointer>;
 }
 
-export default IColorIndex;
+export default IBracketManager;
