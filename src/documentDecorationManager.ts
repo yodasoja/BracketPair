@@ -39,14 +39,14 @@ export default class DocumentDecorationManager {
     public updateDocument(document: TextDocument) {
         const documentDecoration = this.getDocumentDecorations(document);
         if (documentDecoration) {
-            documentDecoration.updateDecorations();
+            documentDecoration.tokenizeDocument();
         }
     }
 
     public onDidOpenTextDocument(document: TextDocument) {
         const documentDecoration = this.getDocumentDecorations(document);
         if (documentDecoration) {
-            documentDecoration.updateDecorations();
+            documentDecoration.tokenizeDocument();
         }
     }
 

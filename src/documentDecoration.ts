@@ -49,45 +49,48 @@ export default class DocumentDecoration {
             const amountOfLinesAdded = changedLines.length - 1;
             const offset = amountOfLinesAdded - amountOfLinesDeleted;
 
-            let removedTextLines: TextLine[] = [];
             if (offset > 0) {
-                // Lines added
-                removedTextLines = this.lines.splice(change.range.start.line, amountOfLinesDeleted);
+                const removedTextLines = this.lines.splice(change.range.start.line);
+                const replacedLine = removedTextLines.shift();
+
+                for (let i = 0; i < changedLines.length; i++) {
+                    const index = change.range.start.line + i;
+                    const newLine = this.tokenizeLine(index);
+                    this.lines.push(newLine);
+                }
+
+                if (replacedLine &&
+                    this.lines[this.lines.length - 1].getRuleStack().equals(replacedLine.getRuleStack())) {
+                    this.lines.push(...removedTextLines);
+                    for (let i = change.range.start.line + changedLines.length; i < this.lines.length; i++) {
+                        this.lines[i].index = i;
+                    }
+                }
+                else {
+                    this.tokenizeDocument();
+                }
             }
             else if (offset === 0) {
                 // Array size unchanged
                 for (let i = 0; i < changedLines.length; i++) {
                     const index = change.range.start.line + i;
-                    const newText = this.document.lineAt(index).text;
-
-                    const previousLineRuleStack = index > 0 ?
-                        this.lines[index - 1].getRuleStack() :
-                        undefined;
-
-                    const previousLineState = index > 0 ?
-                        this.lines[index - 1].cloneState() :
-                        new LineState(this.settings);
+                    const newLine = this.tokenizeLine(index);
 
                     const lineBeingReplaced = this.lines[index];
-
-                    const tokenized = this.tokenizer.tokenizeLine(newText, previousLineRuleStack);
-
-                    const ruleStack = tokenized.ruleStack;
-                    const tokens = tokenized.tokens;
-
-                    const newLine = new TextLine(ruleStack, previousLineState, index);
-                    this.parseTokens(tokens, newLine, newText);
                     this.lines[index] = newLine;
+
                     const lineBeingReplacedRuleStack = lineBeingReplaced.getRuleStack();
-                    if (!lineBeingReplacedRuleStack.equals(ruleStack)) {
+                    if (!lineBeingReplacedRuleStack.equals(newLine.getRuleStack())) {
                         console.log("Content change triggered full reparse from line: " + (index + 1));
                         this.lines.splice(index + 1);
-                        this.updateDecorations();
+                        this.tokenizeDocument();
                         return;
                     }
 
-                    const oldOpenBracketPointers = lineBeingReplaced.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
-                    const currentOpenBracketPointers = newLine.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
+                    const oldOpenBracketPointers =
+                        lineBeingReplaced.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
+                    const currentOpenBracketPointers =
+                        newLine.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
 
                     let swap = true;
                     if (oldOpenBracketPointers.size === currentOpenBracketPointers.size) {
@@ -123,10 +126,7 @@ export default class DocumentDecoration {
             else {
                 // Lines Removed
             }
-            // If lines inserted
-            // for (let i = change.range.start.line + 1; i < this.lines.length; i++) {
-            //     this.lines[i].index = i;
-            // }
+
 
             // const insertedTextLines: TextLine[] = [];
             // const previousLineNumber = change.range.start.line - 1;
@@ -222,7 +222,7 @@ export default class DocumentDecoration {
         }
     }
 
-    public updateDecorations() {
+    public tokenizeDocument() {
         if (this.settings.isDisposed) {
             return;
         }
@@ -236,23 +236,16 @@ export default class DocumentDecoration {
             return;
         }
 
-        // console.time("updateDecorations");
+        // console.time("tokenizeDocument");
 
         const lineIndex = this.lines.length;
-
-        const previousLineNumber = lineIndex - 1;
-        let previousRuleStack: undefined | IStackElement;
-        if (previousLineNumber >= 0 && previousLineNumber < this.lines.length) {
-            previousRuleStack = this.lines[previousLineNumber].getRuleStack();
-        }
-
         for (let i = lineIndex; i < this.document.lineCount; i++) {
-            previousRuleStack = this.parseTokensForLine(i, previousRuleStack);
+            this.tokenizeLine(i);
         }
 
         this.colorDecorations(editors);
 
-        // console.timeEnd("updateDecorations");
+        // console.timeEnd("tokenizeDocument");
     }
 
     public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
@@ -400,6 +393,22 @@ export default class DocumentDecoration {
         // console.timeEnd("updateScopeDecorations");
     }
 
+    private tokenizeLine(index: number) {
+        const newText = this.document.lineAt(index).text;
+        const previousLineRuleStack = index > 0 ?
+            this.lines[index - 1].getRuleStack() :
+            undefined;
+        const previousLineState = index > 0 ?
+            this.lines[index - 1].cloneState() :
+            new LineState(this.settings);
+        const tokenized = this.tokenizer.tokenizeLine(newText, previousLineRuleStack);
+        const ruleStack = tokenized.ruleStack;
+        const tokens = tokenized.tokens;
+        const newLine = new TextLine(ruleStack, previousLineState, index);
+        this.parseTokens(tokens, newLine, newText);
+        return newLine;
+    }
+
     private setOverLineDecoration(
         bracket: Bracket,
         event: vscode.TextEditorSelectionChangeEvent,
@@ -483,17 +492,6 @@ export default class DocumentDecoration {
                 return endBracket;
             }
         }
-    }
-
-    private parseTokensForLine(i: number, previousRuleStack: IStackElement | undefined) {
-        const line = this.document.lineAt(i);
-        const tokenized = this.tokenizer.tokenizeLine(line.text, previousRuleStack);
-        const ruleStack = tokenized.ruleStack;
-        const tokens = tokenized.tokens;
-        const currentLine = this.getLine(i, ruleStack);
-        this.parseTokens(tokens, currentLine, line.text);
-        previousRuleStack = ruleStack;
-        return previousRuleStack;
     }
 
     private parseTokens(tokens: IToken[], currentLine: TextLine, text: string) {
