@@ -1,6 +1,6 @@
 import { Position } from "vscode";
 import Bracket from "./bracket";
-import ClosingBracket from "./closingBracket";
+import BracketClose from "./bracketClose";
 import ColorMode from "./colorMode";
 import ColorIndexes from "./IColorIndexes";
 import MultipleIndexes from "./multipleIndexes";
@@ -60,7 +60,7 @@ export default class LineState {
         return new LineState(this.settings, clone);
     }
 
-    public getClosingBracket(position: Position): ClosingBracket | undefined {
+    public getClosingBracket(position: Position): BracketClose | undefined {
         return this.colorIndexes.getClosingBracket(position);
     }
 

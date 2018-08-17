@@ -1,14 +1,14 @@
 import { Position, Range } from "vscode";
 import Bracket from "./bracket";
+import BracketClose from "./bracketClose";
 import BracketPointer from "./bracketPointer";
-import ClosingBracket from "./closingBracket";
 import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
 import Token from "./token";
 
 export default class SingularIndex implements ColorIndexes {
     private openBracketStack: BracketPointer[] = [];
-    private closedBrackets: ClosingBracket[] = [];
+    private closedBrackets: BracketClose[] = [];
     private previousOpenBracketColorIndex: number = -1;
     private readonly settings: Settings;
     constructor(
@@ -39,13 +39,15 @@ export default class SingularIndex implements ColorIndexes {
             return false;
         }
 
-        const topStack = this.openBracketStack[this.openBracketStack.length - 1];
+        const topStack = this.openBracketStack[this.openBracketStack.length - 1].bracket;
 
         return topStack.token.type === type && topStack.token.depth === depth;
     }
 
     public setCurrent(token: Token, colorIndex: number) {
-        this.openBracketStack.push(new Bracket(token, colorIndex, this.settings.colors[colorIndex]));
+        this.openBracketStack.push(
+            new BracketPointer(
+                new Bracket(token, colorIndex, this.settings.colors[colorIndex])));
         this.previousOpenBracketColorIndex = colorIndex;
     }
 
@@ -56,16 +58,16 @@ export default class SingularIndex implements ColorIndexes {
     public getCurrentColorIndex(token: Token): number | undefined {
         const openBracket = this.openBracketStack.pop();
         if (openBracket) {
-            const closeBracket = new ClosingBracket(token, openBracket);
+            const closeBracket = new BracketClose(token, openBracket);
             this.closedBrackets.push(closeBracket);
 
-            return openBracket.colorIndex;
+            return openBracket.bracket.colorIndex;
         }
     }
 
-    public getClosingBracket(position: Position): ClosingBracket | undefined {
+    public getClosingBracket(position: Position): BracketClose | undefined {
         for (const closeBracket of this.closedBrackets) {
-            const openBracket = closeBracket.openBracket;
+            const openBracket = closeBracket.openBracketPointer.bracket;
             const startPosition = new Position(openBracket.token.line.index,
                 openBracket.token.beginIndex + openBracket.token.character.length);
             const endPosition = new Position(closeBracket.token.line.index, closeBracket.token.beginIndex);

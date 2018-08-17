@@ -1,6 +1,6 @@
 import { Position } from "vscode";
 import Bracket from "./bracket";
-import ClosingBracket from "./closingBracket";
+import BracketClose from "./bracketClose";
 import { IStackElement } from "./IExtensionGrammar";
 import LineState from "./lineState";
 
@@ -53,7 +53,7 @@ export default class TextLine {
         return this.setColorRange(type, character, depth, beginIndex, endIndex);
     }
 
-    public getClosingBracket(position: Position): ClosingBracket | undefined {
+    public getClosingBracket(position: Position): BracketClose | undefined {
         return this.lineState.getClosingBracket(position);
     }
 

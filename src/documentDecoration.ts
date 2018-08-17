@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { EndOfLine } from "vscode";
 import Bracket from "./bracket";
-import ClosingBracket from "./closingBracket";
+import BracketClose from "./bracketClose";
 import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Settings from "./settings";
@@ -171,7 +171,7 @@ export default class DocumentDecoration {
             if (!endBracket) {
                 return;
             }
-            const startBracket = endBracket.openBracket;
+            const startBracket = endBracket.openBracketPointer.bracket;
             const endLineIndex = endBracket.token.line.index;
             const startLineIndex = startBracket.token.line.index;
 
@@ -247,7 +247,7 @@ export default class DocumentDecoration {
 
         // console.time("updateDecorations");
 
-        const lineIndex = this.lines.length === 0 ? 0 : this.lines.length - 1;
+        const lineIndex = this.lines.length;
 
         const previousLineNumber = lineIndex - 1;
         let previousRuleStack: undefined | IStackElement;
@@ -282,7 +282,7 @@ export default class DocumentDecoration {
         if (!endBracket) {
             return;
         }
-        const startBracket = endBracket.openBracket;
+        const startBracket = endBracket.openBracketPointer.bracket;
         const endLineIndex = endBracket.token.line.index;
         const startLineIndex = startBracket.token.line.index;
 
@@ -484,7 +484,7 @@ export default class DocumentDecoration {
         this.scopeDecorations = [];
     }
 
-    private searchScopeForwards(position: vscode.Position): ClosingBracket | undefined {
+    private searchScopeForwards(position: vscode.Position): BracketClose | undefined {
         for (let i = position.line; i < this.lines.length; i++) {
             const endBracket = this.lines[i].getClosingBracket(position);
 

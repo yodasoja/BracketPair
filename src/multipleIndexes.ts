@@ -1,14 +1,15 @@
 import { Position, Range } from "vscode";
 import Bracket from "./bracket";
 import BracketPointer from "./bracketPointer";
-import ClosingBracket from "./closingBracket";
+import BracketClose from "./bracketClose";
 import ColorIndexes from "./IColorIndexes";
 import Settings from "./settings";
 import Token from "./token";
 
 export default class MultipleIndexes implements ColorIndexes {
     private openBracketStack = new Map<string, BracketPointer[]>();
-    private closedBrackets: ClosingBracket[] = [];
+    private closedBrackets: BracketClose[] = [];
+    private allBrackets: BracketClose[] = [];
     private previousOpenBracketColorIndexes = new Map<string, number[]>();
     private readonly settings: Settings;
 
@@ -68,15 +69,15 @@ export default class MultipleIndexes implements ColorIndexes {
             return;
         }
 
-        const closeBracket = new ClosingBracket(token, openBracketPointer);
+        const closeBracket = new BracketClose(token, openBracketPointer);
         this.closedBrackets.push(closeBracket);
 
         return openBracketPointer.bracket.colorIndex;
     }
 
-    public getClosingBracket(position: Position): ClosingBracket | undefined {
+    public getClosingBracket(position: Position): BracketClose | undefined {
         for (const closeBracket of this.closedBrackets) {
-            const openBracket = closeBracket.openBracket.bracket;
+            const openBracket = closeBracket.openBracketPointer.bracket;
             const startPosition = new Position(openBracket.token.line.index,
                 openBracket.token.beginIndex + openBracket.token.character.length);
             const endPosition = new Position(closeBracket.token.line.index, closeBracket.token.beginIndex);
