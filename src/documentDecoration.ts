@@ -88,13 +88,13 @@ export default class DocumentDecoration {
 
             if (insertedLines > 0 || removedLines > 0) {
                 const existingTextLines = this.lines.splice(overLapEndIndex + removedLines);
+                for (let i = 0; i < insertedLines; i++) {
+                    const index = i + overLapEndIndex;
+                    const newLine = this.tokenizeLine(index);
+                    this.lines.push(newLine);
+                }
+                
                 if (existingTextLines.length > 0) {
-                    for (let i = 0; i < insertedLines; i++) {
-                        const index = i + overLapEndIndex;
-                        const newLine = this.tokenizeLine(index);
-                        this.lines.push(newLine);
-                    }
-
                     const fakeNextLine = this.tokenizeLine(insertedLines + overLapEndIndex).getRuleStack();
                     if (existingTextLines[0].getRuleStack().equals(fakeNextLine)) {
                         this.lines.push(...existingTextLines);
@@ -528,8 +528,7 @@ export default class DocumentDecoration {
             ],
         );
 
-        if (match.has(type))
-        {
+        if (match.has(type)) {
             this.manageTokenStack(character, stackMap, type, currentLine, token);
         }
     }
