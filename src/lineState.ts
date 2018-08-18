@@ -47,6 +47,10 @@ export default class LineState {
         return this.charStack;
     }
 
+    public getAmountOfClosedBrackets(){
+        return this.bracketManager.getAmountOfClosedBrackets();
+    }
+
     public cloneState(): LineState {
         const clone =
         {

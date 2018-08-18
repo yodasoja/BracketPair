@@ -35,6 +35,10 @@ export default class MultipleBracketGroups implements IBracketManager {
         return this.previousOpenBracketColorIndexes[type];
     }
 
+    public getAmountOfClosedBrackets(){
+        return this.closedBrackets.length;
+    }
+
     public isClosingPairForCurrentStack(type: string, depth: number): boolean {
         const bracketStack = this.allLinesOpenBracketStack.get(type);
 

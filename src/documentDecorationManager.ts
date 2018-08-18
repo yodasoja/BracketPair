@@ -101,7 +101,7 @@ export default class DocumentDecorationManager {
                 if (tokenizer instanceof Promise) {
                     tokenizer.then(() => {
                         this.updateAllDocuments();
-                    });
+                    }).catch((e) => console.error(e));
                     return;
                 }
 

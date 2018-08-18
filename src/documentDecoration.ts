@@ -42,110 +42,75 @@ export default class DocumentDecoration {
     }
 
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
+        let recolour = false;
         for (const change of contentChanges) {
-            const amountOfLinesDeleted = change.range.end.line - change.range.start.line;
+            const changedLines = change.range.end.line - change.range.start.line + 1;
 
-            const changedLines = change.text.split(this.eol);
-            const amountOfLinesAdded = changedLines.length - 1;
-            const offset = amountOfLinesAdded - amountOfLinesDeleted;
+            const addedLines = change.text.split(this.eol);
+            const offset = addedLines.length - changedLines;
+            const overlapLines = offset > 0 ? addedLines.length - offset : addedLines.length;
+            const overLapEndIndex = change.range.start.line + overlapLines;
+            const insertedLines = addedLines.length - overlapLines;
+            const removedLines = offset < 0 ? -offset : 0;
+            // console.log("Overlapping lines: " + overlapEnd);
+            // console.log("Inserted lines: " + insertedLines);
+            // console.log("Removed lines: " + removedLines);
 
-            if (offset > 0) {
-                const removedTextLines = this.lines.splice(change.range.start.line);
-                const replacedLine = removedTextLines.shift();
-
-                for (let i = 0; i < changedLines.length; i++) {
-                    const index = change.range.start.line + i;
-                    const newLine = this.tokenizeLine(index);
-                    this.lines.push(newLine);
-                }
-
-                if (replacedLine &&
-                    this.lines[this.lines.length - 1].getRuleStack().equals(replacedLine.getRuleStack())) {
-                    this.lines.push(...removedTextLines);
-                    for (let i = change.range.start.line + changedLines.length; i < this.lines.length; i++) {
-                        this.lines[i].index = i;
-                    }
-                }
-                else {
-                    this.tokenizeDocument();
-                }
+            if (insertedLines > 0 && removedLines > 0) {
+                throw new Error("Inserted/Removed line calculation is wrong")
             }
-            else if (offset === 0) {
-                // Array size unchanged
-                for (let i = 0; i < changedLines.length; i++) {
-                    const index = change.range.start.line + i;
-                    const newLine = this.tokenizeLine(index);
 
-                    const lineBeingReplaced = this.lines[index];
-                    this.lines[index] = newLine;
+            for (let i = change.range.start.line; i < overLapEndIndex; i++) {
+                const newLine = this.tokenizeLine(i);
+                const lineBeingReplaced = this.lines[i];
+                this.lines[i] = newLine;
 
-                    const lineBeingReplacedRuleStack = lineBeingReplaced.getRuleStack();
-                    if (!lineBeingReplacedRuleStack.equals(newLine.getRuleStack())) {
-                        console.log("Content change triggered full reparse from line: " + (index + 1));
-                        this.lines.splice(index + 1);
+                const lineBeingReplacedRuleStack = lineBeingReplaced.getRuleStack();
+                if (!lineBeingReplacedRuleStack.equals(newLine.getRuleStack())) {
+                    this.lines.splice(i + 1);
+                    this.tokenizeDocument();
+                    return;
+                }
+
+                // e.g. function(){ => function(()){
+                // Shouldn't trigger full reparse because scope didn't change
+                // Just recolor new brackets
+                if (lineBeingReplaced.getAmountOfClosedBrackets() !== newLine.getAmountOfClosedBrackets()) {
+                    recolour = true;
+                }
+
+                // e.g. function(){ => function(()){
+                // The { has moved, but scope not changed
+                // Just update the reference, so closing brackets doesn't need to be reparsed
+                this.updateMovedOpeningBracketReferences(lineBeingReplaced, newLine);
+            }
+
+            if (insertedLines > 0 || removedLines > 0) {
+                const existingTextLines = this.lines.splice(overLapEndIndex + removedLines);
+                if (existingTextLines.length > 0) {
+                    for (let i = 0; i < insertedLines; i++) {
+                        const index = i + overLapEndIndex;
+                        const newLine = this.tokenizeLine(index);
+                        this.lines.push(newLine);
+                    }
+
+                    const fakeNextLine = this.tokenizeLine(insertedLines + overLapEndIndex).getRuleStack();
+                    if (existingTextLines[0].getRuleStack().equals(fakeNextLine)) {
+                        this.lines.push(...existingTextLines);
+                        for (let i = insertedLines + overLapEndIndex; i < this.lines.length; i++) {
+                            this.lines[i].index = i;
+                        }
+                    }
+                    else {
                         this.tokenizeDocument();
                         return;
                     }
-
-                    const oldOpenBracketPointers =
-                        lineBeingReplaced.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
-                    const currentOpenBracketPointers =
-                        newLine.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
-
-                    let swap = true;
-                    if (oldOpenBracketPointers.size === currentOpenBracketPointers.size) {
-                        const oldIterator = oldOpenBracketPointers.values();
-                        const currentIterator = currentOpenBracketPointers.values();
-                        for (let iterator = 0; iterator < oldOpenBracketPointers.size; iterator++) {
-                            const old = oldIterator.next();
-                            const current = currentIterator.next();
-
-                            if (old.value.bracket.token.type !== current.value.bracket.token.type) {
-                                swap = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (swap) {
-                        const oldIterator = oldOpenBracketPointers.values();
-                        const currentIterator = currentOpenBracketPointers.values();
-                        for (let iterator = 0; iterator < oldOpenBracketPointers.size; iterator++) {
-                            const old = oldIterator.next();
-                            const current = currentIterator.next();
-
-                            const currentBeginIndex = current.value.bracket.token.beginIndex;
-                            const currentLine = current.value.bracket.token.line;
-                            current.value.bracket = old.value.bracket;
-                            current.value.bracket.token.line = currentLine;
-                            current.value.bracket.token.beginIndex = currentBeginIndex;
-                        }
-                    }
                 }
             }
-            else {
-                // Lines Removed
-            }
+        }
 
-
-            // const insertedTextLines: TextLine[] = [];
-            // const previousLineNumber = change.range.start.line - 1;
-
-            // let previousRuleStack = previousLineNumber >= 0 ?
-            //     this.lines[previousLineNumber].getRuleStack() :
-            //     undefined;
-
-            // for (const insertedLine of changedLines) {
-
-            // }
-
-            // this.lines.
-
-            // if (removedTextLines.length > 0) {
-            //     const oldRuleStack = removedTextLines[removedTextLines.length - 1].getRuleStack();
-
-            //     const newRuleStack this.lines
-            // }
+        if (recolour) {
+            this.tokenizeDocument();
         }
     }
 
@@ -239,10 +204,16 @@ export default class DocumentDecoration {
         // console.time("tokenizeDocument");
 
         const lineIndex = this.lines.length;
-        for (let i = lineIndex; i < this.document.lineCount; i++) {
-            this.tokenizeLine(i);
+        const lineCount = this.document.lineCount;
+        if (lineIndex < lineCount) {
+            console.log("Reparse from line: " + (lineIndex + 1));
+            for (let i = lineIndex; i < lineCount; i++) {
+                const newLine = this.tokenizeLine(i);
+                this.lines.push(newLine);
+            }
         }
 
+        console.log("Coloring document");
         this.colorDecorations(editors);
 
         // console.timeEnd("tokenizeDocument");
@@ -505,6 +476,33 @@ export default class DocumentDecoration {
             else {
                 currentLine.addScopeByCommonType(undefined, character, 0, token.startIndex, token.endIndex);
             }
+        }
+    }
+
+    private updateMovedOpeningBracketReferences(lineBeingReplaced: TextLine, newLine: TextLine) {
+        const oldOpenBracketPointers = lineBeingReplaced.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
+        const currentOpenBracketPointers = newLine.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
+        if (oldOpenBracketPointers.size === currentOpenBracketPointers.size) {
+            const oldIterator = oldOpenBracketPointers.values();
+            const currentIterator = currentOpenBracketPointers.values();
+            for (let iterator = 0; iterator < oldOpenBracketPointers.size; iterator++) {
+                const old = oldIterator.next();
+                const current = currentIterator.next();
+                if (old.value.bracket.token.type !== current.value.bracket.token.type) {
+                    throw new Error("Bracket order not the same?");
+                }
+            }
+        }
+        const oldIterator = oldOpenBracketPointers.values();
+        const currentIterator = currentOpenBracketPointers.values();
+        for (let iterator = 0; iterator < oldOpenBracketPointers.size; iterator++) {
+            const old = oldIterator.next();
+            const current = currentIterator.next();
+            const currentBeginIndex = current.value.bracket.token.beginIndex;
+            const currentLine = current.value.bracket.token.line;
+            current.value.bracket = old.value.bracket;
+            current.value.bracket.token.line = currentLine;
+            current.value.bracket.token.beginIndex = currentBeginIndex;
         }
     }
 

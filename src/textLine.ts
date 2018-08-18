@@ -32,6 +32,10 @@ export default class TextLine {
         return this.lineState.cloneState();
     }
 
+    public getAmountOfClosedBrackets() {
+        return this.lineState.getAmountOfClosedBrackets();
+    }
+
     public addScopeByCommonType(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number): void {
         if (type) {
             const startSplitIndex = type.indexOf(".begin.");
@@ -53,8 +57,7 @@ export default class TextLine {
         return this.lineState.getClosingBracket(position);
     }
 
-    public getOpeningBracketsWhereClosingBracketsAreNotOnSameLine()
-    {
+    public getOpeningBracketsWhereClosingBracketsAreNotOnSameLine() {
         return this.lineState.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
     }
 

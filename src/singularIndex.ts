@@ -83,6 +83,10 @@ export default class SingularBracketGroup implements IBracketManager {
         }
     }
 
+    public getAmountOfClosedBrackets() {
+        return this.closedBrackets.length;
+    }
+
     public copyCumulativeState() {
         return new SingularBracketGroup(
             this.settings,
