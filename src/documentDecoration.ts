@@ -19,6 +19,7 @@ export default class DocumentDecoration {
     private scopeSelectionHistory: vscode.Selection[][] = [];
     private readonly tokenEndTrimLength: number;
     private readonly eol: string;
+    private activeCursorPreviousPosition = new vscode.Position(0, 0);
     constructor(document: vscode.TextDocument, textMate: IGrammar, settings: Settings) {
         this.settings = settings;
         this.document = document;
@@ -57,7 +58,7 @@ export default class DocumentDecoration {
             // console.log("Removed lines: " + removedLines);
 
             if (insertedLines > 0 && removedLines > 0) {
-                throw new Error("Inserted/Removed line calculation is wrong")
+                throw new Error("Inserted/Removed line calculation is wrong");
             }
 
             for (let i = change.range.start.line; i < overLapEndIndex; i++) {
@@ -471,7 +472,7 @@ export default class DocumentDecoration {
             const character = text.substr(token.startIndex, token.endIndex);
             if (token.scopes.length > 1) {
                 const type = token.scopes[token.scopes.length - 1];
-                this.parseTokensJavascript(type, character, token, currentLine, text, stack);
+                this.parseTokensJavascript(type, character, token, currentLine, stack);
             }
             else {
                 currentLine.addScopeByCommonType(undefined, character, 0, token.startIndex, token.endIndex);
@@ -489,20 +490,15 @@ export default class DocumentDecoration {
                 const old = oldIterator.next();
                 const current = currentIterator.next();
                 if (old.value.bracket.token.type !== current.value.bracket.token.type) {
-                    throw new Error("Bracket order not the same?");
+                    console.warn("Bracket order not the same?");
+                    return;
                 }
+                const currentBeginIndex = current.value.bracket.token.beginIndex;
+                const currentLine = current.value.bracket.token.line;
+                current.value.bracket = old.value.bracket;
+                current.value.bracket.token.line = currentLine;
+                current.value.bracket.token.beginIndex = currentBeginIndex;
             }
-        }
-        const oldIterator = oldOpenBracketPointers.values();
-        const currentIterator = currentOpenBracketPointers.values();
-        for (let iterator = 0; iterator < oldOpenBracketPointers.size; iterator++) {
-            const old = oldIterator.next();
-            const current = currentIterator.next();
-            const currentBeginIndex = current.value.bracket.token.beginIndex;
-            const currentLine = current.value.bracket.token.line;
-            current.value.bracket = old.value.bracket;
-            current.value.bracket.token.line = currentLine;
-            current.value.bracket.token.beginIndex = currentBeginIndex;
         }
     }
 
@@ -511,7 +507,6 @@ export default class DocumentDecoration {
         character: string,
         token: IToken,
         currentLine: TextLine,
-        text: string,
         stackMap: Map<string, string[]>,
     ) {
         // Remove file extension
@@ -524,42 +519,18 @@ export default class DocumentDecoration {
             type = type.slice(0, -endString.length);
         }
 
-        if (type === "meta.brace.round" || type === "punctuation.definition.parameters") {
-            const openChar = "(";
-            const closeChar = ")";
-            const currentMatch = text.substring(token.startIndex, token.endIndex);
-            if (currentMatch === openChar) {
-                this.manageTokenStack(openChar, stackMap, type, currentLine, token);
-            }
-            else {
-                this.manageTokenStack(closeChar, stackMap, type, currentLine, token);
-            }
-            return;
-        }
+        const match = new Set<string>(
+            [
+                "meta.brace.round",
+                "punctuation.definition.parameters",
+                "meta.brace.square",
+                "punctuation.definition.block",
+            ],
+        );
 
-        if (type === "meta.brace.square") {
-            const openChar = "[";
-            const closeChar = "]";
-            const currentMatch = text.substring(token.startIndex, token.endIndex);
-            if (currentMatch === openChar) {
-                this.manageTokenStack(openChar, stackMap, type, currentLine, token);
-            }
-            else {
-                this.manageTokenStack(closeChar, stackMap, type, currentLine, token);
-            }
-            return;
-        }
-
-        if (type === "punctuation.definition.block") {
-            const openChar = "{";
-            const closeChar = "}";
-            if (text.substring(token.startIndex, token.endIndex) === openChar) {
-                this.manageTokenStack(openChar, stackMap, type, currentLine, token);
-            }
-            else {
-                this.manageTokenStack(closeChar, stackMap, type, currentLine, token);
-            }
-            return;
+        if (match.has(type))
+        {
+            this.manageTokenStack(character, stackMap, type, currentLine, token);
         }
     }
 
@@ -574,17 +545,35 @@ export default class DocumentDecoration {
             const topStack = stack[stack.length - 1];
             if (topStack === currentChar) {
                 stack.push(currentChar);
-                currentLine.addScopeByCommonType(type, currentChar, stack.length + token.scopes.length, token.startIndex, token.endIndex);
+                currentLine.addScopeByCommonType(
+                    type,
+                    currentChar,
+                    stack.length + token.scopes.length,
+                    token.startIndex,
+                    token.endIndex,
+                );
             }
             else {
-                currentLine.addScopeByCommonType(type, currentChar, stack.length + token.scopes.length, token.startIndex, token.endIndex);
+                currentLine.addScopeByCommonType(
+                    type,
+                    currentChar,
+                    stack.length + token.scopes.length,
+                    token.startIndex,
+                    token.endIndex,
+                );
                 stack.pop();
             }
         }
         else {
             const newStack = [currentChar];
             stackMap.set(type, newStack);
-            currentLine.addScopeByCommonType(type, currentChar, newStack.length + token.scopes.length, token.startIndex, token.endIndex);
+            currentLine.addScopeByCommonType(
+                type,
+                currentChar,
+                newStack.length + token.scopes.length,
+                token.startIndex,
+                token.endIndex,
+            );
         }
     }
 
@@ -661,16 +650,5 @@ export default class DocumentDecoration {
             else { spacing++; }
         }
         return spacing;
-    }
-
-    private replaceOpenBrackets(oldArray: BracketPointer[], newArray: BracketPointer[]) {
-        for (let bracketIndex = 0; bracketIndex < oldArray.length; bracketIndex++) {
-            const oldPointer = oldArray[bracketIndex];
-            const newPointer = newArray[bracketIndex];
-
-            oldPointer.bracket.token.line = newPointer.bracket.token.line;
-            oldPointer.bracket.token.beginIndex = newPointer.bracket.token.beginIndex;
-            newPointer.bracket = oldPointer.bracket;
-        }
     }
 }
