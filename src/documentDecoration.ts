@@ -475,7 +475,7 @@ export default class DocumentDecoration {
                 this.parseTokensJavascript(type, character, token, currentLine, stack);
             }
             else {
-                currentLine.addScopeByCommonType(undefined, character, 0, token.startIndex, token.endIndex);
+                currentLine.addBracket(undefined, character, 0, token.startIndex, token.endIndex);
             }
         }
     }
@@ -545,7 +545,7 @@ export default class DocumentDecoration {
             const topStack = stack[stack.length - 1];
             if (topStack === currentChar) {
                 stack.push(currentChar);
-                currentLine.addScopeByCommonType(
+                currentLine.addBracket(
                     type,
                     currentChar,
                     stack.length + token.scopes.length,
@@ -554,7 +554,7 @@ export default class DocumentDecoration {
                 );
             }
             else {
-                currentLine.addScopeByCommonType(
+                currentLine.addBracket(
                     type,
                     currentChar,
                     stack.length + token.scopes.length,
@@ -567,7 +567,7 @@ export default class DocumentDecoration {
         else {
             const newStack = [currentChar];
             stackMap.set(type, newStack);
-            currentLine.addScopeByCommonType(
+            currentLine.addBracket(
                 type,
                 currentChar,
                 newStack.length + token.scopes.length,

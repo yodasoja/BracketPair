@@ -36,32 +36,13 @@ export default class TextLine {
         return this.lineState.getAmountOfClosedBrackets();
     }
 
-    public addScopeByCommonType(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number): void {
-        if (type) {
-            const startSplitIndex = type.indexOf(".begin.");
-            if (startSplitIndex !== -1) {
-                type = type.substring(0, startSplitIndex);
-            }
-            else {
-                const endSplitIndex = type.indexOf(".end.");
-                if (endSplitIndex !== -1) {
-                    type = type.substring(0, endSplitIndex);
-                }
-            }
-        }
-
-        return this.setColorRange(type, character, depth, beginIndex, endIndex);
-    }
-
-    public getClosingBracket(position: Position): BracketClose | undefined {
-        return this.lineState.getClosingBracket(position);
-    }
-
-    public getOpeningBracketsWhereClosingBracketsAreNotOnSameLine() {
-        return this.lineState.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
-    }
-
-    private setColorRange(type: string | undefined, character: string, depth: number, beginIndex: number, endIndex: number) {
+    public addBracket(
+        type: string | undefined,
+        character: string,
+        depth: number,
+        beginIndex: number,
+        endIndex: number,
+    ): void {
         const color = this.lineState.getBracketColor(type, character, depth, beginIndex, this);
 
         const colorRanges = this.colorRanges.get(color);
@@ -72,5 +53,13 @@ export default class TextLine {
             this.colorRanges.set(color, [{ beginIndex, endIndex }]);
         }
         return;
+    }
+
+    public getClosingBracket(position: Position): BracketClose | undefined {
+        return this.lineState.getClosingBracket(position);
+    }
+
+    public getOpeningBracketsWhereClosingBracketsAreNotOnSameLine() {
+        return this.lineState.getOpeningBracketsWhereClosingBracketsAreNotOnSameLine();
     }
 }
