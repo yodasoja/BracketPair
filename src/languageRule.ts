@@ -3,51 +3,64 @@
 export default class LanguageRule {
     public languageId: string;
     // public baseLanguageRule: string | undefined;
-    public languageTokens: LanguageToken[] = [];
+    public languageTokens: LanguageAgnosticToken[] = [];
 
     public build() {
-        const commonTokens = this.languageTokens.map((e) => new LanguageAgnosticToken(e));
+        const map = new Map<string, string>();
+
+        for (const token of this.languageTokens) {
+            map.set(token.tokenOpen + token.suffix, token.commonToken);
+            if (token.tokenClose) {
+                map.set(token.tokenClose + token.suffix, token.commonToken);
+            }
+        }
+
+        return map;
     }
 
     public initTypescript() {
         // User input from settings json
-        const brace = new LanguageToken("meta.brace.round.ts");
-        const parameters = new LanguageToken(
+        const brace = new LanguageAgnosticToken("meta.brace.round.ts");
+        const parameters = new LanguageAgnosticToken(
             "punctuation.definition.parameters.begin.ts",
             "punctuation.definition.parameters.end.ts",
         );
-        const square = new LanguageToken("meta.brace.square.ts");
-        const block = new LanguageToken("punctuation.definition.block.ts");
+        const square = new LanguageAgnosticToken("meta.brace.square.ts");
+        const block = new LanguageAgnosticToken("punctuation.definition.block.ts");
 
         this.languageTokens = [brace, parameters, square, block];
     }
 }
 
-class LanguageToken {
+class LanguageAgnosticToken {
+    public readonly commonToken: string;
     public tokenOpen: string;
     public tokenClose?: string;
-
+    public readonly suffix: string;
     constructor(tokenOpen: string, tokenClose?: string) {
-        this.tokenOpen = tokenOpen;
-        this.tokenClose = tokenClose;
-    }
-}
+        const openSplit = tokenOpen.split(".");
+        this.suffix = "." + openSplit.pop();
+        this.tokenOpen = openSplit.join(".");
 
-class LanguageAgnosticToken {
-    public readonly type: string;
-    public readonly languageToken: LanguageToken;
-    constructor(languageToken: LanguageToken) {
-        this.languageToken = languageToken;
-        const openNoSuffix = languageToken.tokenOpen.split(".").slice(0, -1).join(".");
-
-        if (languageToken.tokenClose) {
-            const closeSplit = languageToken.tokenClose.split(".");
+        if (tokenClose) {
+            const closeSplit = tokenClose.split(".");
             closeSplit.pop();
+            this.tokenClose = closeSplit.join(".");
 
+            if (openSplit.length !== closeSplit.length) {
+                throw new Error("Open and Close tokens are not same type");
+            }
 
+            let i = 0;
+            for (; i < openSplit.length; i++) {
+                if (openSplit[i] !== closeSplit[i]) {
+                    break;
+                }
+            }
+
+            openSplit.splice(i);
         }
-        else {
-            this.type = openNoSuffix;
-        }
+
+        this.commonToken = openSplit.join(".");
     }
 }

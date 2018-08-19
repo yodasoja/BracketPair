@@ -7,6 +7,7 @@ import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Settings from "./settings";
 import TextLine from "./textLine";
+import LanguageRule from "./languageRule";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
@@ -17,16 +18,16 @@ export default class DocumentDecoration {
     private readonly tokenizer: IGrammar;
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
-    private readonly tokenEndTrimLength: number;
     private readonly eol: string;
+    private readonly typeMap: Map<string, string>;
     constructor(document: vscode.TextDocument, textMate: IGrammar, settings: Settings) {
         this.settings = settings;
         this.document = document;
         this.tokenizer = textMate;
 
-        const scopeName = (this.tokenizer as any)._grammar.scopeName as string;
-        const split = scopeName.split(".");
-        this.tokenEndTrimLength = split[split.length - 1].length + 1;
+        const rule = new LanguageRule();
+        rule.initTypescript();
+        this.typeMap = rule.build();
 
         if (this.document.eol === EndOfLine.LF) {
             this.eol = "\n";
@@ -70,6 +71,14 @@ export default class DocumentDecoration {
 
         if (amountOfInsertedLines > 0 && amountOfRemovedLines > 0) {
             throw new Error("Inserted/Removed line calculation is wrong");
+        }
+
+        if (amountOfInsertedLines < 0) {
+            throw new Error("amountOfInsertedLines < 0");
+        }
+
+        if (amountOfRemovedLines < 0) {
+            throw new Error("amountOfRemovedLines < 0");
         }
 
         for (let i = change.range.start.line; i < overLapEndIndex; i++) {
@@ -483,7 +492,11 @@ export default class DocumentDecoration {
             const character = text.substring(token.startIndex, token.endIndex);
             if (token.scopes.length > 1) {
                 const type = token.scopes[token.scopes.length - 1];
-                this.parseTokensJavascript(type, character, token, currentLine, stack);
+                const commonType = this.typeMap.get(type);
+
+                if (commonType) {
+                    this.manageTokenStack(character, stack, commonType, currentLine, token);
+                }
             }
             else {
                 // Orphan bracket
@@ -511,37 +524,6 @@ export default class DocumentDecoration {
                 current.value.bracket.token.line = currentLine;
                 current.value.bracket.token.beginIndex = currentBeginIndex;
             }
-        }
-    }
-
-    private parseTokensJavascript(
-        type: string,
-        character: string,
-        token: IToken,
-        currentLine: TextLine,
-        stackMap: Map<string, string[]>,
-    ) {
-        // Remove file extension
-        type = type.slice(0, -this.tokenEndTrimLength);
-        const beginString = ".begin";
-        const endString = ".end";
-        if (type.endsWith(beginString)) {
-            type = type.slice(0, -beginString.length);
-        } else if (type.endsWith(endString)) {
-            type = type.slice(0, -endString.length);
-        }
-
-        const match = new Set<string>(
-            [
-                "meta.brace.round",
-                "punctuation.definition.parameters",
-                "meta.brace.square",
-                "punctuation.definition.block",
-            ],
-        );
-
-        if (match.has(type)) {
-            this.manageTokenStack(character, stackMap, type, currentLine, token);
         }
     }
 
