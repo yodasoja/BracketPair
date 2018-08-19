@@ -82,6 +82,22 @@
                                 }
                             ]
 
+                        },
+                        {
+                            "language": "html",
+                            "tokens" :
+                            [
+                                {
+                                    "open" : "entity.name.tag",
+                                    "unlessParentTokenEndsWith" : "meta.tag.metadata.doctype"
+                                },
+                                {
+                                    "open" : "punctuation.definition.tag.begin",
+                                    "close" : "punctuation.definition.tag.end",
+                                    "unlessParentTokenEndsWith" : "void"
+                                }
+                            ]
+
                         }
                     ]
                 },
