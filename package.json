@@ -42,6 +42,49 @@
             "type": "object",
             "title": "BracketPair",
             "properties": {
+                "bracketPairColorizer2.languages": {
+                    "description": "Ensure that an opening brackets color does not match a previous brackets color",
+                    "scope": "window",
+                    "default": [
+                        {
+                            "language": "javascript",
+                            "tokens": [
+                                {
+                                    "open": "punctuation.definition.parameters.begin",
+                                    "close": "punctuation.definition.parameters.end"
+                                },
+                                {
+                                    "open": "meta.brace.round"
+                                },
+                                {
+                                    "open": "meta.brace.square"
+                                },
+                                {
+                                    "open": "punctuation.definition.block"
+                                }
+                            ]
+                        },
+                        {
+                            "language": "typescript",
+                            "extends": "javascript"
+                        },
+                        {
+                            "language": "json",
+                            "tokens" :
+                            [
+                                {
+                                    "open" : "punctuation.definition.dictionary.begin",
+                                    "close" : "punctuation.definition.dictionary.end"
+                                },
+                                {
+                                    "open" : "punctuation.definition.array.begin",
+                                    "close" : "punctuation.definition.array.end"
+                                }
+                            ]
+
+                        }
+                    ]
+                },
                 "bracketPairColorizer.timeOut": {
                     "type": "number",
                     "default": 200,
