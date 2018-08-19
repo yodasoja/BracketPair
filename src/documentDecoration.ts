@@ -63,13 +63,12 @@ export default class DocumentDecoration {
         let recolour = false;
         const amountOfExistingLinesChanged = (change.range.end.line - change.range.start.line) + 1;
         const amountOfNewLinesChanged = change.text.split(this.eol).length;
-        const overlap = Math.min(amountOfExistingLinesChanged, amountOfNewLinesChanged);
-        const insertedLines = amountOfNewLinesChanged - overlap;
+        const amountOfRemovedLines = Math.max(0, amountOfExistingLinesChanged - amountOfNewLinesChanged);
+        const amountOfLinesToReparse = amountOfExistingLinesChanged - amountOfRemovedLines;
+        const amountOfInsertedLines = amountOfRemovedLines > 0 ? 0 : amountOfNewLinesChanged - amountOfLinesToReparse;
+        const overLapEndIndex = amountOfLinesToReparse + change.range.start.line;
 
-        const removedLineCount = Math.max(0, amountOfExistingLinesChanged - amountOfNewLinesChanged);
-        const overLapEndIndex = overlap + change.range.start.line;
-
-        if (insertedLines > 0 && removedLineCount > 0) {
+        if (amountOfInsertedLines > 0 && amountOfRemovedLines > 0) {
             throw new Error("Inserted/Removed line calculation is wrong");
         }
 
@@ -98,20 +97,20 @@ export default class DocumentDecoration {
             this.updateMovedOpeningBracketReferences(lineBeingReplaced, newLine);
         }
 
-        if (insertedLines > 0 || removedLineCount > 0) {
+        if (amountOfInsertedLines > 0 || amountOfRemovedLines > 0) {
             const existingTextLines = this.lines.splice(overLapEndIndex);
-            existingTextLines.splice(0, removedLineCount);
-            for (let i = 0; i < insertedLines; i++) {
+            existingTextLines.splice(0, amountOfRemovedLines);
+            for (let i = 0; i < amountOfInsertedLines; i++) {
                 const index = i + overLapEndIndex;
                 const newLine = this.tokenizeLine(index);
                 this.lines.push(newLine);
             }
 
             if (existingTextLines.length > 0) {
-                const fakeNextLine = this.tokenizeLine(insertedLines + overLapEndIndex).getRuleStack();
+                const fakeNextLine = this.tokenizeLine(amountOfInsertedLines + overLapEndIndex).getRuleStack();
                 if (existingTextLines[0].getRuleStack().equals(fakeNextLine)) {
                     this.lines.push(...existingTextLines);
-                    for (let i = insertedLines + overLapEndIndex; i < this.lines.length; i++) {
+                    for (let i = amountOfInsertedLines + overLapEndIndex; i < this.lines.length; i++) {
                         this.lines[i].index = i;
                     }
                 }
