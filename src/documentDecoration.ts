@@ -66,7 +66,7 @@ export default class DocumentDecoration {
         const overlap = Math.min(amountOfExistingLinesChanged, amountOfNewLinesChanged);
         const insertedLines = amountOfNewLinesChanged - overlap;
 
-        const removedLineCount = amountOfExistingLinesChanged - 1;
+        const removedLineCount = Math.max(0, amountOfExistingLinesChanged - amountOfNewLinesChanged);
         const overLapEndIndex = overlap + change.range.start.line;
 
         if (insertedLines > 0 && removedLineCount > 0) {
@@ -99,7 +99,8 @@ export default class DocumentDecoration {
         }
 
         if (insertedLines > 0 || removedLineCount > 0) {
-            const existingTextLines = this.lines.splice(overLapEndIndex + removedLineCount);
+            const existingTextLines = this.lines.splice(overLapEndIndex);
+            existingTextLines.splice(0, removedLineCount);
             for (let i = 0; i < insertedLines; i++) {
                 const index = i + overLapEndIndex;
                 const newLine = this.tokenizeLine(index);
