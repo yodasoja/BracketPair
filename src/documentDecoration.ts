@@ -19,7 +19,6 @@ export default class DocumentDecoration {
     private scopeSelectionHistory: vscode.Selection[][] = [];
     private readonly tokenEndTrimLength: number;
     private readonly eol: string;
-    private activeCursorPreviousPosition = new vscode.Position(0, 0);
     constructor(document: vscode.TextDocument, textMate: IGrammar, settings: Settings) {
         this.settings = settings;
         this.document = document;
@@ -43,69 +42,85 @@ export default class DocumentDecoration {
     }
 
     public onDidChangeTextDocument(contentChanges: vscode.TextDocumentContentChangeEvent[]) {
-        let recolour = false;
-        for (const change of contentChanges) {
-            const changedLines = change.range.end.line - change.range.start.line + 1;
-
-            const addedLines = change.text.split(this.eol);
-            const offset = addedLines.length - changedLines;
-            const overlapLines = offset > 0 ? addedLines.length - offset : addedLines.length;
-            const overLapEndIndex = change.range.start.line + overlapLines;
-            const insertedLines = addedLines.length - overlapLines;
-            const removedLines = offset < 0 ? -offset : 0;
-            // console.log("Overlapping lines: " + overlapEnd);
-            // console.log("Inserted lines: " + insertedLines);
-            // console.log("Removed lines: " + removedLines);
-
-            if (insertedLines > 0 && removedLines > 0) {
-                throw new Error("Inserted/Removed line calculation is wrong");
+        if (contentChanges.length > 1) {
+            let minLineIndexToUpdate = 0;
+            for (const contentChange of contentChanges) {
+                minLineIndexToUpdate = Math.min(minLineIndexToUpdate, contentChange.range.start.line);
             }
 
-            for (let i = change.range.start.line; i < overLapEndIndex; i++) {
-                const newLine = this.tokenizeLine(i);
-                const lineBeingReplaced = this.lines[i];
-                this.lines[i] = newLine;
+            if (minLineIndexToUpdate === 0) {
+                this.lines = [];
+            }
+            else {
+                this.lines.splice(minLineIndexToUpdate);
+            }
+            this.tokenizeDocument();
+            return;
+        }
 
-                const lineBeingReplacedRuleStack = lineBeingReplaced.getRuleStack();
-                if (!lineBeingReplacedRuleStack.equals(newLine.getRuleStack())) {
-                    this.lines.splice(i + 1);
+        const change = contentChanges[0];
+
+        let recolour = false;
+        const changedLines = change.range.end.line - change.range.start.line + 1;
+
+        const addedLines = change.text.split(this.eol);
+        const offset = addedLines.length - changedLines;
+        const overlapLines = offset > 0 ? addedLines.length - offset : addedLines.length;
+        const overLapEndIndex = change.range.start.line + overlapLines;
+        const insertedLines = addedLines.length - overlapLines;
+        const removedLines = offset < 0 ? -offset : 0;
+        // console.log("Overlapping lines: " + overlapEnd);
+        // console.log("Inserted lines: " + insertedLines);
+        // console.log("Removed lines: " + removedLines);
+
+        if (insertedLines > 0 && removedLines > 0) {
+            throw new Error("Inserted/Removed line calculation is wrong");
+        }
+
+        for (let i = change.range.start.line; i < overLapEndIndex; i++) {
+            const newLine = this.tokenizeLine(i);
+            const lineBeingReplaced = this.lines[i];
+            this.lines[i] = newLine;
+
+            const lineBeingReplacedRuleStack = lineBeingReplaced.getRuleStack();
+            if (!lineBeingReplacedRuleStack.equals(newLine.getRuleStack())) {
+                this.lines.splice(i + 1);
+                this.tokenizeDocument();
+                return;
+            }
+
+            // e.g. [].map() => [].map(())
+            // Shouldn't trigger full reparse because scope didn't change
+            // Just recolor new brackets
+            if (lineBeingReplaced.getAmountOfClosedBrackets() !== newLine.getAmountOfClosedBrackets()) {
+                recolour = true;
+            }
+
+            // e.g. function(){ => function(()){
+            // The { has moved, but scope not changed
+            // Just update the reference, so closing brackets doesn't need to be reparsed
+            this.updateMovedOpeningBracketReferences(lineBeingReplaced, newLine);
+        }
+
+        if (insertedLines > 0 || removedLines > 0) {
+            const existingTextLines = this.lines.splice(overLapEndIndex + removedLines);
+            for (let i = 0; i < insertedLines; i++) {
+                const index = i + overLapEndIndex;
+                const newLine = this.tokenizeLine(index);
+                this.lines.push(newLine);
+            }
+
+            if (existingTextLines.length > 0) {
+                const fakeNextLine = this.tokenizeLine(insertedLines + overLapEndIndex).getRuleStack();
+                if (existingTextLines[0].getRuleStack().equals(fakeNextLine)) {
+                    this.lines.push(...existingTextLines);
+                    for (let i = insertedLines + overLapEndIndex; i < this.lines.length; i++) {
+                        this.lines[i].index = i;
+                    }
+                }
+                else {
                     this.tokenizeDocument();
                     return;
-                }
-
-                // e.g. function(){ => function(()){
-                // Shouldn't trigger full reparse because scope didn't change
-                // Just recolor new brackets
-                if (lineBeingReplaced.getAmountOfClosedBrackets() !== newLine.getAmountOfClosedBrackets()) {
-                    recolour = true;
-                }
-
-                // e.g. function(){ => function(()){
-                // The { has moved, but scope not changed
-                // Just update the reference, so closing brackets doesn't need to be reparsed
-                this.updateMovedOpeningBracketReferences(lineBeingReplaced, newLine);
-            }
-
-            if (insertedLines > 0 || removedLines > 0) {
-                const existingTextLines = this.lines.splice(overLapEndIndex + removedLines);
-                for (let i = 0; i < insertedLines; i++) {
-                    const index = i + overLapEndIndex;
-                    const newLine = this.tokenizeLine(index);
-                    this.lines.push(newLine);
-                }
-                
-                if (existingTextLines.length > 0) {
-                    const fakeNextLine = this.tokenizeLine(insertedLines + overLapEndIndex).getRuleStack();
-                    if (existingTextLines[0].getRuleStack().equals(fakeNextLine)) {
-                        this.lines.push(...existingTextLines);
-                        for (let i = insertedLines + overLapEndIndex; i < this.lines.length; i++) {
-                            this.lines[i].index = i;
-                        }
-                    }
-                    else {
-                        this.tokenizeDocument();
-                        return;
-                    }
                 }
             }
         }
@@ -469,12 +484,13 @@ export default class DocumentDecoration {
     private parseTokens(tokens: IToken[], currentLine: TextLine, text: string) {
         const stack = currentLine.getCharStack();
         for (const token of tokens) {
-            const character = text.substr(token.startIndex, token.endIndex);
+            const character = text.substring(token.startIndex, token.endIndex);
             if (token.scopes.length > 1) {
                 const type = token.scopes[token.scopes.length - 1];
                 this.parseTokensJavascript(type, character, token, currentLine, stack);
             }
             else {
+                // Orphan bracket
                 currentLine.addBracket(undefined, character, 0, token.startIndex, token.endIndex);
             }
         }

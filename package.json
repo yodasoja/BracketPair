@@ -1,11 +1,11 @@
 {
-    "name": "bracket-pair-colorizer",
-    "displayName": "Bracket Pair Colorizer",
+    "name": "bracket-pair-colorizer2",
+    "displayName": "Bracket Pair Colorizer 2",
     "description": "A customizable extension for colorizing matching brackets",
-    "version": "1.0.59",
+    "version": "0.0.1",
     "publisher": "CoenraadS",
     "engines": {
-        "vscode": "^1.23.0"
+        "vscode": "^1.26.0"
     },
     "icon": "images/icon.png",
     "categories": [
