@@ -65,7 +65,7 @@ export default class DocumentDecoration {
         const amountOfNewLinesChanged = change.text.split(this.eol).length;
         const amountOfRemovedLines = Math.max(0, amountOfExistingLinesChanged - amountOfNewLinesChanged);
         const amountOfLinesToReparse = amountOfExistingLinesChanged - amountOfRemovedLines;
-        const amountOfInsertedLines = amountOfRemovedLines > 0 ? 0 : amountOfNewLinesChanged - amountOfLinesToReparse;
+        const amountOfInsertedLines = amountOfNewLinesChanged - amountOfLinesToReparse;
         const overLapEndIndex = amountOfLinesToReparse + change.range.start.line;
 
         if (amountOfInsertedLines > 0 && amountOfRemovedLines > 0) {
