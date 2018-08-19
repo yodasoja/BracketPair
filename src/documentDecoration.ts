@@ -61,19 +61,15 @@ export default class DocumentDecoration {
         const change = contentChanges[0];
 
         let recolour = false;
-        const changedLines = change.range.end.line - change.range.start.line + 1;
+        const amountOfExistingLinesChanged = (change.range.end.line - change.range.start.line) + 1;
+        const amountOfNewLinesChanged = change.text.split(this.eol).length;
+        const overlap = Math.min(amountOfExistingLinesChanged, amountOfNewLinesChanged);
+        const insertedLines = amountOfNewLinesChanged - overlap;
 
-        const addedLines = change.text.split(this.eol);
-        const offset = addedLines.length - changedLines;
-        const overlapLines = offset > 0 ? addedLines.length - offset : addedLines.length;
-        const overLapEndIndex = change.range.start.line + overlapLines;
-        const insertedLines = addedLines.length - overlapLines;
-        const removedLines = offset < 0 ? -offset : 0;
-        // console.log("Overlapping lines: " + overlapEnd);
-        // console.log("Inserted lines: " + insertedLines);
-        // console.log("Removed lines: " + removedLines);
+        const removedLineCount = amountOfExistingLinesChanged - 1;
+        const overLapEndIndex = overlap + change.range.start.line;
 
-        if (insertedLines > 0 && removedLines > 0) {
+        if (insertedLines > 0 && removedLineCount > 0) {
             throw new Error("Inserted/Removed line calculation is wrong");
         }
 
@@ -102,8 +98,8 @@ export default class DocumentDecoration {
             this.updateMovedOpeningBracketReferences(lineBeingReplaced, newLine);
         }
 
-        if (insertedLines > 0 || removedLines > 0) {
-            const existingTextLines = this.lines.splice(overLapEndIndex + removedLines);
+        if (insertedLines > 0 || removedLineCount > 0) {
+            const existingTextLines = this.lines.splice(overLapEndIndex + removedLineCount);
             for (let i = 0; i < insertedLines; i++) {
                 const index = i + overLapEndIndex;
                 const newLine = this.tokenizeLine(index);
