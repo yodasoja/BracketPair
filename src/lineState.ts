@@ -67,16 +67,12 @@ export default class LineState {
     }
 
     public getBracketColor(
-        type: string | undefined,
+        type: string,
         character: string,
         depth: number,
         beginIndex: number,
         line: TextLine,
     ): string {
-        if (!type) {
-            this.previousBracketColor = this.settings.orphanColor;
-            return this.settings.orphanColor;
-        }
         const token = new Token(type, character, depth, beginIndex, line);
         if (this.bracketManager.isClosingPairForCurrentStack(type, depth)) {
             return this.getCloseBracketColor(token);
@@ -120,13 +116,9 @@ export default class LineState {
         let color: string;
         if (colorIndex !== undefined) {
             color = this.settings.colors[colorIndex];
-        }
-        else {
-            color = this.settings.orphanColor;
+            return color;
         }
 
-        this.previousBracketColor = color;
-
-        return color;
+        throw new Error("Could not get closing bracket color");
     }
 }

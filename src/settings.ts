@@ -19,7 +19,6 @@ export default class Settings {
     public readonly showBracketsInRuler: boolean;
     public readonly scopeLineRelativePosition: boolean;
     public colors: string[];
-    public orphanColor: string;
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
     private readonly activeBracketCSSElements: string[][];
@@ -146,11 +145,6 @@ export default class Settings {
                     + consecutiveSettings.length);
             }
 
-            this.orphanColor = consecutiveSettings[consecutiveSettings.length - 1] as string;
-            if (typeof this.orphanColor !== "string") {
-                throw new Error("consecutivePairColors[" + (consecutiveSettings.length - 1) + "] is not a string");
-            }
-
             this.colors = consecutiveSettings[consecutiveSettings.length - 2] as string[];
             if (!Array.isArray(this.colors)) {
                 throw new Error("consecutivePairColors[" + (consecutiveSettings.length - 2) + "] is not a string[]");
@@ -180,11 +174,6 @@ export default class Settings {
                 this.colors = innerArray[1] as string[];
                 if (!Array.isArray(this.colors)) {
                     throw new Error("independentSettings[" + index + "][1] is not string[]");
-                }
-
-                this.orphanColor = innerArray[2] as string;
-                if (typeof this.orphanColor !== "string") {
-                    throw new Error("independentSettings[" + index + "][2] is not a string");
                 }
             });
         }
@@ -297,12 +286,6 @@ export default class Settings {
             });
             decorations.set(color, decoration);
         }
-
-        const errorDecoration = vscode.window.createTextEditorDecorationType({
-            color: this.orphanColor,
-            rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-        });
-        decorations.set(this.orphanColor, errorDecoration);
 
         return decorations;
     }
