@@ -20,7 +20,7 @@ export default class Settings {
     public readonly showBracketsInGutter: boolean;
     public readonly showBracketsInRuler: boolean;
     public readonly scopeLineRelativePosition: boolean;
-    public readonly ignoreExtensions: string[];
+    public readonly ignoreFileExtensions: string[];
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
     private readonly activeBracketCSSElements: string[][];
@@ -38,13 +38,13 @@ export default class Settings {
 
         const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
         
-        const ignoreExtensions = configuration.get("ignoreExtensions") as string[];
+        const ignoreFileExtensions = configuration.get("ignoreFileExtensions") as string[];
 
-        if (!Array.isArray(ignoreExtensions)) {
-            throw new Error("ignoreExtensions is not an array");
+        if (!Array.isArray(ignoreFileExtensions)) {
+            throw new Error("ignoreFileExtensions is not an array");
         }
 
-        this.ignoreExtensions = ignoreExtensions
+        this.ignoreFileExtensions = ignoreFileExtensions
         
         const activeScopeCSS = configuration.get("activeScopeCSS") as string[];
 

@@ -105,10 +105,8 @@ export default class DocumentDecorationManager {
                 const settings = new Settings(primaryLanguage, this.gutterIcons, document.uri);
                 const currentUriExtension = '.' + uri.split(".").pop() || '';
 
-                console.log(settings.ignoreExtensions)
-
                 if (!this.supportedLanguages.has(primaryLanguage) ||
-                    settings.ignoreExtensions.indexOf(currentUriExtension) > -1
+                    settings.ignoreFileExtensions.indexOf(currentUriExtension) > -1
                 ) {
                     return;
                 }

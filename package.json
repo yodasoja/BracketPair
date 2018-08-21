@@ -195,7 +195,7 @@
                     "description": "Define paired characters and their color groups",
                     "scope": "resource"
                 },
-                "bracketPairColorizer.ignoreExtensions": {
+                "bracketPairColorizer.ignoreFileExtensions": {
                     "type": "array",
                     "default": [],
                     "description": "Define file extensions to exclude from highlighting",
