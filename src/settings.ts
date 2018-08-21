@@ -20,6 +20,7 @@ export default class Settings {
     public readonly showBracketsInGutter: boolean;
     public readonly showBracketsInRuler: boolean;
     public readonly scopeLineRelativePosition: boolean;
+    public readonly ignoreExtensions: string[];
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
     private readonly activeBracketCSSElements: string[][];
@@ -36,6 +37,15 @@ export default class Settings {
         this.prismLanguageID = languageID;
 
         const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
+        
+        const ignoreExtensions = configuration.get("ignoreExtensions") as string[];
+
+        if (!Array.isArray(ignoreExtensions)) {
+            throw new Error("ignoreExtensions is not an array");
+        }
+
+        this.ignoreExtensions = ignoreExtensions
+        
         const activeScopeCSS = configuration.get("activeScopeCSS") as string[];
 
         if (!Array.isArray(activeScopeCSS)) {
