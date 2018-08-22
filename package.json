@@ -1,5 +1,5 @@
 {
-    "name": "bracket-pair-colorizer2",
+    "name": "bracket-pair-colorizer",
     "displayName": "Bracket Pair Colorizer 2",
     "description": "A customizable extension for colorizing matching brackets",
     "version": "0.0.1",
@@ -45,10 +45,11 @@
                 "bracketPairColorizer2.languages": {
                     "description": "Ensure that an opening brackets color does not match a previous brackets color",
                     "scope": "window",
+                    "$schema": "./json-schema/language-schema.json",
                     "default": [
                         {
                             "language": "javascript",
-                            "tokens": [
+                            "scopes": [
                                 {
                                     "open": "punctuation.definition.parameters.begin",
                                     "close": "punctuation.definition.parameters.end"
@@ -70,7 +71,7 @@
                         },
                         {
                             "language": "json",
-                            "tokens" :
+                            "scopes" :
                             [
                                 {
                                     "open" : "punctuation.definition.dictionary.begin",
@@ -85,7 +86,7 @@
                         },
                         {
                             "language": "html",
-                            "tokens" :
+                            "scopes" :
                             [
                                 {
                                     "open" : "entity.name.tag",

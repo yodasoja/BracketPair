@@ -1,6 +1,5 @@
 import { IGrammar, IExtensionPackage } from "./IExtensionGrammar";
 
-"use strict";
 import * as path from "path";
 import * as vscode from "vscode";
 import fs = require("fs");
@@ -65,7 +64,7 @@ export class TextMateLoader {
         const dict = new Map<string, { scopeName: string, path: string }>();
         vscode.extensions.all.forEach((extension) => {
             const packageJSON = extension.packageJSON as IExtensionPackage;
-            if (packageJSON.contributes && packageJSON.contributes.grammars && packageJSON.contributes.grammars) {
+            if (packageJSON.contributes && packageJSON.contributes.grammars) {
                 packageJSON.contributes.grammars.forEach((grammar) => {
                     if (grammar.language && grammar.scopeName && grammar.path) {
                         const fullPath = path.join(extension.extensionPath, grammar.path);

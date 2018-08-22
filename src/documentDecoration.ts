@@ -7,7 +7,7 @@ import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
 import Settings from "./settings";
 import TextLine from "./textLine";
-import LanguageRule from "./languageRule";
+import LanguageRule, { LanguageAgnosticToken } from "./languageRule";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
@@ -19,15 +19,24 @@ export default class DocumentDecoration {
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
     private readonly eol: string;
-    private readonly typeMap: Map<string, string>;
+    private readonly typeMap = new Map<string, LanguageAgnosticToken>();
     constructor(document: vscode.TextDocument, textMate: IGrammar, settings: Settings) {
         this.settings = settings;
         this.document = document;
         this.tokenizer = textMate;
 
-        const rule = new LanguageRule();
-        rule.initTypescript();
-        this.typeMap = rule.build();
+        const suffix = "." + (this.tokenizer as any)._grammar.scopeName.split(".").pop();
+
+        const rule = new LanguageRule(this.document.uri);
+        const lookupBuilder = rule.get(this.document.languageId);
+        if (lookupBuilder) {
+            for (const lookup of lookupBuilder) {
+                this.typeMap.set(lookup.scope.open + suffix, lookup);
+                if (lookup.scope.close) {
+                    this.typeMap.set(lookup.scope.close + suffix, lookup);
+                }
+            }
+        }
 
         if (this.document.eol === EndOfLine.LF) {
             this.eol = "\n";
@@ -486,21 +495,28 @@ export default class DocumentDecoration {
         }
     }
 
+    private isValidToken(tokens: string[]) {
+        // If get common token
+        // Check parent token for rule somehow
+        // type = ??
+        // Remove grouping?
+
+        // If common token is the same
+        // Use fullname + common as stack key
+    }
+
     private parseTokens(tokens: IToken[], currentLine: TextLine, text: string) {
         const stack = currentLine.getCharStack();
         for (const token of tokens) {
             const character = text.substring(token.startIndex, token.endIndex);
             if (token.scopes.length > 1) {
                 const type = token.scopes[token.scopes.length - 1];
-                const commonType = this.typeMap.get(type);
+                
+                const lookup = this.typeMap.get(type);
 
-                if (commonType) {
-                    this.manageTokenStack(character, stack, commonType, currentLine, token);
+                if (lookup) {
+                    this.manageTokenStack(character, stack, lookup.commonToken, currentLine, token);
                 }
-            }
-            else {
-                // Orphan bracket
-                currentLine.addBracket(undefined, character, 0, token.startIndex, token.endIndex);
             }
         }
     }
@@ -533,10 +549,11 @@ export default class DocumentDecoration {
         type: string,
         currentLine: TextLine,
         token: IToken) {
-        const stack = stackMap.get(type);
+        const stackKey = type + token.scopes.length;
+        const stack = stackMap.get(stackKey);
         if (stack && stack.length > 0) {
             const topStack = stack[stack.length - 1];
-            if (topStack === currentChar) {
+            if ((topStack) === currentChar) {
                 stack.push(currentChar);
                 currentLine.addBracket(
                     type,
@@ -559,7 +576,7 @@ export default class DocumentDecoration {
         }
         else {
             const newStack = [currentChar];
-            stackMap.set(type, newStack);
+            stackMap.set(stackKey, newStack);
             currentLine.addBracket(
                 type,
                 currentChar,

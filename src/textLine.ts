@@ -37,7 +37,7 @@ export default class TextLine {
     }
 
     public addBracket(
-        type: string | undefined,
+        type: string,
         character: string,
         depth: number,
         beginIndex: number,
