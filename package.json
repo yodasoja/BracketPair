@@ -58,7 +58,7 @@
                                     "closeSuffix": ".end"
                                 },
                                 {
-                                    "startsWith": "punctuation.definition.",
+                                    "startsWith": "punctuation.definition",
                                     "openSuffix": ".begin",
                                     "closeSuffix": ".end"
                                 }
@@ -92,7 +92,7 @@
                             "scopes": [
                                 {
                                     "parent": "entity.name.tag",
-                                    "startsWith": "meta.tag.structure.",
+                                    "startsWith": "meta.tag.structure",
                                     "openAndCloseCharactersAreTheSame": true,
                                     "openSuffix": ".start",
                                     "closeSuffix": ".end"

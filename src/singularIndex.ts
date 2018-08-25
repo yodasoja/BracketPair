@@ -72,9 +72,9 @@ export default class SingularBracketGroup implements IBracketManager {
     public getClosingBracket(position: Position): BracketClose | undefined {
         for (const closeBracket of this.closedBrackets) {
             const openBracket = closeBracket.openBracketPointer.bracket;
-            const startPosition = new Position(openBracket.token.line.index,
-                openBracket.token.beginIndex + openBracket.token.character.length);
-            const endPosition = new Position(closeBracket.token.line.index, closeBracket.token.beginIndex);
+            const startPosition = new Position(openBracket.token.line.index, openBracket.token.beginIndex + 1);
+            const endPosition = new Position(closeBracket.token.line.index,
+                closeBracket.token.beginIndex + closeBracket.token.character.length - 1);
             const range = new Range(startPosition, endPosition);
 
             if (range.contains(position)) {

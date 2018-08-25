@@ -567,7 +567,12 @@ export default class DocumentDecoration {
         context: BracketContext,
     ) {
         const stackKey = type + token.scopes.length;
+        console.log(stackKey);
         const stack = stackMap.get(stackKey);
+        if (openAndCloseCharactersAreTheSame) {
+            currentChar += token.scopes.length;
+        }
+
         if (stack && stack.length > 0) {
             if (context === BracketContext.Open) {
                 stack.push(currentChar);
@@ -591,21 +596,7 @@ export default class DocumentDecoration {
             }
             else if (context === BracketContext.Unknown) {
                 const topStack = stack[stack.length - 1];
-                const charToCompare = openAndCloseCharactersAreTheSame ?
-                    currentChar + token.scopes.length :
-                    currentChar;
-
-                if (charToCompare === topStack) {
-                    currentLine.addBracket(
-                        type,
-                        currentChar,
-                        stack.length + token.scopes.length,
-                        token.startIndex,
-                        token.endIndex,
-                    );
-                    stack.pop();
-                }
-                else {
+                if (currentChar === topStack) {
                     stack.push(currentChar);
                     currentLine.addBracket(
                         type,
@@ -614,6 +605,16 @@ export default class DocumentDecoration {
                         token.startIndex,
                         token.endIndex,
                     );
+                }
+                else {
+                    currentLine.addBracket(
+                        type,
+                        currentChar,
+                        stack.length + token.scopes.length,
+                        token.startIndex,
+                        token.endIndex,
+                    );
+                    stack.pop();
                 }
             }
         }
