@@ -3,8 +3,8 @@ import { EndOfLine } from "vscode";
 import Bracket from "./bracket";
 import BracketClose from "./bracketClose";
 import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
-import RuleBuilder, { LanguageAgnosticToken } from "./ruleBuilder";
 import LineState from "./lineState";
+import { TokenMatch } from "./ruleBuilder";
 import Settings from "./settings";
 import TextLine from "./textLine";
 
@@ -18,25 +18,15 @@ export default class DocumentDecoration {
     private scopeDecorations: vscode.TextEditorDecorationType[] = [];
     private scopeSelectionHistory: vscode.Selection[][] = [];
     private readonly eol: string;
-    private readonly typeMap = new Map<string, LanguageAgnosticToken>();
+    private readonly typeMap: TokenMatch[];
+    private readonly suffix: string;
     constructor(document: vscode.TextDocument, textMate: IGrammar, settings: Settings) {
         this.settings = settings;
         this.document = document;
         this.tokenizer = textMate;
 
-        const suffix = "." + (this.tokenizer as any)._grammar.scopeName.split(".")[1];
-
-        const rule = new RuleBuilder();
-        const lookupBuilder = rule.get(this.document.languageId);
-        if (lookupBuilder) {
-            for (const lookup of lookupBuilder) {
-                this.typeMap.set(lookup.scope.open + suffix, lookup);
-                if (lookup.scope.close) {
-                    this.typeMap.set(lookup.scope.close + suffix, lookup);
-                }
-            }
-        }
-
+        this.suffix = "." + (this.tokenizer as any)._grammar.scopeName.split(".")[1];
+        this.typeMap = this.settings.getRule(document.languageId) || [];
         if (this.document.eol === EndOfLine.LF) {
             this.eol = "\n";
         }
@@ -494,27 +484,30 @@ export default class DocumentDecoration {
         }
     }
 
-    private isValidToken(tokens: string[]) {
-        // If get common token
-        // Check parent token for rule somehow
-        // type = ??
-        // Remove grouping?
-
-        // If common token is the same
-        // Use fullname + common as stack key
-    }
-
     private parseTokens(tokens: IToken[], currentLine: TextLine, text: string) {
         const stack = currentLine.getCharStack();
         for (const token of tokens) {
             const character = text.substring(token.startIndex, token.endIndex);
             if (token.scopes.length > 1) {
-                const type = token.scopes[token.scopes.length - 1];
-                
-                const lookup = this.typeMap.get(type);
+                this.validateToken(token, character, stack, currentLine);
+            }
+        }
+    }
 
-                if (lookup) {
-                    this.manageTokenStack(character, stack, lookup.commonToken, currentLine, token);
+    private validateToken(token: IToken, character: string, stack: Map<string, string[]>, currentLine: TextLine) {
+        for (const tokenMatch of this.typeMap) {
+            if (token.scopes.length - (tokenMatch.depth + 1) >= 0) {
+                const type = token.scopes[token.scopes.length - (tokenMatch.depth + 1)];
+                const typeNoLanguageSuffix = type.substring(0, type.length - this.suffix.length);
+                if (tokenMatch.regex.test(typeNoLanguageSuffix)) {
+                    if (tokenMatch.disabled) {
+                        return;
+                    }
+
+                    const commonToken =
+                        typeNoLanguageSuffix.substring(0, typeNoLanguageSuffix.length - tokenMatch.suffix.length);
+                    this.manageTokenStack(character, stack, commonToken, currentLine, token, tokenMatch.openAndCloseCharactersAreTheSame);
+                    return;
                 }
             }
         }
@@ -547,8 +540,10 @@ export default class DocumentDecoration {
         stackMap: Map<string, string[]>,
         type: string,
         currentLine: TextLine,
-        token: IToken) {
-        const stackKey = type + token.scopes.length;
+        token: IToken,
+        openAndCloseCharactersAreTheSame: boolean,
+    ) {
+        const stackKey = openAndCloseCharactersAreTheSame ? currentChar : type + token.scopes.length;
         const stack = stackMap.get(stackKey);
         if (stack && stack.length > 0) {
             const topStack = stack[stack.length - 1];

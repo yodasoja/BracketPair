@@ -48,20 +48,34 @@
                     "$schema": "./json-schema/language-schema.json",
                     "default": [
                         {
-                            "language": "javascript",
+                            "language": "default",
                             "scopes": [
                                 {
-                                    "open": "punctuation.definition.parameters.begin",
-                                    "close": "punctuation.definition.parameters.end"
+                                    "disabled": true,
+                                    "startsWith": "punctuation.definition.string",
+                                    "openAndCloseCharactersAreTheSame": true,
+                                    "openSuffix": ".begin",
+                                    "closeSuffix": ".end"
                                 },
                                 {
-                                    "open": "meta.brace.round"
+                                    "startsWith": "punctuation.definition.",
+                                    "openSuffix": ".begin",
+                                    "closeSuffix": ".end"
+                                }
+                            ]
+                        },
+                        {
+                            "language": "javascript",
+                            "extends": "default",
+                            "scopes": [
+                                {
+                                    "startsWith": "meta.brace.round"
                                 },
                                 {
-                                    "open": "meta.brace.square"
+                                    "startsWith": "meta.brace.square"
                                 },
                                 {
-                                    "open": "punctuation.definition.block"
+                                    "startsWith": "punctuation.definition.block"
                                 }
                             ]
                         },
@@ -71,39 +85,23 @@
                         },
                         {
                             "language": "json",
-                            "scopes": [
-                                {
-                                    "open": "punctuation.definition.dictionary.begin",
-                                    "close": "punctuation.definition.dictionary.end"
-                                },
-                                {
-                                    "open": "punctuation.definition.array.begin",
-                                    "close": "punctuation.definition.array.end"
-                                }
-                            ]
+                            "extends": "default"
                         },
                         {
                             "language": "html",
                             "scopes": [
                                 {
-                                    "open": "entity.name.tag",
-                                    "unlessParentTokenEndsWith": "meta.tag.metadata.doctype",
-                                    "stackStrategy": "contentMatch"
+                                    "depth": 1,
+                                    "startsWith": "meta.tag.structure.",
+                                    "openAndCloseCharactersAreTheSame": true,
+                                    "openSuffix": ".start",
+                                    "closeSuffix": ".end"
                                 }
                             ]
                         },
                         {
                             "language": "python",
-                            "scopes": [
-                                {
-                                    "open": "punctuation.definition.dict.begin",
-                                    "close": "punctuation.definition.dict.end"
-                                },
-                                {
-                                    "open": "punctuation.definition.arguments.begin",
-                                    "close": "punctuation.definition.arguments.end"
-                                }
-                            ]
+                            "extends": "default"
                         }
                     ]
                 },

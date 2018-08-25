@@ -3,23 +3,20 @@ import {
     TextEditor, TextEditorSelectionChangeEvent, window,
 } from "vscode";
 import DocumentDecoration from "./documentDecoration";
-import GutterIconManager from "./gutterIconManager";
 import { IGrammar } from "./IExtensionGrammar";
 import Settings from "./settings";
 import { TextMateLoader } from "./textMateLoader";
 
 export default class DocumentDecorationManager {
-    private readonly gutterIcons = new GutterIconManager();
     private showError = true;
-    private documents = new Map<string, DocumentDecoration>();
-    private textMateLoader = new TextMateLoader();
+    private readonly documents = new Map<string, DocumentDecoration>();
+    private readonly textMateLoader = new TextMateLoader();
+    private readonly settings = new Settings();
 
     public Dispose() {
         this.documents.forEach((document, key) => {
             document.dispose();
         });
-
-        this.gutterIcons.Dispose();
     }
 
     public expandBracketSelection(editor: TextEditor) {
@@ -105,8 +102,7 @@ export default class DocumentDecorationManager {
                     return;
                 }
 
-                const settings = new Settings(document.languageId, this.gutterIcons, document.uri);
-                documentDecorations = new DocumentDecoration(document, tokenizer as IGrammar, settings);
+                documentDecorations = new DocumentDecoration(document, tokenizer as IGrammar, this.settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
                 if (error instanceof Error) {

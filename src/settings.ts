@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import ColorMode from "./colorMode";
 import Colors from "./colors";
 import GutterIconManager from "./gutterIconManager";
+import { RuleBuilder } from "./ruleBuilder";
 
 export default class Settings {
     public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
@@ -9,7 +10,7 @@ export default class Settings {
     public readonly contextualParsing: boolean;
     public readonly forceIterationColorCycle: boolean;
     public readonly forceUniqueOpeningColor: boolean;
-    public readonly languageID: string;
+    // public readonly languageID: string;
     public readonly regexNonExact: RegExp;
     public readonly timeOutLength: number;
     public readonly highlightActiveScope: boolean;
@@ -25,16 +26,13 @@ export default class Settings {
     private readonly activeScopeLineCSSElements: string[][];
     private readonly activeScopeLineCSSBorder: string;
     private readonly rulerPosition: string;
-
+    private readonly ruleBuilder = new RuleBuilder();
     constructor(
-        languageID: string,
-        gutterIcons: GutterIconManager,
-        documentUri?: vscode.Uri,
     ) {
-        this.gutterIcons = gutterIcons;
-        this.languageID = languageID;
+        this.gutterIcons = new GutterIconManager();
+        this.ruleBuilder = new RuleBuilder();
 
-        const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
+        const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", undefined);
         const activeScopeCSS = configuration.get("activeScopeCSS") as string[];
 
         if (!Array.isArray(activeScopeCSS)) {
@@ -181,12 +179,17 @@ export default class Settings {
         this.bracketDecorations = this.createBracketDecorations();
     }
 
+    public getRule(languageID: string) {
+        return this.ruleBuilder.get(languageID);
+    }
+
     public dispose() {
         if (!this.isDisposed) {
-            this.bracketDecorations.forEach((decoration, key) => {
+            this.bracketDecorations.forEach((decoration) => {
                 decoration.dispose();
             });
             this.bracketDecorations.clear();
+            this.gutterIcons.Dispose();
             this.isDisposed = true;
         }
     }

@@ -2,38 +2,73 @@ import * as vscode from "vscode";
 
 // tslint:disable:max-classes-per-file
 
-class ScopeDefinitions {
-    public readonly open: string;
-    public readonly close?: string;
-    public readonly unlessParentTokenEndsWith?: string;
+class ScopeDefinition {
+    public readonly depth?: number;
+    public readonly disabled?: boolean;
+    public readonly openAndCloseCharactersAreTheSame?: boolean;
+    public readonly startsWith?: string;
+    public readonly openSuffix?: string;
+    public readonly closeSuffix?: string;
 }
 
-class UserLanguageDefinition {
+class BasicDefinition {
     public readonly language: string;
     public readonly extends?: string;
-    public readonly stackStrategy = "depth";
-    public readonly scopes?: ScopeDefinitions[];
+    public readonly scopes?: ScopeDefinition[];
 }
 
-class LanguageDefinition {
-    public readonly language: string;
-    public readonly scope: Map<string, ScopeDefinitions>;
+export class TokenMatch {
+    public readonly regex: RegExp;
+    public readonly suffix: string;
+    public readonly depth: number;
+    public readonly disabled: boolean;
+    public readonly openAndCloseCharactersAreTheSame: boolean;
+    constructor(
+        depth: number,
+        disabled: boolean,
+        openAndCloseCharactersAreTheSame: boolean,
+        startsWith: string,
+        suffix?: string,
+    ) {
+        this.openAndCloseCharactersAreTheSame = openAndCloseCharactersAreTheSame;
+        this.depth = depth;
+        this.disabled = disabled;
+        const regexStart = this.escapeRegExp(startsWith);
+        if (suffix) {
+            const regexEnd = this.escapeRegExp(suffix);
+            this.regex = new RegExp("^" + regexStart + ".*" + regexEnd + "$");
+            this.suffix = suffix;
+        }
+        else {
+            this.regex = new RegExp("^" + regexStart);
+            this.suffix = "";
+        }
+    }
 
-    constructor(language: string, scope: Map<string, ScopeDefinitions>) {
-        this.language = language;
-        this.scope = scope;
+    private escapeRegExp(input: string) {
+        return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
     }
 }
 
-export default class RuleBuilder {
-    private readonly start = new Map<string, UserLanguageDefinition>();
-    private readonly intermediate = new Map<string, LanguageDefinition>();
-    private readonly final = new Map<string, Set<LanguageAgnosticToken>>();
+class DefinitionAfterInheritance {
+    public readonly language: string;
+    public readonly scopes: Map<string, ScopeDefinition>;
+
+    constructor(language: string, scopes: Map<string, ScopeDefinition>) {
+        this.language = language;
+        this.scopes = scopes;
+    }
+}
+
+export class RuleBuilder {
+    private readonly start = new Map<string, BasicDefinition>();
+    private readonly intermediate = new Map<string, DefinitionAfterInheritance>();
+    private readonly final = new Map<string, TokenMatch[]>();
 
     constructor() {
         const userLanguages =
             vscode.workspace.getConfiguration("bracketPairColorizer2", undefined)
-                .get("languages") as UserLanguageDefinition[];
+                .get("languages") as BasicDefinition[];
 
         for (const userLanguage of userLanguages) {
             this.start.set(userLanguage.language, userLanguage);
@@ -49,39 +84,78 @@ export default class RuleBuilder {
         const baseLanguage = this.start.get(languageId);
 
         if (baseLanguage) {
-            const history = new Set<UserLanguageDefinition>();
+            const history = new Set<BasicDefinition>();
             const scopesThisToBase = this.getAllScopes(baseLanguage, [], history);
 
-            const scopeMap = new Map<string, ScopeDefinitions>();
+            const scopeMap = new Map<string, ScopeDefinition>();
 
             // Set base map first then let extended languages overwrite
             for (let i = scopesThisToBase.length; i-- > 0;) {
                 for (const scope of scopesThisToBase[i]) {
-                    scopeMap.set(scope.open, scope);
+                    if (!scope.startsWith) {
+                        console.error("Missing 'startsWith' property");
+                        console.error(scope);
+                        continue;
+                    }
+
+                    scopeMap.set(scope.startsWith, scope);
                 }
             }
 
-            const extendedLanguage = new LanguageDefinition(baseLanguage.language, scopeMap);
+            const extendedLanguage = new DefinitionAfterInheritance(baseLanguage.language, scopeMap);
 
             this.intermediate.set(extendedLanguage.language, extendedLanguage);
 
-            const tokens = new Set<LanguageAgnosticToken>();
+            const tokens: TokenMatch[] = [];
             for (const scope of scopeMap.values()) {
-                tokens.add(new LanguageAgnosticToken(scope));
+                if (!scope.startsWith) {
+                    console.error("Missing 'startsWith' property");
+                    console.error(scope);
+                    continue;
+                }
+
+                const depth = scope.depth || 0;
+                if (scope.openSuffix && scope.closeSuffix) {
+                    tokens.push(
+                        new TokenMatch(
+                            depth,
+                            !!scope.disabled,
+                            !!scope.openAndCloseCharactersAreTheSame,
+                            scope.startsWith,
+                            scope.openSuffix,
+                        ),
+                        new TokenMatch(
+                            depth,
+                            !!scope.disabled,
+                            !!scope.openAndCloseCharactersAreTheSame,
+                            scope.startsWith,
+                            scope.closeSuffix,
+                        ),
+                    );
+                }
+                else {
+                    tokens.push(
+                        new TokenMatch(
+                            depth,
+                            !!scope.disabled,
+                            !!scope.openAndCloseCharactersAreTheSame,
+                            scope.startsWith,
+                        ),
+                    );
+                }
             }
 
             this.final.set(languageId, tokens);
             return tokens;
         }
-        else {
-            console.warn("No language definitions for " + languageId);
-        }
+
+        return this.final.get("default");
     }
 
     private getAllScopes(
-        userLanguageDefinition: UserLanguageDefinition,
-        allScopeDefinitions: ScopeDefinitions[][],
-        history: Set<UserLanguageDefinition>): ScopeDefinitions[][] {
+        userLanguageDefinition: BasicDefinition,
+        allScopeDefinitions: ScopeDefinition[][],
+        history: Set<BasicDefinition>): ScopeDefinition[][] {
         if (history.has(userLanguageDefinition)) {
             console.error("Cycle detected while parsing user languages: " +
                 userLanguageDefinition.language + " => " +
@@ -99,7 +173,7 @@ export default class RuleBuilder {
             const parsedLanguage = this.intermediate.get(userLanguageDefinition.extends);
 
             if (parsedLanguage) {
-                allScopeDefinitions.push([...parsedLanguage.scope.values()]);
+                allScopeDefinitions.push([...parsedLanguage.scopes.values()]);
                 return allScopeDefinitions;
             }
 
@@ -113,30 +187,5 @@ export default class RuleBuilder {
         }
 
         return allScopeDefinitions;
-    }
-}
-
-export class LanguageAgnosticToken {
-    public readonly commonToken: string;
-    public readonly scope: ScopeDefinitions;
-    constructor(scope: ScopeDefinitions) {
-        this.scope = scope;
-
-        if (scope.close) {
-            const openSplit = scope.open.split(".");
-            const closeSplit = scope.open.split(".");
-            let i = 0;
-            for (; i < openSplit.length; i++) {
-                if (openSplit[i] !== closeSplit[i]) {
-                    break;
-                }
-            }
-
-            openSplit.splice(i);
-            this.commonToken = openSplit.join("");
-        }
-        else {
-            this.commonToken = scope.open;
-        }
     }
 }
