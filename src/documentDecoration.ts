@@ -2,12 +2,11 @@ import * as vscode from "vscode";
 import { EndOfLine } from "vscode";
 import Bracket from "./bracket";
 import BracketClose from "./bracketClose";
-import BracketPointer from "./bracketPointer";
 import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
+import RuleBuilder, { LanguageAgnosticToken } from "./ruleBuilder";
 import LineState from "./lineState";
 import Settings from "./settings";
 import TextLine from "./textLine";
-import LanguageRule, { LanguageAgnosticToken } from "./languageRule";
 
 export default class DocumentDecoration {
     public readonly settings: Settings;
@@ -25,9 +24,9 @@ export default class DocumentDecoration {
         this.document = document;
         this.tokenizer = textMate;
 
-        const suffix = "." + (this.tokenizer as any)._grammar.scopeName.split(".").pop();
+        const suffix = "." + (this.tokenizer as any)._grammar.scopeName.split(".")[1];
 
-        const rule = new LanguageRule(this.document.uri);
+        const rule = new RuleBuilder();
         const lookupBuilder = rule.get(this.document.languageId);
         if (lookupBuilder) {
             for (const lookup of lookupBuilder) {

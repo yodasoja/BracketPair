@@ -71,34 +71,39 @@
                         },
                         {
                             "language": "json",
-                            "scopes" :
-                            [
+                            "scopes": [
                                 {
-                                    "open" : "punctuation.definition.dictionary.begin",
-                                    "close" : "punctuation.definition.dictionary.end"
+                                    "open": "punctuation.definition.dictionary.begin",
+                                    "close": "punctuation.definition.dictionary.end"
                                 },
                                 {
-                                    "open" : "punctuation.definition.array.begin",
-                                    "close" : "punctuation.definition.array.end"
+                                    "open": "punctuation.definition.array.begin",
+                                    "close": "punctuation.definition.array.end"
                                 }
                             ]
-
                         },
                         {
                             "language": "html",
-                            "scopes" :
-                            [
+                            "scopes": [
                                 {
-                                    "open" : "entity.name.tag",
-                                    "unlessParentTokenEndsWith" : "meta.tag.metadata.doctype"
-                                },
-                                {
-                                    "open" : "punctuation.definition.tag.begin",
-                                    "close" : "punctuation.definition.tag.end",
-                                    "unlessParentTokenEndsWith" : "void"
+                                    "open": "entity.name.tag",
+                                    "unlessParentTokenEndsWith": "meta.tag.metadata.doctype",
+                                    "stackStrategy": "contentMatch"
                                 }
                             ]
-
+                        },
+                        {
+                            "language": "python",
+                            "scopes": [
+                                {
+                                    "open": "punctuation.definition.dict.begin",
+                                    "close": "punctuation.definition.dict.end"
+                                },
+                                {
+                                    "open": "punctuation.definition.arguments.begin",
+                                    "close": "punctuation.definition.arguments.end"
+                                }
+                            ]
                         }
                     ]
                 },

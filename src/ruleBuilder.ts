@@ -11,12 +11,13 @@ class ScopeDefinitions {
 class UserLanguageDefinition {
     public readonly language: string;
     public readonly extends?: string;
+    public readonly stackStrategy = "depth";
     public readonly scopes?: ScopeDefinitions[];
 }
 
 class LanguageDefinition {
     public readonly language: string;
-    public readonly scope: Map<string, ScopeDefinitions>
+    public readonly scope: Map<string, ScopeDefinitions>;
 
     constructor(language: string, scope: Map<string, ScopeDefinitions>) {
         this.language = language;
@@ -24,28 +25,28 @@ class LanguageDefinition {
     }
 }
 
-export default class LanguageRule {
-    private readonly extendedLanguages = new Map<string, LanguageDefinition>();
-    private readonly baseLanguages = new Map<string, UserLanguageDefinition>();
-    private readonly stackLookup = new Map<string, Set<LanguageAgnosticToken>>();
+export default class RuleBuilder {
+    private readonly start = new Map<string, UserLanguageDefinition>();
+    private readonly intermediate = new Map<string, LanguageDefinition>();
+    private readonly final = new Map<string, Set<LanguageAgnosticToken>>();
 
-    constructor(uri: vscode.Uri) {
+    constructor() {
         const userLanguages =
-            vscode.workspace.getConfiguration("bracketPairColorizer2", uri)
+            vscode.workspace.getConfiguration("bracketPairColorizer2", undefined)
                 .get("languages") as UserLanguageDefinition[];
 
         for (const userLanguage of userLanguages) {
-            this.baseLanguages.set(userLanguage.language, userLanguage);
+            this.start.set(userLanguage.language, userLanguage);
         }
     }
 
     public get(languageId: string) {
-        const stackResult = this.stackLookup.get(languageId);
+        const stackResult = this.final.get(languageId);
         if (stackResult) {
             return stackResult;
         }
 
-        const baseLanguage = this.baseLanguages.get(languageId);
+        const baseLanguage = this.start.get(languageId);
 
         if (baseLanguage) {
             const history = new Set<UserLanguageDefinition>();
@@ -62,14 +63,14 @@ export default class LanguageRule {
 
             const extendedLanguage = new LanguageDefinition(baseLanguage.language, scopeMap);
 
-            this.extendedLanguages.set(extendedLanguage.language, extendedLanguage);
+            this.intermediate.set(extendedLanguage.language, extendedLanguage);
 
             const tokens = new Set<LanguageAgnosticToken>();
             for (const scope of scopeMap.values()) {
                 tokens.add(new LanguageAgnosticToken(scope));
             }
 
-            this.stackLookup.set(languageId, tokens);
+            this.final.set(languageId, tokens);
             return tokens;
         }
         else {
@@ -95,14 +96,14 @@ export default class LanguageRule {
         }
 
         if (userLanguageDefinition.extends) {
-            const parsedLanguage = this.extendedLanguages.get(userLanguageDefinition.extends);
+            const parsedLanguage = this.intermediate.get(userLanguageDefinition.extends);
 
             if (parsedLanguage) {
                 allScopeDefinitions.push([...parsedLanguage.scope.values()]);
                 return allScopeDefinitions;
             }
 
-            const unParsedLanguage = this.baseLanguages.get(userLanguageDefinition.extends);
+            const unParsedLanguage = this.start.get(userLanguageDefinition.extends);
             if (unParsedLanguage) {
                 this.getAllScopes(unParsedLanguage, allScopeDefinitions, history);
             }
