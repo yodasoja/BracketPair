@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 // tslint:disable:max-classes-per-file
 
 class ScopeDefinition {
-    public readonly depth?: number;
+    public readonly parent?: string;
     public readonly disabled?: boolean;
     public readonly openAndCloseCharactersAreTheSame?: boolean;
     public readonly startsWith?: string;
@@ -17,31 +17,39 @@ class BasicDefinition {
     public readonly scopes?: ScopeDefinition[];
 }
 
+export enum BracketContext {
+    Unknown,
+    Open,
+    Close,
+}
+
 export class TokenMatch {
     public readonly regex: RegExp;
-    public readonly suffix: string;
-    public readonly depth: number;
+    public readonly suffix?: string;
+    public readonly parent?: string;
     public readonly disabled: boolean;
+    public readonly context: BracketContext;
     public readonly openAndCloseCharactersAreTheSame: boolean;
     constructor(
-        depth: number,
         disabled: boolean,
         openAndCloseCharactersAreTheSame: boolean,
         startsWith: string,
-        suffix?: string,
+        context: BracketContext,
+        suffix: string | undefined,
+        parent: string | undefined,
     ) {
+        this.context = context;
+        this.suffix = suffix;
         this.openAndCloseCharactersAreTheSame = openAndCloseCharactersAreTheSame;
-        this.depth = depth;
+        this.parent = parent;
         this.disabled = disabled;
         const regexStart = this.escapeRegExp(startsWith);
         if (suffix) {
             const regexEnd = this.escapeRegExp(suffix);
             this.regex = new RegExp("^" + regexStart + ".*" + regexEnd + "$");
-            this.suffix = suffix;
         }
         else {
             this.regex = new RegExp("^" + regexStart);
-            this.suffix = "";
         }
     }
 
@@ -114,32 +122,36 @@ export class RuleBuilder {
                     continue;
                 }
 
-                const depth = scope.depth || 0;
+                const depth = scope.parent || 0;
                 if (scope.openSuffix && scope.closeSuffix) {
                     tokens.push(
                         new TokenMatch(
-                            depth,
                             !!scope.disabled,
                             !!scope.openAndCloseCharactersAreTheSame,
                             scope.startsWith,
+                            BracketContext.Open,
                             scope.openSuffix,
+                            scope.parent,
                         ),
                         new TokenMatch(
-                            depth,
                             !!scope.disabled,
                             !!scope.openAndCloseCharactersAreTheSame,
                             scope.startsWith,
+                            BracketContext.Close,
                             scope.closeSuffix,
+                            scope.parent,
                         ),
                     );
                 }
                 else {
                     tokens.push(
                         new TokenMatch(
-                            depth,
                             !!scope.disabled,
                             !!scope.openAndCloseCharactersAreTheSame,
                             scope.startsWith,
+                            BracketContext.Unknown,
+                            undefined,
+                            scope.parent,
                         ),
                     );
                 }

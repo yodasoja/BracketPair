@@ -4,7 +4,7 @@ import Bracket from "./bracket";
 import BracketClose from "./bracketClose";
 import { IGrammar, IStackElement, IToken } from "./IExtensionGrammar";
 import LineState from "./lineState";
-import { TokenMatch } from "./ruleBuilder";
+import { BracketContext, TokenMatch } from "./ruleBuilder";
 import Settings from "./settings";
 import TextLine from "./textLine";
 
@@ -496,17 +496,39 @@ export default class DocumentDecoration {
 
     private validateToken(token: IToken, character: string, stack: Map<string, string[]>, currentLine: TextLine) {
         for (const tokenMatch of this.typeMap) {
-            if (token.scopes.length - (tokenMatch.depth + 1) >= 0) {
-                const type = token.scopes[token.scopes.length - (tokenMatch.depth + 1)];
+            let offset = 1;
+            if (tokenMatch.parent) {
+                const type = token.scopes[token.scopes.length - 1];
+                const typeNoLanguageSuffix = type.substring(0, type.length - this.suffix.length);
+                if (tokenMatch.parent === typeNoLanguageSuffix) {
+                    offset = 2;
+                }
+                else {
+                    continue;
+                }
+            }
+
+            if (token.scopes.length - offset >= 0) {
+                const type = token.scopes[token.scopes.length - offset];
                 const typeNoLanguageSuffix = type.substring(0, type.length - this.suffix.length);
                 if (tokenMatch.regex.test(typeNoLanguageSuffix)) {
                     if (tokenMatch.disabled) {
                         return;
                     }
 
-                    const commonToken =
-                        typeNoLanguageSuffix.substring(0, typeNoLanguageSuffix.length - tokenMatch.suffix.length);
-                    this.manageTokenStack(character, stack, commonToken, currentLine, token, tokenMatch.openAndCloseCharactersAreTheSame);
+                    const commonToken = tokenMatch.suffix ?
+                        typeNoLanguageSuffix.substring(0, typeNoLanguageSuffix.length - tokenMatch.suffix.length) :
+                        typeNoLanguageSuffix;
+
+                    this.manageTokenStack(
+                        character,
+                        stack,
+                        commonToken,
+                        currentLine,
+                        token,
+                        tokenMatch.openAndCloseCharactersAreTheSame,
+                        tokenMatch.context,
+                    );
                     return;
                 }
             }
@@ -542,12 +564,12 @@ export default class DocumentDecoration {
         currentLine: TextLine,
         token: IToken,
         openAndCloseCharactersAreTheSame: boolean,
+        context: BracketContext,
     ) {
-        const stackKey = openAndCloseCharactersAreTheSame ? currentChar : type + token.scopes.length;
+        const stackKey = type + token.scopes.length;
         const stack = stackMap.get(stackKey);
         if (stack && stack.length > 0) {
-            const topStack = stack[stack.length - 1];
-            if ((topStack) === currentChar) {
+            if (context === BracketContext.Open) {
                 stack.push(currentChar);
                 currentLine.addBracket(
                     type,
@@ -557,7 +579,7 @@ export default class DocumentDecoration {
                     token.endIndex,
                 );
             }
-            else {
+            else if (context === BracketContext.Close) {
                 currentLine.addBracket(
                     type,
                     currentChar,
@@ -566,6 +588,33 @@ export default class DocumentDecoration {
                     token.endIndex,
                 );
                 stack.pop();
+            }
+            else if (context === BracketContext.Unknown) {
+                const topStack = stack[stack.length - 1];
+                const charToCompare = openAndCloseCharactersAreTheSame ?
+                    currentChar + token.scopes.length :
+                    currentChar;
+
+                if (charToCompare === topStack) {
+                    currentLine.addBracket(
+                        type,
+                        currentChar,
+                        stack.length + token.scopes.length,
+                        token.startIndex,
+                        token.endIndex,
+                    );
+                    stack.pop();
+                }
+                else {
+                    stack.push(currentChar);
+                    currentLine.addBracket(
+                        type,
+                        currentChar,
+                        stack.length + token.scopes.length,
+                        token.startIndex,
+                        token.endIndex,
+                    );
+                }
             }
         }
         else {

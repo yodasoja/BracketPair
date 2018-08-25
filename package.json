@@ -91,7 +91,7 @@
                             "language": "html",
                             "scopes": [
                                 {
-                                    "depth": 1,
+                                    "parent": "entity.name.tag",
                                     "startsWith": "meta.tag.structure.",
                                     "openAndCloseCharactersAreTheSame": true,
                                     "openSuffix": ".start",
