@@ -220,7 +220,7 @@ export default class DocumentDecoration {
             return;
         }
 
-        // console.time("tokenizeDocument");
+        console.time("tokenizeDocument");
 
         const lineIndex = this.lines.length;
         const lineCount = this.document.lineCount;
@@ -232,10 +232,10 @@ export default class DocumentDecoration {
             }
         }
 
+        console.timeEnd("tokenizeDocument");
+
         console.log("Coloring document");
         this.colorDecorations(editors);
-
-        // console.timeEnd("tokenizeDocument");
     }
 
     public updateScopeDecorations(event: vscode.TextEditorSelectionChangeEvent) {
@@ -499,6 +499,10 @@ export default class DocumentDecoration {
             let offset = 1;
             if (tokenMatch.parent) {
                 const type = token.scopes[token.scopes.length - 1];
+                if (!type.endsWith(this.suffix)) {
+                    continue;
+                }
+
                 const typeNoLanguageSuffix = type.substring(0, type.length - this.suffix.length);
                 if (tokenMatch.parent === typeNoLanguageSuffix) {
                     offset = 2;
@@ -510,6 +514,9 @@ export default class DocumentDecoration {
 
             if (token.scopes.length - offset >= 0) {
                 const type = token.scopes[token.scopes.length - offset];
+                if (!type.endsWith(this.suffix)) {
+                    continue;
+                }
                 const typeNoLanguageSuffix = type.substring(0, type.length - this.suffix.length);
                 if (tokenMatch.regex.test(typeNoLanguageSuffix)) {
                     if (tokenMatch.disabled) {
@@ -567,7 +574,6 @@ export default class DocumentDecoration {
         context: BracketContext,
     ) {
         const stackKey = type + token.scopes.length;
-        console.log(stackKey);
         const stack = stackMap.get(stackKey);
         if (openAndCloseCharactersAreTheSame) {
             currentChar += token.scopes.length;
@@ -632,7 +638,7 @@ export default class DocumentDecoration {
     }
 
     private colorDecorations(editors: vscode.TextEditor[]) {
-        // console.time("colorDecorations");
+        console.time("colorDecorations");
         const colorMap = new Map<string, vscode.Range[]>();
 
         // Reduce all the colors/ranges of the lines into a singular map
@@ -676,7 +682,7 @@ export default class DocumentDecoration {
             });
         }
 
-        // console.timeEnd("colorDecorations");
+        console.timeEnd("colorDecorations");
     }
 
     private calculateColumnFromCharIndex(lineText: string, charIndex: number, tabSize: number): number {

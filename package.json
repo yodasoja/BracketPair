@@ -69,13 +69,13 @@
                             "extends": "default",
                             "scopes": [
                                 {
-                                    "startsWith": "meta.brace.round"
+                                    "equals": "meta.brace.round"
                                 },
                                 {
-                                    "startsWith": "meta.brace.square"
+                                    "equals": "meta.brace.square"
                                 },
                                 {
-                                    "startsWith": "punctuation.definition.block"
+                                    "equals": "punctuation.definition.block"
                                 }
                             ]
                         },
@@ -92,7 +92,7 @@
                             "scopes": [
                                 {
                                     "parent": "entity.name.tag",
-                                    "startsWith": "meta.tag.structure",
+                                    "startsWith": "meta.tag",
                                     "openAndCloseCharactersAreTheSame": true,
                                     "openSuffix": ".start",
                                     "closeSuffix": ".end"

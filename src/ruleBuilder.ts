@@ -6,6 +6,7 @@ class ScopeDefinition {
     public readonly parent?: string;
     public readonly disabled?: boolean;
     public readonly openAndCloseCharactersAreTheSame?: boolean;
+    public readonly equals?: string;
     public readonly startsWith?: string;
     public readonly openSuffix?: string;
     public readonly closeSuffix?: string;
@@ -33,8 +34,9 @@ export class TokenMatch {
     constructor(
         disabled: boolean,
         openAndCloseCharactersAreTheSame: boolean,
-        startsWith: string,
         context: BracketContext,
+        equals: string | undefined,
+        startsWith: string | undefined,
         suffix: string | undefined,
         parent: string | undefined,
     ) {
@@ -43,13 +45,18 @@ export class TokenMatch {
         this.openAndCloseCharactersAreTheSame = openAndCloseCharactersAreTheSame;
         this.parent = parent;
         this.disabled = disabled;
-        const regexStart = this.escapeRegExp(startsWith);
-        if (suffix) {
-            const regexEnd = this.escapeRegExp(suffix);
-            this.regex = new RegExp("^" + regexStart + ".*" + regexEnd + "$");
+        if (equals) {
+            this.regex = new RegExp("^" + this.escapeRegExp(equals) + "$");
         }
-        else {
-            this.regex = new RegExp("^" + regexStart);
+        else if (startsWith) {
+            const regexStart = this.escapeRegExp(startsWith);
+            if (suffix) {
+                const regexEnd = this.escapeRegExp(suffix);
+                this.regex = new RegExp("^" + regexStart + ".*" + regexEnd + "$");
+            }
+            else {
+                this.regex = new RegExp("^" + regexStart);
+            }
         }
     }
 
@@ -100,13 +107,12 @@ export class RuleBuilder {
             // Set base map first then let extended languages overwrite
             for (let i = scopesThisToBase.length; i-- > 0;) {
                 for (const scope of scopesThisToBase[i]) {
-                    if (!scope.startsWith) {
-                        console.error("Missing 'startsWith' property");
-                        console.error(scope);
-                        continue;
+                    if (scope.startsWith) {
+                        scopeMap.set(scope.startsWith, scope);
                     }
-
-                    scopeMap.set(scope.startsWith, scope);
+                    else if (scope.equals) {
+                        scopeMap.set(scope.equals, scope);
+                    }
                 }
             }
 
@@ -116,44 +122,44 @@ export class RuleBuilder {
 
             const tokens: TokenMatch[] = [];
             for (const scope of scopeMap.values()) {
-                if (!scope.startsWith) {
-                    console.error("Missing 'startsWith' property");
-                    console.error(scope);
-                    continue;
-                }
-
-                const depth = scope.parent || 0;
-                if (scope.openSuffix && scope.closeSuffix) {
+                if (scope.startsWith && scope.openSuffix && scope.closeSuffix) {
                     tokens.push(
                         new TokenMatch(
                             !!scope.disabled,
                             !!scope.openAndCloseCharactersAreTheSame,
-                            scope.startsWith,
                             BracketContext.Open,
+                            undefined,
+                            scope.startsWith,
                             scope.openSuffix,
                             scope.parent,
                         ),
                         new TokenMatch(
                             !!scope.disabled,
                             !!scope.openAndCloseCharactersAreTheSame,
-                            scope.startsWith,
                             BracketContext.Close,
+                            undefined,
+                            scope.startsWith,
                             scope.closeSuffix,
                             scope.parent,
                         ),
                     );
                 }
-                else {
+                else if (scope.equals) {
                     tokens.push(
                         new TokenMatch(
                             !!scope.disabled,
                             !!scope.openAndCloseCharactersAreTheSame,
-                            scope.startsWith,
                             BracketContext.Unknown,
+                            scope.equals,
+                            undefined,
                             undefined,
                             scope.parent,
                         ),
                     );
+                }
+                else {
+                    console.warn("Invalid scope");
+                    console.warn(scope);
                 }
             }
 
