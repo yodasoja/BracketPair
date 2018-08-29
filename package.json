@@ -70,6 +70,12 @@
                     "description": "Should different brackets share a color group (Consecutive), or use their own color group (Independent)",
                     "scope": "resource"
                 },
+                "bracketPairColorizer.highlightBracketBackgroundAlpha": {
+                    "type": "number",
+                    "default": 0.55,
+                    "description": "Decimal number from 0 to 1 for the alpha channel on the highlighted bracket background. Only works if \"backgroundColor: {color-alpha};\" is set in bracketPairColorizer.activeScopeCSS and bracketPairColorizer.highlightActiveScope is set to true.",
+                    "scope": "resource"
+                },
                 "bracketPairColorizer.highlightActiveScope": {
                     "type": "boolean",
                     "default": false,
