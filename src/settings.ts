@@ -21,6 +21,7 @@ export default class Settings {
     public readonly showBracketsInGutter: boolean;
     public readonly showBracketsInRuler: boolean;
     public readonly scopeLineRelativePosition: boolean;
+    public readonly ignoreFileExtensions: string[];
     public isDisposed = false;
     private readonly gutterIcons: GutterIconManager;
     private readonly activeBracketCSSElements: string[][];
@@ -37,6 +38,15 @@ export default class Settings {
         this.prismLanguageID = languageID;
 
         const configuration = vscode.workspace.getConfiguration("bracketPairColorizer", documentUri);
+        
+        const ignoreFileExtensions = configuration.get("ignoreFileExtensions") as string[];
+
+        if (!Array.isArray(ignoreFileExtensions)) {
+            throw new Error("ignoreFileExtensions is not an array");
+        }
+
+        this.ignoreFileExtensions = ignoreFileExtensions
+        
         const activeScopeCSS = configuration.get("activeScopeCSS") as string[];
 
         if (!Array.isArray(activeScopeCSS)) {

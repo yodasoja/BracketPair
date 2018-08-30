@@ -1,4 +1,4 @@
-import { commands, ExtensionContext, window, workspace } from "vscode";
+import { commands, ExtensionContext, window, workspace, Event } from "vscode";
 import DocumentDecorationManager from "./documentDecorationManager";
 export function activate(context: ExtensionContext) {
     let documentDecorationManager = new DocumentDecorationManager();
@@ -20,7 +20,6 @@ export function activate(context: ExtensionContext) {
             if (event.affectsConfiguration("bracketPairColorizer") ||
                 event.affectsConfiguration("editor.lineHeight") ||
                 event.affectsConfiguration("editor.fontSize")
-
             ) {
                 documentDecorationManager.Dispose();
                 documentDecorationManager = new DocumentDecorationManager();

@@ -101,11 +101,16 @@ export default class DocumentDecorationManager {
             try {
                 const languages = this.getPrismLanguageID(document.languageId);
                 const primaryLanguage = languages[0];
-                if (!this.supportedLanguages.has(primaryLanguage)) {
+
+                const settings = new Settings(primaryLanguage, this.gutterIcons, document.uri);
+                const currentUriExtension = '.' + uri.split(".").pop() || '';
+
+                if (!this.supportedLanguages.has(primaryLanguage) ||
+                    settings.ignoreFileExtensions.indexOf(currentUriExtension) > -1
+                ) {
                     return;
                 }
 
-                const settings = new Settings(primaryLanguage, this.gutterIcons, document.uri);
                 documentDecorations = new DocumentDecoration(document, this.Prism, settings);
                 this.documents.set(uri, documentDecorations);
             } catch (error) {
