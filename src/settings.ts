@@ -14,7 +14,6 @@ export default class Settings {
     public readonly prismLanguageID: string;
     public readonly regexNonExact: RegExp;
     public readonly timeOutLength: number;
-    public readonly highlightBracketBackgroundAlpha: number;
     public readonly highlightActiveScope: boolean;
     public readonly showVerticalScopeLine: boolean;
     public readonly showHorizontalScopeLine: boolean;
@@ -79,12 +78,6 @@ export default class Settings {
 
         if (typeof this.highlightActiveScope !== "boolean") {
             throw new Error("alwaysHighlightActiveScope is not a boolean");
-        }
-
-        this.highlightBracketBackgroundAlpha = configuration.get("highlightBracketBackgroundAlpha") as number;
-
-        if (typeof this.highlightBracketBackgroundAlpha !== "number") {
-            throw new Error("highlightBracketBackgroundAlpha is not a number");
         }
 
         this.showVerticalScopeLine = configuration.get("showVerticalScopeLine") as boolean;
@@ -253,18 +246,12 @@ export default class Settings {
     }
 
     public createScopeBracketDecorations(color: string) {
-        const red = parseInt(color.substr(1, 2), 16);
-        const green = parseInt(color.substr(3, 2), 16);
-        const blue = parseInt(color.substr(5, 2), 16);
-
         const decorationSettings: vscode.DecorationRenderOptions = {
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
         };
 
         this.activeBracketCSSElements.forEach((element) => {
-            decorationSettings[element[0]] = element[1]
-                .replace("{color}", color)
-                .replace("{color-alpha}", `rgba(${red}, ${green}, ${blue}, ${this.highlightBracketBackgroundAlpha})`);
+            decorationSettings[element[0]] = element[1].replace("{color}", color);
         });
 
         const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
