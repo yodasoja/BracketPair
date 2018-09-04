@@ -1,7 +1,10 @@
 ## Release Notes
 
+### 1.0.60
+Added setting to ignore file extensions (Thanks @SeedyROM)
+
 ### 1.0.59
-Update to PrismJS 1.50.0
+Update to PrismJS 1.15.0
 
 ### 1.0.58
 Batch file support   
