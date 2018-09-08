@@ -1,6 +1,14 @@
 import { commands, ExtensionContext, window, workspace, Event } from "vscode";
 import DocumentDecorationManager from "./documentDecorationManager";
-export function activate(context: ExtensionContext) {
+
+function wait(ms: number) {
+    return new Promise((resolve) => setTimeout(() => resolve(), ms));
+}
+
+export async function activate(context: ExtensionContext) {
+    // Below new() line calls huge require()s and takes about 2 secs in MBP 15-inch Mid 2014.
+    // Wait 0.5 sec to let other plugins be loaded before this plugin.
+    await wait(500);
     let documentDecorationManager = new DocumentDecorationManager();
 
     context.subscriptions.push(
